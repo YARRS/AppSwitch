@@ -259,7 +259,7 @@ async def update_product(
     product_id: str,
     update_data: ProductUpdate,
     admin_user: UserInDB = Depends(get_admin_user),
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Update product (admin only)"""
     try:
