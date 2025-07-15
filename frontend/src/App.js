@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Moon, Sun, Zap, Shield, Home, Users, Settings, Package, BarChart3 } from 'lucide-react';
+import { Moon, Sun, Zap, Shield, Home, Users, Settings, Package, BarChart3, LogIn, UserPlus, User as UserIcon } from 'lucide-react';
 import axios from 'axios';
+
+// Components
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { ProtectedRoute, AdminRoute, OptionalAuth } from './components/ProtectedRoute';
+import Login from './components/Login';
+import Register from './components/Register';
+import UserProfile from './components/UserProfile';
 
 // Theme context
 export const ThemeContext = React.createContext();
