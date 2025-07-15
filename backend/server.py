@@ -33,26 +33,23 @@ client = AsyncIOMotorClient(MONGO_URL)
 db = client.get_default_database()
 
 # OAuth2 setup
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
 
-# Base models
-class BaseResponse(BaseModel):
-    success: bool
-    message: str
-    data: Optional[dict] = None
+# Database dependency
+async def get_database():
+    return db
 
-class UserBase(BaseModel):
-    email: str
-    username: str
-    role: str = "customer"
+# Import and include routers
+from routes.auth import router as auth_router
+from routes.products import router as products_router
+from routes.cart import router as cart_router
+from routes.orders import router as orders_router
 
-class UserCreate(UserBase):
-    password: str
-
-class UserResponse(UserBase):
-    id: str
-    created_at: str
-    is_active: bool
+# Include routers
+app.include_router(auth_router, dependencies=[Depends(get_database)])
+app.include_router(products_router, dependencies=[Depends(get_database)])
+app.include_router(cart_router, dependencies=[Depends(get_database)])
+app.include_router(orders_router, dependencies=[Depends(get_database)])
 
 # Health check endpoint
 @app.get("/api/health")
