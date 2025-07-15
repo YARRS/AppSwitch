@@ -12,8 +12,13 @@ from auth import AuthService, UserService, get_current_active_user, get_admin_us
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
+# Database dependency
+async def get_db():
+    from server import db
+    return db
+
 @router.post("/register", response_model=APIResponse)
-async def register(user_data: UserCreate, db: AsyncIOMotorDatabase = Depends()):
+async def register(user_data: UserCreate, db: AsyncIOMotorDatabase = Depends(get_db)):
     """Register a new user"""
     try:
         user_service = UserService(db)
