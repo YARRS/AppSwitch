@@ -174,7 +174,7 @@ async def get_products(
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
     is_active: Optional[bool] = None,
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Get products with filtering and pagination"""
     try:
