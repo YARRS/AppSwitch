@@ -303,7 +303,7 @@ async def update_product(
 async def delete_product(
     product_id: str,
     admin_user: UserInDB = Depends(get_admin_user),
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Delete product (admin only)"""
     try:
