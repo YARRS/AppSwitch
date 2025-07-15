@@ -340,7 +340,7 @@ async def delete_product(
         )
 
 @router.get("/categories/available", response_model=APIResponse)
-async def get_available_categories(db: AsyncIOMotorDatabase = Depends()):
+async def get_available_categories(db: AsyncIOMotorDatabase = Depends(get_db)):
     """Get available product categories"""
     try:
         categories = [
