@@ -72,7 +72,7 @@ async def register(user_data: UserCreate, db: AsyncIOMotorDatabase = Depends(get
         )
 
 @router.post("/login", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncIOMotorDatabase = Depends()):
+async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncIOMotorDatabase = Depends(get_db)):
     """Login user and return access token"""
     try:
         user_service = UserService(db)
