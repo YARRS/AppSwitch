@@ -128,7 +128,7 @@ class ProductService:
 async def create_product(
     product_data: ProductCreate,
     admin_user: UserInDB = Depends(get_admin_user),
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Create new product (admin only)"""
     try:
