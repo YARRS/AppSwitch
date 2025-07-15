@@ -45,11 +45,15 @@ from routes.products import router as products_router
 from routes.cart import router as cart_router
 from routes.orders import router as orders_router
 
+# Make db available globally for imports
+import sys
+sys.modules['server'].db = db
+
 # Include routers
-app.include_router(auth_router, dependencies=[Depends(get_database)])
-app.include_router(products_router, dependencies=[Depends(get_database)])
-app.include_router(cart_router, dependencies=[Depends(get_database)])
-app.include_router(orders_router, dependencies=[Depends(get_database)])
+app.include_router(auth_router)
+app.include_router(products_router)
+app.include_router(cart_router)
+app.include_router(orders_router)
 
 # Health check endpoint
 @app.get("/api/health")
