@@ -94,6 +94,14 @@ function App() {
 
 // Header Component
 function Header({ darkMode, toggleDarkMode }) {
+  const { user, logout, isAuthenticated } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    setShowUserMenu(false);
+  };
+
   return (
     <header className="sticky top-0 z-50 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -113,7 +121,9 @@ function Header({ darkMode, toggleDarkMode }) {
             <a href="/products" className="nav-link">Products</a>
             <a href="/about" className="nav-link">About</a>
             <a href="/contact" className="nav-link">Contact</a>
-            <a href="/admin" className="nav-link">Admin</a>
+            {isAuthenticated && user?.role === 'admin' && (
+              <a href="/admin" className="nav-link">Admin</a>
+            )}
           </nav>
           
           <div className="flex items-center space-x-4">
@@ -127,9 +137,55 @@ function Header({ darkMode, toggleDarkMode }) {
                 <Moon className="w-5 h-5 text-gray-700" />
               )}
             </button>
-            <button className="btn-primary">
-              Get Started
-            </button>
+            
+            {isAuthenticated ? (
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                >
+                  <UserIcon className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                  <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    {user?.username}
+                  </span>
+                </button>
+                
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50">
+                    <a
+                      href="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                      onClick={() => setShowUserMenu(false)}
+                    >
+                      Profile
+                    </a>
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <a
+                  href="/login"
+                  className="flex items-center space-x-1 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span>Sign In</span>
+                </a>
+                <a
+                  href="/register"
+                  className="flex items-center space-x-1 btn-primary"
+                >
+                  <UserPlus className="w-4 h-4" />
+                  <span>Sign Up</span>
+                </a>
+              </div>
+            )}
           </div>
         </div>
       </div>
