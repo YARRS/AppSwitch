@@ -53,23 +53,42 @@ function App() {
   };
 
   return (
-    <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
-      <Router>
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
-          <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-          <main className="relative">
-            <Routes>
-              <Route path="/" element={<HomePage backendStatus={backendStatus} />} />
-              <Route path="/products" element={<ProductsPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route path="/admin" element={<AdminPage />} />
-            </Routes>
-          </main>
-          <Footer />
-        </div>
-      </Router>
-    </ThemeContext.Provider>
+    <AuthProvider>
+      <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
+        <Router>
+          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
+            <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+            <main className="relative">
+              <Routes>
+                <Route path="/" element={<HomePage backendStatus={backendStatus} />} />
+                <Route path="/products" element={<ProductsPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                <Route 
+                  path="/profile" 
+                  element={
+                    <ProtectedRoute>
+                      <UserProfile />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/admin" 
+                  element={
+                    <AdminRoute>
+                      <AdminPage />
+                    </AdminRoute>
+                  } 
+                />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        </Router>
+      </ThemeContext.Provider>
+    </AuthProvider>
   );
 }
 
