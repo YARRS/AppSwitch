@@ -144,7 +144,7 @@ async def get_current_user_info(current_user: UserInDB = Depends(get_current_act
 async def update_current_user(
     update_data: UserUpdate,
     current_user: UserInDB = Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Update current user information"""
     try:
