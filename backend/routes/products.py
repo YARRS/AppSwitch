@@ -12,6 +12,11 @@ from auth import get_current_active_user, get_admin_user
 
 router = APIRouter(prefix="/api/products", tags=["Products"])
 
+# Database dependency
+async def get_db():
+    from server import db
+    return db
+
 class ProductService:
     def __init__(self, db: AsyncIOMotorDatabase):
         self.db = db
