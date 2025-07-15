@@ -261,7 +261,7 @@ async def update_user_role(
     user_id: str,
     new_role: UserRole,
     admin_user: UserInDB = Depends(get_admin_user),
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Update user role (admin only)"""
     try:
