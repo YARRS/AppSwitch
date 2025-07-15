@@ -204,7 +204,7 @@ async def get_all_users(
     page: int = 1,
     per_page: int = 20,
     admin_user: UserInDB = Depends(get_admin_user),
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Get all users (admin only)"""
     try:
