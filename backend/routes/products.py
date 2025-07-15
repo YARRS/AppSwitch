@@ -218,7 +218,7 @@ async def get_products(
 @router.get("/{product_id}", response_model=APIResponse)
 async def get_product(
     product_id: str,
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Get product by ID"""
     try:
