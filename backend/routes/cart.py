@@ -11,6 +11,11 @@ from auth import get_current_active_user
 
 router = APIRouter(prefix="/api/cart", tags=["Shopping Cart"])
 
+# Database dependency
+async def get_db():
+    from server import db
+    return db
+
 class CartService:
     def __init__(self, db: AsyncIOMotorDatabase):
         self.db = db
