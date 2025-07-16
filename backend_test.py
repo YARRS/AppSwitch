@@ -876,36 +876,84 @@ class BackendTester:
         # Authentication tests
         print("\n🔐 Testing Authentication APIs...")
         if self.create_test_user():
-            self.authenticate_user()
+            if self.authenticate_user():
+                # Product tests
+                print("\n📦 Testing Product APIs...")
+                self.create_test_product()
+                self.test_products_list()
+                self.test_products_get_by_id()
+                if self.test_product_id:
+                    self.test_products_update_stock()
+                
+                # Inventory tests
+                print("\n📊 Testing Inventory APIs...")
+                self.test_inventory_stock_in()
+                self.test_inventory_stock_out()
+                self.test_inventory_logs()
+                self.test_inventory_low_stock()
+                
+                # Commission tests
+                print("\n💰 Testing Commission APIs...")
+                self.test_commissions_get_earnings()
+                self.test_commissions_get_summary()
+                
+                # Dashboard tests
+                print("\n📈 Testing Dashboard APIs...")
+                self.test_dashboard_main()
+                self.test_dashboard_salesperson()
+                
+                # Role-based access control tests
+                print("\n🔒 Testing Role-based Access Control...")
+                self.test_role_based_access()
         
-        # Product tests
-        print("\n📦 Testing Product APIs...")
-        if self.auth_token:
-            self.create_test_product()
-            self.test_products_list()
-            self.test_products_get_by_id()
-            if self.test_product_id:
-                self.test_products_update_stock()
+        # Print summary
+        print("\n" + "=" * 60)
+        print("📊 TEST SUMMARY")
+        print("=" * 60)
+        print(f"Total Tests: {self.total_tests}")
+        print(f"Passed: {self.passed_tests}")
+        print(f"Failed: {self.failed_tests}")
+        print(f"Success Rate: {(self.passed_tests/self.total_tests)*100:.1f}%")
         
-        # Inventory tests
-        print("\n📊 Testing Inventory APIs...")
-        if self.auth_token:
-            self.test_inventory_stock_in()
-            self.test_inventory_stock_out()
-            self.test_inventory_logs()
-            self.test_inventory_low_stock()
+        # Print detailed results
+        print("\n📋 DETAILED RESULTS:")
+        for result in self.results:
+            status_icon = "✅" if result["status"] == "PASS" else "❌"
+            print(f"{status_icon} {result['test']}: {result['message']}")
         
-        # Commission tests
-        print("\n💰 Testing Commission APIs...")
-        if self.auth_token:
-            self.test_commissions_get_earnings()
-            self.test_commissions_get_summary()
-        
-        # Dashboard tests
-        print("\n📈 Testing Dashboard APIs...")
-        if self.auth_token:
-            self.test_dashboard_main()
-            self.test_dashboard_salesperson()
+        return self.failed_tests == 0
+    
+    def test_role_based_access(self):
+        """Test role-based access control for salesperson"""
+        try:
+            headers = self.get_auth_headers()
+            
+            # Test admin-only endpoints that salesperson should NOT access
+            admin_endpoints = [
+                ("/api/products/", "POST", {"name": "Test", "price": 100}),  # Create product
+                ("/api/commissions/rules", "POST", {"user_id": "test", "commission_type": "percentage", "commission_value": 5}),  # Create commission rule
+                ("/api/dashboard/analytics", "GET", None)  # Analytics dashboard
+            ]
+            
+            for endpoint, method, data in admin_endpoints:
+                try:
+                    if method == "POST":
+                        response = requests.post(f"{API_BASE}{endpoint}", json=data, headers=headers, timeout=15)
+                    else:
+                        response = requests.get(f"{API_BASE}{endpoint}", headers=headers, timeout=15)
+                    
+                    if response.status_code == 403:
+                        self.log_result(f"Role Access Control ({endpoint})", "PASS", "Proper 403 Forbidden for salesperson role")
+                    elif response.status_code == 401:
+                        self.log_result(f"Role Access Control ({endpoint})", "PASS", "Proper 401 Unauthorized")
+                    else:
+                        self.log_result(f"Role Access Control ({endpoint})", "FAIL", f"Expected 403/401, got {response.status_code}")
+                        
+                except Exception as e:
+                    self.log_result(f"Role Access Control ({endpoint})", "FAIL", f"Error: {str(e)}")
+                    
+        except Exception as e:
+            self.log_result("Role Access Control", "FAIL", f"Error: {str(e)}")
     
     def test_products_list(self):
         """Test GET /api/products"""
