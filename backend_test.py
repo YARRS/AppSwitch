@@ -97,7 +97,7 @@ class BackendTester:
             user_email = None
             for result in self.results:
                 if result["test"] == "User Registration" and result["status"] == "PASS":
-                    user_email = result["details"]["data"]["user"]["email"]
+                    user_email = result["details"]["data"]["email"]
                     break
             
             if not user_email:
@@ -113,9 +113,13 @@ class BackendTester:
             
             if response.status_code == 200:
                 data = response.json()
-                self.auth_token = data["access_token"]
-                self.log_result("User Authentication", "PASS", "User authenticated successfully", {"token_type": data["token_type"]})
-                return True
+                if data.get("access_token"):
+                    self.auth_token = data["access_token"]
+                    self.log_result("User Authentication", "PASS", "User authenticated successfully", {"token_type": data.get("token_type", "bearer")})
+                    return True
+                else:
+                    self.log_result("User Authentication", "FAIL", f"No access token in response: {data}")
+                    return False
             else:
                 self.log_result("User Authentication", "FAIL", f"Authentication failed: {response.text}")
                 return False
