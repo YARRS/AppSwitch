@@ -24,6 +24,28 @@ class OrderStatus(str, Enum):
     DELIVERED = "delivered"
     CANCELLED = "cancelled"
 
+# Campaign status enum
+class CampaignStatus(str, Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    SCHEDULED = "scheduled"
+    EXPIRED = "expired"
+
+# Commission status enum
+class CommissionStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    PAID = "paid"
+    CANCELLED = "cancelled"
+
+# Inventory action enum
+class InventoryAction(str, Enum):
+    STOCK_IN = "stock_in"
+    STOCK_OUT = "stock_out"
+    ADJUSTMENT = "adjustment"
+    REASSIGNMENT = "reassignment"
+    RETURN = "return"
+
 # Product category enum
 class ProductCategory(str, Enum):
     SMART_SWITCH = "smart_switch"
