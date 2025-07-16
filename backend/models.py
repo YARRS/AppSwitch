@@ -302,3 +302,156 @@ class PaginatedResponse(BaseModel):
     page: int
     per_page: int
     total_pages: int
+
+# Inventory Management Models
+class InventoryLogBase(BaseModel):
+    product_id: str
+    user_id: str
+    action: InventoryAction
+    quantity: int
+    reason: str
+    notes: Optional[str] = None
+
+class InventoryLogCreate(InventoryLogBase):
+    pass
+
+class InventoryLogInDB(InventoryLogBase, BaseDocument):
+    pass
+
+class InventoryLogResponse(InventoryLogBase, BaseDocument):
+    pass
+
+# Campaign Management Models
+class CampaignBase(BaseModel):
+    name: str
+    description: str
+    discount_type: str  # "percentage" or "fixed"
+    discount_value: float
+    min_order_amount: Optional[float] = None
+    max_discount_amount: Optional[float] = None
+    start_date: datetime
+    end_date: datetime
+    status: CampaignStatus = CampaignStatus.SCHEDULED
+    product_ids: List[str] = []  # Empty means all products
+    user_roles: List[str] = []  # Empty means all users
+    usage_limit: Optional[int] = None
+    usage_count: int = 0
+    created_by: str
+
+class CampaignCreate(CampaignBase):
+    pass
+
+class CampaignUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    discount_type: Optional[str] = None
+    discount_value: Optional[float] = None
+    min_order_amount: Optional[float] = None
+    max_discount_amount: Optional[float] = None
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    status: Optional[CampaignStatus] = None
+    product_ids: Optional[List[str]] = None
+    user_roles: Optional[List[str]] = None
+    usage_limit: Optional[int] = None
+
+class CampaignInDB(CampaignBase, BaseDocument):
+    pass
+
+class CampaignResponse(CampaignBase, BaseDocument):
+    pass
+
+# Commission Management Models
+class CommissionRuleBase(BaseModel):
+    user_id: str
+    user_role: UserRole
+    commission_type: str  # "percentage" or "fixed"
+    commission_value: float
+    min_order_amount: Optional[float] = None
+    max_commission_amount: Optional[float] = None
+    product_categories: List[str] = []  # Empty means all categories
+    is_active: bool = True
+
+class CommissionRuleCreate(CommissionRuleBase):
+    pass
+
+class CommissionRuleUpdate(BaseModel):
+    commission_type: Optional[str] = None
+    commission_value: Optional[float] = None
+    min_order_amount: Optional[float] = None
+    max_commission_amount: Optional[float] = None
+    product_categories: Optional[List[str]] = None
+    is_active: Optional[bool] = None
+
+class CommissionRuleInDB(CommissionRuleBase, BaseDocument):
+    pass
+
+class CommissionRuleResponse(CommissionRuleBase, BaseDocument):
+    pass
+
+class CommissionEarningBase(BaseModel):
+    user_id: str
+    order_id: str
+    product_id: str
+    commission_rule_id: str
+    order_amount: float
+    commission_amount: float
+    commission_rate: float
+    status: CommissionStatus = CommissionStatus.PENDING
+    approved_by: Optional[str] = None
+    paid_at: Optional[datetime] = None
+
+class CommissionEarningCreate(CommissionEarningBase):
+    pass
+
+class CommissionEarningUpdate(BaseModel):
+    status: Optional[CommissionStatus] = None
+    approved_by: Optional[str] = None
+    notes: Optional[str] = None
+
+class CommissionEarningInDB(CommissionEarningBase, BaseDocument):
+    notes: Optional[str] = None
+
+class CommissionEarningResponse(CommissionEarningBase, BaseDocument):
+    notes: Optional[str] = None
+
+# Dashboard Analytics Models
+class DashboardStatsBase(BaseModel):
+    total_products: int = 0
+    total_orders: int = 0
+    total_revenue: float = 0.0
+    total_customers: int = 0
+    low_stock_products: int = 0
+    pending_orders: int = 0
+    active_campaigns: int = 0
+    total_commissions: float = 0.0
+
+class SalespersonDashboard(DashboardStatsBase):
+    my_sales: float = 0.0
+    my_commissions: float = 0.0
+    my_products: int = 0
+    my_customers: int = 0
+
+class StoreAdminDashboard(DashboardStatsBase):
+    inventory_alerts: int = 0
+    reassignment_requests: int = 0
+
+class SalesManagerDashboard(DashboardStatsBase):
+    team_performance: List[Dict[str, Any]] = []
+    campaign_performance: List[Dict[str, Any]] = []
+
+class StoreOwnerDashboard(DashboardStatsBase):
+    profit_margin: float = 0.0
+    commission_payouts: float = 0.0
+    inventory_value: float = 0.0
+
+class SupportExecutiveDashboard(BaseModel):
+    total_tickets: int = 0
+    pending_tickets: int = 0
+    resolved_tickets: int = 0
+    customer_inquiries: int = 0
+
+class MarketingManagerDashboard(DashboardStatsBase):
+    conversion_rate: float = 0.0
+    customer_acquisition: int = 0
+    email_campaigns: int = 0
