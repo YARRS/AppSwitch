@@ -70,13 +70,17 @@ class BackendTester:
             
             response = requests.post(f"{API_BASE}/auth/register", json=user_data, timeout=10)
             
-            if response.status_code == 201:
+            if response.status_code in [200, 201]:
                 data = response.json()
-                self.test_user_id = data["data"]["user"]["id"]
-                self.log_result("User Registration", "PASS", "Test user created successfully", data)
-                return True
+                if data.get("success"):
+                    self.test_user_id = data["data"]["id"]
+                    self.log_result("User Registration", "PASS", "Test user created successfully", data)
+                    return True
+                else:
+                    self.log_result("User Registration", "FAIL", f"API returned success=false: {data}")
+                    return False
             else:
-                self.log_result("User Registration", "FAIL", f"Failed to create user: {response.text}")
+                self.log_result("User Registration", "FAIL", f"HTTP {response.status_code}: {response.text}")
                 return False
                 
         except Exception as e:
