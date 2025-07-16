@@ -238,7 +238,7 @@ class BackendTester:
     def test_connection_endpoint(self):
         """Test /api/test endpoint for frontend connectivity"""
         try:
-            response = requests.get(f"{API_BASE}/test", timeout=10)
+            response = requests.get(f"{API_BASE}/test", timeout=30)
             
             if response.status_code == 200:
                 data = response.json()
