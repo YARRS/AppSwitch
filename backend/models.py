@@ -278,7 +278,7 @@ class InquiryBase(BaseModel):
     phone: Optional[str] = None
     subject: str
     message: str
-    status: str = "pending"
+    status: InquiryStatus = InquiryStatus.PENDING
 
 class InquiryCreate(InquiryBase):
     pass
