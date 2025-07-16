@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """
-Backend Authentication Testing Script for SmartSwitch IoT Application
-Tests all authentication endpoints and verifies functionality
+Backend API Testing Script for SmartSwitch IoT Advanced E-commerce System
+Tests all new API endpoints including inventory, campaigns, commissions, dashboard, and inquiries
 """
 
 import requests
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 import random
 import string
+import uuid
 
 # Backend URL from frontend .env
 BACKEND_URL = "https://b10e2e92-18e0-431f-80c5-732bab767d6c.preview.emergentagent.com"
