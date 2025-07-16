@@ -9,11 +9,12 @@ class UserRole(str, Enum):
     CUSTOMER = "customer"
     ADMIN = "admin"
     SUPER_ADMIN = "super_admin"
-    INVENTORY_MANAGER = "inventory_manager"
+    SALESPERSON = "salesperson"
+    STORE_ADMIN = "store_admin"
     SALES_MANAGER = "sales_manager"
-    CUSTOMER_SERVICE = "customer_service"
+    STORE_OWNER = "store_owner"
+    SUPPORT_EXECUTIVE = "support_executive"
     MARKETING_MANAGER = "marketing_manager"
-    FINANCE_MANAGER = "finance_manager"
 
 # Order status enum
 class OrderStatus(str, Enum):
