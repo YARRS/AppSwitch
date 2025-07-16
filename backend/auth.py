@@ -258,3 +258,79 @@ async def get_super_admin_user(current_user: UserInDB = Depends(get_current_acti
             detail="Super admin access required"
         )
     return current_user
+
+# Role-based permission decorators
+async def get_salesperson_user(current_user: UserInDB = Depends(get_current_active_user)) -> UserInDB:
+    """Get current salesperson user"""
+    if current_user.role != "salesperson":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Salesperson access required"
+        )
+    return current_user
+
+async def get_store_admin_user(current_user: UserInDB = Depends(get_current_active_user)) -> UserInDB:
+    """Get current store admin user"""
+    if current_user.role != "store_admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Store admin access required"
+        )
+    return current_user
+
+async def get_sales_manager_user(current_user: UserInDB = Depends(get_current_active_user)) -> UserInDB:
+    """Get current sales manager user"""
+    if current_user.role != "sales_manager":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Sales manager access required"
+        )
+    return current_user
+
+async def get_store_owner_user(current_user: UserInDB = Depends(get_current_active_user)) -> UserInDB:
+    """Get current store owner user"""
+    if current_user.role != "store_owner":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Store owner access required"
+        )
+    return current_user
+
+async def get_support_executive_user(current_user: UserInDB = Depends(get_current_active_user)) -> UserInDB:
+    """Get current support executive user"""
+    if current_user.role != "support_executive":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Support executive access required"
+        )
+    return current_user
+
+async def get_marketing_manager_user(current_user: UserInDB = Depends(get_current_active_user)) -> UserInDB:
+    """Get current marketing manager user"""
+    if current_user.role != "marketing_manager":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Marketing manager access required"
+        )
+    return current_user
+
+# Multi-role permission decorators
+async def get_admin_or_manager_user(current_user: UserInDB = Depends(get_current_active_user)) -> UserInDB:
+    """Get user with admin or manager permissions"""
+    allowed_roles = ["admin", "super_admin", "store_owner", "sales_manager", "marketing_manager"]
+    if current_user.role not in allowed_roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Manager or admin access required"
+        )
+    return current_user
+
+async def get_inventory_user(current_user: UserInDB = Depends(get_current_active_user)) -> UserInDB:
+    """Get user with inventory permissions"""
+    allowed_roles = ["admin", "super_admin", "store_admin", "salesperson", "store_owner"]
+    if current_user.role not in allowed_roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Inventory access required"
+        )
+    return current_user
