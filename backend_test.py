@@ -68,7 +68,7 @@ class BackendTester:
                 "role": "salesperson"
             }
             
-            response = requests.post(f"{API_BASE}/auth/register", json=user_data, timeout=10)
+            response = requests.post(f"{API_BASE}/auth/register", json=user_data, timeout=30)
             
             if response.status_code in [200, 201]:
                 data = response.json()
