@@ -299,46 +299,559 @@ class BackendTester:
                     {"error_type": type(e).__name__}
                 )
     
-    def test_cors_configuration(self):
-        """Test CORS configuration for frontend access"""
+    # INVENTORY MANAGEMENT TESTS
+    def test_inventory_stock_in(self):
+        """Test POST /api/inventory/stock-in"""
         try:
-            # Test preflight request
-            headers = {
-                'Origin': 'http://localhost:3000',
-                'Access-Control-Request-Method': 'GET',
-                'Access-Control-Request-Headers': 'Content-Type'
+            if not self.test_product_id:
+                self.log_result("Inventory Stock In", "SKIP", "No test product available")
+                return
+            
+            stock_data = {
+                "product_id": self.test_product_id,
+                "quantity": 50,
+                "reason": "New stock arrival",
+                "notes": "Test stock addition"
             }
             
-            response = requests.options(f"{API_BASE}/health", headers=headers, timeout=10)
+            headers = self.get_auth_headers()
+            response = requests.post(f"{API_BASE}/inventory/stock-in", json=stock_data, headers=headers, timeout=10)
             
-            cors_headers = {
-                'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
-                'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
-                'Access-Control-Allow-Headers': response.headers.get('Access-Control-Allow-Headers')
-            }
-            
-            if cors_headers['Access-Control-Allow-Origin']:
-                self.log_result(
-                    "CORS Configuration", 
-                    "PASS", 
-                    "CORS headers properly configured",
-                    cors_headers
-                )
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Inventory Stock In", "PASS", "Stock added successfully", data)
+                else:
+                    self.log_result("Inventory Stock In", "FAIL", "API returned success=false", data)
             else:
-                self.log_result(
-                    "CORS Configuration", 
-                    "FAIL", 
-                    "CORS headers missing or misconfigured",
-                    cors_headers
-                )
+                self.log_result("Inventory Stock In", "FAIL", f"HTTP {response.status_code}: {response.text}")
                 
-        except requests.exceptions.RequestException as e:
-            self.log_result(
-                "CORS Configuration", 
-                "FAIL", 
-                f"Connection error: {str(e)}",
-                {"error_type": type(e).__name__}
-            )
+        except Exception as e:
+            self.log_result("Inventory Stock In", "FAIL", f"Error: {str(e)}")
+    
+    def test_inventory_stock_out(self):
+        """Test POST /api/inventory/stock-out"""
+        try:
+            if not self.test_product_id:
+                self.log_result("Inventory Stock Out", "SKIP", "No test product available")
+                return
+            
+            stock_data = {
+                "product_id": self.test_product_id,
+                "quantity": 10,
+                "reason": "Sale",
+                "notes": "Test stock removal"
+            }
+            
+            headers = self.get_auth_headers()
+            response = requests.post(f"{API_BASE}/inventory/stock-out", json=stock_data, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Inventory Stock Out", "PASS", "Stock removed successfully", data)
+                else:
+                    self.log_result("Inventory Stock Out", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Inventory Stock Out", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Inventory Stock Out", "FAIL", f"Error: {str(e)}")
+    
+    def test_inventory_adjust(self):
+        """Test POST /api/inventory/adjust"""
+        try:
+            if not self.test_product_id:
+                self.log_result("Inventory Adjust", "SKIP", "No test product available")
+                return
+            
+            adjust_data = {
+                "product_id": self.test_product_id,
+                "quantity_change": -5,
+                "reason": "Damaged goods",
+                "notes": "Test stock adjustment"
+            }
+            
+            headers = self.get_auth_headers()
+            response = requests.post(f"{API_BASE}/inventory/adjust", json=adjust_data, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Inventory Adjust", "PASS", "Stock adjusted successfully", data)
+                else:
+                    self.log_result("Inventory Adjust", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Inventory Adjust", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Inventory Adjust", "FAIL", f"Error: {str(e)}")
+    
+    def test_inventory_logs(self):
+        """Test GET /api/inventory/logs"""
+        try:
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/inventory/logs?page=1&per_page=10", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Inventory Logs", "PASS", f"Retrieved {len(data.get('data', []))} inventory logs", data)
+                else:
+                    self.log_result("Inventory Logs", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Inventory Logs", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Inventory Logs", "FAIL", f"Error: {str(e)}")
+    
+    def test_inventory_low_stock(self):
+        """Test GET /api/inventory/low-stock"""
+        try:
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/inventory/low-stock?limit=20", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Inventory Low Stock", "PASS", f"Retrieved {len(data.get('data', []))} low stock products", data)
+                else:
+                    self.log_result("Inventory Low Stock", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Inventory Low Stock", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Inventory Low Stock", "FAIL", f"Error: {str(e)}")
+    
+    def test_inventory_reassign(self):
+        """Test POST /api/inventory/reassign"""
+        try:
+            if not self.test_product_id or not self.test_user_id:
+                self.log_result("Inventory Reassign", "SKIP", "No test product or user available")
+                return
+            
+            reassign_data = {
+                "product_id": self.test_product_id,
+                "from_user_id": self.test_user_id,
+                "to_user_id": str(uuid.uuid4()),  # Dummy user ID
+                "reason": "Staff change"
+            }
+            
+            headers = self.get_auth_headers()
+            response = requests.post(f"{API_BASE}/inventory/reassign", json=reassign_data, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Inventory Reassign", "PASS", "Product reassigned successfully", data)
+                else:
+                    self.log_result("Inventory Reassign", "FAIL", "API returned success=false", data)
+            elif response.status_code == 403:
+                self.log_result("Inventory Reassign", "PASS", "Proper permission check - 403 Forbidden", {"status_code": response.status_code})
+            else:
+                self.log_result("Inventory Reassign", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Inventory Reassign", "FAIL", f"Error: {str(e)}")
+    
+    # CAMPAIGN MANAGEMENT TESTS
+    def test_campaigns_create(self):
+        """Test POST /api/campaigns/"""
+        try:
+            campaign_data = {
+                "name": f"Test Campaign {uuid.uuid4().hex[:8]}",
+                "description": "Test campaign for API testing",
+                "discount_type": "percentage",
+                "discount_value": 10.0,
+                "min_order_amount": 100.0,
+                "max_discount_amount": 50.0,
+                "start_date": datetime.utcnow().isoformat(),
+                "end_date": (datetime.utcnow() + timedelta(days=30)).isoformat(),
+                "status": "scheduled",
+                "product_ids": [],
+                "user_roles": ["customer"],
+                "usage_limit": 100
+            }
+            
+            headers = self.get_auth_headers()
+            response = requests.post(f"{API_BASE}/campaigns/", json=campaign_data, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.test_campaign_id = data["data"]["id"]
+                    self.log_result("Campaign Create", "PASS", "Campaign created successfully", data)
+                else:
+                    self.log_result("Campaign Create", "FAIL", "API returned success=false", data)
+            elif response.status_code == 403:
+                self.log_result("Campaign Create", "PASS", "Proper permission check - 403 Forbidden", {"status_code": response.status_code})
+            else:
+                self.log_result("Campaign Create", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Campaign Create", "FAIL", f"Error: {str(e)}")
+    
+    def test_campaigns_list(self):
+        """Test GET /api/campaigns/"""
+        try:
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/campaigns/?page=1&per_page=10", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Campaign List", "PASS", f"Retrieved {len(data.get('data', []))} campaigns", data)
+                else:
+                    self.log_result("Campaign List", "FAIL", "API returned success=false", data)
+            elif response.status_code == 403:
+                self.log_result("Campaign List", "PASS", "Proper permission check - 403 Forbidden", {"status_code": response.status_code})
+            else:
+                self.log_result("Campaign List", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Campaign List", "FAIL", f"Error: {str(e)}")
+    
+    def test_campaigns_get_by_id(self):
+        """Test GET /api/campaigns/{id}"""
+        try:
+            if not self.test_campaign_id:
+                self.log_result("Campaign Get By ID", "SKIP", "No test campaign available")
+                return
+            
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/campaigns/{self.test_campaign_id}", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Campaign Get By ID", "PASS", "Campaign retrieved successfully", data)
+                else:
+                    self.log_result("Campaign Get By ID", "FAIL", "API returned success=false", data)
+            elif response.status_code == 403:
+                self.log_result("Campaign Get By ID", "PASS", "Proper permission check - 403 Forbidden", {"status_code": response.status_code})
+            else:
+                self.log_result("Campaign Get By ID", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Campaign Get By ID", "FAIL", f"Error: {str(e)}")
+    
+    def test_campaigns_active_list(self):
+        """Test GET /api/campaigns/active/list"""
+        try:
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/campaigns/active/list", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Campaign Active List", "PASS", f"Retrieved {len(data.get('data', []))} active campaigns", data)
+                else:
+                    self.log_result("Campaign Active List", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Campaign Active List", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Campaign Active List", "FAIL", f"Error: {str(e)}")
+    
+    def test_campaigns_calculate_discount(self):
+        """Test POST /api/campaigns/{id}/calculate-discount"""
+        try:
+            if not self.test_campaign_id:
+                self.log_result("Campaign Calculate Discount", "SKIP", "No test campaign available")
+                return
+            
+            discount_data = {
+                "order_amount": 200.0,
+                "product_ids": [self.test_product_id] if self.test_product_id else []
+            }
+            
+            headers = self.get_auth_headers()
+            response = requests.post(f"{API_BASE}/campaigns/{self.test_campaign_id}/calculate-discount", 
+                                   json=discount_data, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Campaign Calculate Discount", "PASS", "Discount calculated successfully", data)
+                else:
+                    self.log_result("Campaign Calculate Discount", "FAIL", "API returned success=false", data)
+            elif response.status_code == 400:
+                self.log_result("Campaign Calculate Discount", "PASS", "Proper validation - campaign not active", {"status_code": response.status_code})
+            else:
+                self.log_result("Campaign Calculate Discount", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Campaign Calculate Discount", "FAIL", f"Error: {str(e)}")
+    
+    # COMMISSION MANAGEMENT TESTS
+    def test_commissions_create_rule(self):
+        """Test POST /api/commissions/rules"""
+        try:
+            rule_data = {
+                "user_id": self.test_user_id or str(uuid.uuid4()),
+                "user_role": "salesperson",
+                "commission_type": "percentage",
+                "commission_value": 5.0,
+                "min_order_amount": 50.0,
+                "max_commission_amount": 100.0,
+                "product_categories": ["smart_switch"],
+                "is_active": True
+            }
+            
+            headers = self.get_auth_headers()
+            response = requests.post(f"{API_BASE}/commissions/rules", json=rule_data, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.test_commission_rule_id = data["data"]["id"]
+                    self.log_result("Commission Create Rule", "PASS", "Commission rule created successfully", data)
+                else:
+                    self.log_result("Commission Create Rule", "FAIL", "API returned success=false", data)
+            elif response.status_code == 403:
+                self.log_result("Commission Create Rule", "PASS", "Proper permission check - 403 Forbidden", {"status_code": response.status_code})
+            else:
+                self.log_result("Commission Create Rule", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Commission Create Rule", "FAIL", f"Error: {str(e)}")
+    
+    def test_commissions_get_rules(self):
+        """Test GET /api/commissions/rules"""
+        try:
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/commissions/rules?page=1&per_page=10", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Commission Get Rules", "PASS", f"Retrieved {len(data.get('data', []))} commission rules", data)
+                else:
+                    self.log_result("Commission Get Rules", "FAIL", "API returned success=false", data)
+            elif response.status_code == 403:
+                self.log_result("Commission Get Rules", "PASS", "Proper permission check - 403 Forbidden", {"status_code": response.status_code})
+            else:
+                self.log_result("Commission Get Rules", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Commission Get Rules", "FAIL", f"Error: {str(e)}")
+    
+    def test_commissions_get_earnings(self):
+        """Test GET /api/commissions/earnings"""
+        try:
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/commissions/earnings?page=1&per_page=10", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Commission Get Earnings", "PASS", f"Retrieved {len(data.get('data', []))} commission earnings", data)
+                else:
+                    self.log_result("Commission Get Earnings", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Commission Get Earnings", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Commission Get Earnings", "FAIL", f"Error: {str(e)}")
+    
+    def test_commissions_get_summary(self):
+        """Test GET /api/commissions/summary"""
+        try:
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/commissions/summary", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Commission Get Summary", "PASS", "Commission summary retrieved successfully", data)
+                else:
+                    self.log_result("Commission Get Summary", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Commission Get Summary", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Commission Get Summary", "FAIL", f"Error: {str(e)}")
+    
+    # DASHBOARD TESTS
+    def test_dashboard_main(self):
+        """Test GET /api/dashboard/"""
+        try:
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/dashboard/", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Dashboard Main", "PASS", "Dashboard data retrieved successfully", data)
+                else:
+                    self.log_result("Dashboard Main", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Dashboard Main", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Dashboard Main", "FAIL", f"Error: {str(e)}")
+    
+    def test_dashboard_stats(self):
+        """Test GET /api/dashboard/stats"""
+        try:
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/dashboard/stats", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Dashboard Stats", "PASS", "Dashboard stats retrieved successfully", data)
+                else:
+                    self.log_result("Dashboard Stats", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Dashboard Stats", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Dashboard Stats", "FAIL", f"Error: {str(e)}")
+    
+    def test_dashboard_salesperson(self):
+        """Test GET /api/dashboard/salesperson/{user_id}"""
+        try:
+            if not self.test_user_id:
+                self.log_result("Dashboard Salesperson", "SKIP", "No test user available")
+                return
+            
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/dashboard/salesperson/{self.test_user_id}", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Dashboard Salesperson", "PASS", "Salesperson dashboard retrieved successfully", data)
+                else:
+                    self.log_result("Dashboard Salesperson", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Dashboard Salesperson", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Dashboard Salesperson", "FAIL", f"Error: {str(e)}")
+    
+    def test_dashboard_analytics(self):
+        """Test GET /api/dashboard/analytics"""
+        try:
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/dashboard/analytics", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Dashboard Analytics", "PASS", "Analytics data retrieved successfully", data)
+                else:
+                    self.log_result("Dashboard Analytics", "FAIL", "API returned success=false", data)
+            elif response.status_code == 403:
+                self.log_result("Dashboard Analytics", "PASS", "Proper permission check - 403 Forbidden", {"status_code": response.status_code})
+            else:
+                self.log_result("Dashboard Analytics", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Dashboard Analytics", "FAIL", f"Error: {str(e)}")
+    
+    # INQUIRY TESTS
+    def test_inquiries_create_public(self):
+        """Test POST /api/inquiries/ (public endpoint)"""
+        try:
+            inquiry_data = {
+                "name": "John Smith",
+                "email": f"customer_{uuid.uuid4().hex[:8]}@example.com",
+                "phone": "+1234567890",
+                "subject": "Product Inquiry",
+                "message": "I would like to know more about your smart switches."
+            }
+            
+            # No auth headers for public endpoint
+            response = requests.post(f"{API_BASE}/inquiries/", json=inquiry_data, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.test_inquiry_id = data["data"]["id"]
+                    self.log_result("Inquiry Create Public", "PASS", "Inquiry created successfully", data)
+                else:
+                    self.log_result("Inquiry Create Public", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Inquiry Create Public", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Inquiry Create Public", "FAIL", f"Error: {str(e)}")
+    
+    def test_inquiries_list(self):
+        """Test GET /api/inquiries/"""
+        try:
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/inquiries/?page=1&per_page=10", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Inquiry List", "PASS", f"Retrieved {len(data.get('data', []))} inquiries", data)
+                else:
+                    self.log_result("Inquiry List", "FAIL", "API returned success=false", data)
+            elif response.status_code == 403:
+                self.log_result("Inquiry List", "PASS", "Proper permission check - 403 Forbidden", {"status_code": response.status_code})
+            else:
+                self.log_result("Inquiry List", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Inquiry List", "FAIL", f"Error: {str(e)}")
+    
+    def test_inquiries_get_by_id(self):
+        """Test GET /api/inquiries/{id}"""
+        try:
+            if not self.test_inquiry_id:
+                self.log_result("Inquiry Get By ID", "SKIP", "No test inquiry available")
+                return
+            
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/inquiries/{self.test_inquiry_id}", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Inquiry Get By ID", "PASS", "Inquiry retrieved successfully", data)
+                else:
+                    self.log_result("Inquiry Get By ID", "FAIL", "API returned success=false", data)
+            elif response.status_code == 403:
+                self.log_result("Inquiry Get By ID", "PASS", "Proper permission check - 403 Forbidden", {"status_code": response.status_code})
+            else:
+                self.log_result("Inquiry Get By ID", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Inquiry Get By ID", "FAIL", f"Error: {str(e)}")
+    
+    def test_inquiries_update(self):
+        """Test PUT /api/inquiries/{id}"""
+        try:
+            if not self.test_inquiry_id:
+                self.log_result("Inquiry Update", "SKIP", "No test inquiry available")
+                return
+            
+            update_data = {
+                "status": "in_progress",
+                "admin_notes": "Following up with customer"
+            }
+            
+            headers = self.get_auth_headers()
+            response = requests.put(f"{API_BASE}/inquiries/{self.test_inquiry_id}", 
+                                  json=update_data, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Inquiry Update", "PASS", "Inquiry updated successfully", data)
+                else:
+                    self.log_result("Inquiry Update", "FAIL", "API returned success=false", data)
+            elif response.status_code == 403:
+                self.log_result("Inquiry Update", "PASS", "Proper permission check - 403 Forbidden", {"status_code": response.status_code})
+            else:
+                self.log_result("Inquiry Update", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Inquiry Update", "FAIL", f"Error: {str(e)}")
     
     def run_all_tests(self):
         """Run all backend tests"""
