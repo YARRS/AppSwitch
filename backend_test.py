@@ -22,6 +22,12 @@ class BackendTester:
         self.total_tests = 0
         self.passed_tests = 0
         self.failed_tests = 0
+        self.auth_token = None
+        self.test_user_id = None
+        self.test_product_id = None
+        self.test_campaign_id = None
+        self.test_commission_rule_id = None
+        self.test_inquiry_id = None
         
     def log_result(self, test_name, status, message, details=None):
         """Log test result"""
@@ -43,6 +49,109 @@ class BackendTester:
             print(f"❌ {test_name}: {message}")
             if details:
                 print(f"   Details: {details}")
+    
+    def get_auth_headers(self):
+        """Get authorization headers"""
+        if self.auth_token:
+            return {"Authorization": f"Bearer {self.auth_token}"}
+        return {}
+    
+    def create_test_user(self):
+        """Create a test user for authentication"""
+        try:
+            user_data = {
+                "email": f"testuser_{uuid.uuid4().hex[:8]}@smartswitch.com",
+                "username": f"testuser_{uuid.uuid4().hex[:8]}",
+                "password": "TestPass123!",
+                "full_name": "Test User",
+                "phone": "+1234567890",
+                "role": "salesperson"
+            }
+            
+            response = requests.post(f"{API_BASE}/auth/register", json=user_data, timeout=10)
+            
+            if response.status_code == 201:
+                data = response.json()
+                self.test_user_id = data["data"]["user"]["id"]
+                self.log_result("User Registration", "PASS", "Test user created successfully", data)
+                return True
+            else:
+                self.log_result("User Registration", "FAIL", f"Failed to create user: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_result("User Registration", "FAIL", f"Error creating user: {str(e)}")
+            return False
+    
+    def authenticate_user(self):
+        """Authenticate test user and get token"""
+        try:
+            if not self.test_user_id:
+                return False
+                
+            # Get user email from previous registration
+            user_email = None
+            for result in self.results:
+                if result["test"] == "User Registration" and result["status"] == "PASS":
+                    user_email = result["details"]["data"]["user"]["email"]
+                    break
+            
+            if not user_email:
+                self.log_result("User Authentication", "FAIL", "No test user email found")
+                return False
+            
+            login_data = {
+                "username": user_email,
+                "password": "TestPass123!"
+            }
+            
+            response = requests.post(f"{API_BASE}/auth/login", data=login_data, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                self.auth_token = data["access_token"]
+                self.log_result("User Authentication", "PASS", "User authenticated successfully", {"token_type": data["token_type"]})
+                return True
+            else:
+                self.log_result("User Authentication", "FAIL", f"Authentication failed: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_result("User Authentication", "FAIL", f"Error authenticating user: {str(e)}")
+            return False
+    
+    def create_test_product(self):
+        """Create a test product for inventory testing"""
+        try:
+            product_data = {
+                "name": f"Test Smart Switch {uuid.uuid4().hex[:8]}",
+                "description": "Test smart switch for API testing",
+                "category": "smart_switch",
+                "price": 99.99,
+                "sku": f"TSW-{uuid.uuid4().hex[:8].upper()}",
+                "brand": "SmartSwitch",
+                "stock_quantity": 100,
+                "min_stock_level": 10,
+                "specifications": {"voltage": "220V", "wireless": "WiFi"},
+                "features": ["Voice Control", "App Control", "Timer"],
+                "is_active": True
+            }
+            
+            headers = self.get_auth_headers()
+            response = requests.post(f"{API_BASE}/products/", json=product_data, headers=headers, timeout=10)
+            
+            if response.status_code == 201:
+                data = response.json()
+                self.test_product_id = data["data"]["id"]
+                self.log_result("Product Creation", "PASS", "Test product created successfully", {"product_id": self.test_product_id})
+                return True
+            else:
+                self.log_result("Product Creation", "FAIL", f"Failed to create product: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Product Creation", "FAIL", f"Error creating product: {str(e)}")
+            return False
     
     def test_health_endpoint(self):
         """Test /api/health endpoint for database connection"""
