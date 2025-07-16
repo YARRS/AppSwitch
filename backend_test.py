@@ -128,38 +128,78 @@ class BackendTester:
             self.log_result("User Authentication", "FAIL", f"Error authenticating user: {str(e)}")
             return False
     
-    def create_test_product(self):
-        """Create a test product for inventory testing"""
+    def create_admin_user_and_product(self):
+        """Create an admin user and test product for comprehensive testing"""
         try:
-            product_data = {
-                "name": f"Test Smart Switch {uuid.uuid4().hex[:8]}",
-                "description": "Test smart switch for API testing",
-                "category": "smart_switch",
-                "price": 99.99,
-                "sku": f"TSW-{uuid.uuid4().hex[:8].upper()}",
-                "brand": "SmartSwitch",
-                "stock_quantity": 100,
-                "min_stock_level": 10,
-                "specifications": {"voltage": "220V", "wireless": "WiFi"},
-                "features": ["Voice Control", "App Control", "Timer"],
-                "is_active": True
+            # Create admin user
+            admin_data = {
+                "email": f"admin_{uuid.uuid4().hex[:8]}@smartswitch.com",
+                "username": f"admin_{uuid.uuid4().hex[:8]}",
+                "password": "AdminPass123!",
+                "full_name": "Test Admin",
+                "phone": "+1234567890",
+                "role": "admin"
             }
             
-            headers = self.get_auth_headers()
-            response = requests.post(f"{API_BASE}/products/", json=product_data, headers=headers, timeout=10)
+            response = requests.post(f"{API_BASE}/auth/register", json=admin_data, timeout=30)
             
-            if response.status_code == 201:
+            if response.status_code in [200, 201]:
                 data = response.json()
-                self.test_product_id = data["data"]["id"]
-                self.log_result("Product Creation", "PASS", "Test product created successfully", {"product_id": self.test_product_id})
-                return True
+                if data.get("success"):
+                    admin_id = data["data"]["id"]
+                    admin_email = data["data"]["email"]
+                    
+                    # Login as admin
+                    login_data = {
+                        "username": admin_email,
+                        "password": "AdminPass123!"
+                    }
+                    
+                    login_response = requests.post(f"{API_BASE}/auth/login", data=login_data, timeout=30)
+                    
+                    if login_response.status_code == 200:
+                        login_data = login_response.json()
+                        admin_token = login_data["access_token"]
+                        
+                        # Create product as admin
+                        product_data = {
+                            "name": f"Test Smart Switch {uuid.uuid4().hex[:8]}",
+                            "description": "Test smart switch for API testing",
+                            "category": "smart_switch",
+                            "price": 99.99,
+                            "sku": f"TSW-{uuid.uuid4().hex[:8].upper()}",
+                            "brand": "SmartSwitch",
+                            "stock_quantity": 100,
+                            "min_stock_level": 10,
+                            "specifications": {"voltage": "220V", "wireless": "WiFi"},
+                            "features": ["Voice Control", "App Control", "Timer"],
+                            "is_active": True
+                        }
+                        
+                        headers = {"Authorization": f"Bearer {admin_token}"}
+                        product_response = requests.post(f"{API_BASE}/products/", json=product_data, headers=headers, timeout=30)
+                        
+                        if product_response.status_code in [200, 201]:
+                            product_data = product_response.json()
+                            if product_data.get("success"):
+                                self.test_product_id = product_data["data"]["id"]
+                                self.log_result("Admin Product Creation", "PASS", "Test product created by admin successfully")
+                                return True
+                            else:
+                                self.log_result("Admin Product Creation", "FAIL", f"API returned success=false: {product_data}")
+                        else:
+                            self.log_result("Admin Product Creation", "FAIL", f"HTTP {product_response.status_code}: {product_response.text}")
+                    else:
+                        self.log_result("Admin Login", "FAIL", f"Admin login failed: {login_response.text}")
+                else:
+                    self.log_result("Admin Registration", "FAIL", f"API returned success=false: {data}")
             else:
-                self.log_result("Product Creation", "FAIL", f"Failed to create product: {response.text}")
-                return False
+                self.log_result("Admin Registration", "FAIL", f"HTTP {response.status_code}: {response.text}")
                 
         except Exception as e:
-            self.log_result("Product Creation", "FAIL", f"Error creating product: {str(e)}")
-            return False
+            self.log_result("Admin Setup", "FAIL", f"Error: {str(e)}")
+            
+        return False
     
     def test_health_endpoint(self):
         """Test /api/health endpoint for database connection"""
