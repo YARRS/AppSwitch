@@ -853,18 +853,128 @@ class BackendTester:
         except Exception as e:
             self.log_result("Inquiry Update", "FAIL", f"Error: {str(e)}")
     
+    def run_salesperson_dashboard_tests(self):
+        """Run Salesperson Dashboard specific tests"""
+        print("🚀 Starting Salesperson Dashboard Backend API Tests")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 60)
+        
+        # Basic connectivity tests
+        self.test_health_endpoint()
+        self.test_root_endpoint()
+        self.test_connection_endpoint()
+        self.test_error_handling()
+        
+        # Authentication tests
+        print("\n🔐 Testing Authentication APIs...")
+        if self.create_test_user():
+            self.authenticate_user()
+        
+        # Product tests
+        print("\n📦 Testing Product APIs...")
+        if self.auth_token:
+            self.create_test_product()
+            self.test_products_list()
+            self.test_products_get_by_id()
+            if self.test_product_id:
+                self.test_products_update_stock()
+        
+        # Inventory tests
+        print("\n📊 Testing Inventory APIs...")
+        if self.auth_token:
+            self.test_inventory_stock_in()
+            self.test_inventory_stock_out()
+            self.test_inventory_logs()
+            self.test_inventory_low_stock()
+        
+        # Commission tests
+        print("\n💰 Testing Commission APIs...")
+        if self.auth_token:
+            self.test_commissions_get_earnings()
+            self.test_commissions_get_summary()
+        
+        # Dashboard tests
+        print("\n📈 Testing Dashboard APIs...")
+        if self.auth_token:
+            self.test_dashboard_main()
+            self.test_dashboard_salesperson()
+    
+    def test_products_list(self):
+        """Test GET /api/products"""
+        try:
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/products/?page=1&per_page=10", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Products List", "PASS", f"Retrieved {len(data.get('data', []))} products", data)
+                else:
+                    self.log_result("Products List", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Products List", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Products List", "FAIL", f"Error: {str(e)}")
+    
+    def test_products_get_by_id(self):
+        """Test GET /api/products/{id}"""
+        try:
+            if not self.test_product_id:
+                self.log_result("Products Get By ID", "SKIP", "No test product available")
+                return
+            
+            headers = self.get_auth_headers()
+            response = requests.get(f"{API_BASE}/products/{self.test_product_id}", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Products Get By ID", "PASS", "Product retrieved successfully", data)
+                else:
+                    self.log_result("Products Get By ID", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Products Get By ID", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Products Get By ID", "FAIL", f"Error: {str(e)}")
+    
+    def test_products_update_stock(self):
+        """Test PUT /api/products/{id} for stock updates"""
+        try:
+            if not self.test_product_id:
+                self.log_result("Products Update Stock", "SKIP", "No test product available")
+                return
+            
+            update_data = {
+                "stock_quantity": 75,
+                "min_stock_level": 15
+            }
+            
+            headers = self.get_auth_headers()
+            response = requests.put(f"{API_BASE}/products/{self.test_product_id}", 
+                                  json=update_data, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Products Update Stock", "PASS", "Product stock updated successfully", data)
+                else:
+                    self.log_result("Products Update Stock", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Products Update Stock", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Products Update Stock", "FAIL", f"Error: {str(e)}")
+
     def run_all_tests(self):
         """Run all backend tests"""
         print("🚀 Starting SmartSwitch IoT Backend API Tests")
         print(f"Backend URL: {BACKEND_URL}")
         print("=" * 60)
         
-        # Run all tests
-        self.test_health_endpoint()
-        self.test_root_endpoint()
-        self.test_connection_endpoint()
-        self.test_error_handling()
-        self.test_cors_configuration()
+        # Run salesperson dashboard specific tests
+        self.run_salesperson_dashboard_tests()
         
         # Print summary
         print("\n" + "=" * 60)
