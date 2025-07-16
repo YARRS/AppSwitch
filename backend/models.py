@@ -46,6 +46,14 @@ class InventoryAction(str, Enum):
     REASSIGNMENT = "reassignment"
     RETURN = "return"
 
+# Inquiry status enum
+class InquiryStatus(str, Enum):
+    PENDING = "pending"
+    IN_PROGRESS = "in_progress"
+    RESPONDED = "responded"
+    RESOLVED = "resolved"
+    CLOSED = "closed"
+
 # Product category enum
 class ProductCategory(str, Enum):
     SMART_SWITCH = "smart_switch"
