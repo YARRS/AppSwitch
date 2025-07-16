@@ -48,6 +48,7 @@ from routes.inventory import router as inventory_router
 from routes.campaigns import router as campaigns_router
 from routes.commissions import router as commissions_router
 from routes.dashboard import router as dashboard_router
+from routes.inquiries import router as inquiries_router
 
 # Make db available globally for imports
 import sys
@@ -62,6 +63,7 @@ app.include_router(inventory_router)
 app.include_router(campaigns_router)
 app.include_router(commissions_router)
 app.include_router(dashboard_router)
+app.include_router(inquiries_router)
 
 # Health check endpoint
 @app.get("/api/health")
