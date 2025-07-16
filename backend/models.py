@@ -284,7 +284,7 @@ class InquiryCreate(InquiryBase):
     pass
 
 class InquiryUpdate(BaseModel):
-    status: Optional[str] = None
+    status: Optional[InquiryStatus] = None
     admin_notes: Optional[str] = None
 
 class InquiryInDB(InquiryBase, BaseDocument):
