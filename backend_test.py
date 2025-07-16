@@ -917,9 +917,12 @@ class BackendTester:
         print("\n🔐 Testing Authentication APIs...")
         if self.create_test_user():
             if self.authenticate_user():
+                # Create admin user and product for testing
+                print("\n👑 Setting up Admin User and Test Product...")
+                self.create_admin_user_and_product()
+                
                 # Product tests
                 print("\n📦 Testing Product APIs...")
-                self.create_test_product()
                 self.test_products_list()
                 self.test_products_get_by_id()
                 if self.test_product_id:
