@@ -1,0 +1,437 @@
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { Search, Filter, ShoppingCart, Eye, Star } from 'lucide-react';
+import axios from 'axios';
+
+const ProductsPage = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [priceRange, setPriceRange] = useState({ min: '', max: '' });
+  const [categories, setCategories] = useState([]);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    per_page: 12,
+    total: 0,
+    total_pages: 0
+  });
+
+  const { isAuthenticated, getAuthenticatedAxios } = useAuth();
+  const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+
+  // Fetch products from API
+  const fetchProducts = async (page = 1) => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        page: page.toString(),
+        per_page: pagination.per_page.toString(),
+        is_active: 'true' // Only show active products
+      });
+
+      if (searchTerm) params.append('search', searchTerm);
+      if (selectedCategory) params.append('category', selectedCategory);
+      if (priceRange.min) params.append('min_price', priceRange.min);
+      if (priceRange.max) params.append('max_price', priceRange.max);
+
+      const response = await axios.get(`${API_BASE_URL}/api/products?${params}`);
+      
+      if (response.data.success) {
+        setProducts(response.data.data || []);
+        setPagination({
+          page: response.data.page || 1,
+          per_page: response.data.per_page || 12,
+          total: response.data.total || 0,
+          total_pages: response.data.total_pages || 0
+        });
+      } else {
+        throw new Error(response.data.message || 'Failed to fetch products');
+      }
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      setError('Failed to load products. Please try again later.');
+      // Fallback to sample data for demo
+      setProducts(getSampleProducts());
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch available categories
+  const fetchCategories = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/products/categories/available`);
+      if (response.data.success) {
+        setCategories(response.data.data || []);
+      }
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      // Fallback categories
+      setCategories([
+        { value: 'smart_switch', label: 'Smart Switch' },
+        { value: 'dimmer_switch', label: 'Dimmer Switch' },
+        { value: 'motion_sensor', label: 'Motion Sensor' },
+        { value: 'smart_plug', label: 'Smart Plug' },
+        { value: 'gateway', label: 'Gateway' },
+        { value: 'accessories', label: 'Accessories' }
+      ]);
+    }
+  };
+
+  // Sample products for fallback
+  const getSampleProducts = () => [
+    {
+      id: '1',
+      name: 'SmartSwitch Pro',
+      description: 'Professional grade smart switch with advanced features',
+      price: 29.99,
+      category: 'smart_switch',
+      images: [],
+      is_in_stock: true,
+      stock_quantity: 50,
+      features: 'WiFi enabled, voice control, smartphone app'
+    },
+    {
+      id: '2',
+      name: 'SmartSwitch Basic',
+      description: 'Entry-level smart switch perfect for home automation',
+      price: 19.99,
+      category: 'smart_switch',
+      images: [],
+      is_in_stock: true,
+      stock_quantity: 75,
+      features: 'WiFi enabled, smartphone app'
+    },
+    {
+      id: '3',
+      name: 'Dimmer Switch Pro',
+      description: 'Smart dimmer switch with adjustable brightness control',
+      price: 34.99,
+      category: 'dimmer_switch',
+      images: [],
+      is_in_stock: true,
+      stock_quantity: 30,
+      features: 'Adjustable brightness, WiFi enabled, voice control'
+    },
+    {
+      id: '4',
+      name: 'Motion Sensor',
+      description: 'Smart motion sensor for automated lighting control',
+      price: 24.99,
+      category: 'motion_sensor',
+      images: [],
+      is_in_stock: true,
+      stock_quantity: 40,
+      features: 'Motion detection, automated control, battery powered'
+    },
+    {
+      id: '5',
+      name: 'Smart Plug',
+      description: 'WiFi-enabled smart plug for any device',
+      price: 14.99,
+      category: 'smart_plug',
+      images: [],
+      is_in_stock: true,
+      stock_quantity: 100,
+      features: 'WiFi enabled, remote control, scheduling'
+    },
+    {
+      id: '6',
+      name: 'Smart Home Gateway',
+      description: 'Central hub for all your smart home devices',
+      price: 79.99,
+      category: 'gateway',
+      images: [],
+      is_in_stock: true,
+      stock_quantity: 25,
+      features: 'Central hub, multiple device support, cloud connectivity'
+    }
+  ];
+
+  useEffect(() => {
+    fetchCategories();
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    fetchProducts(1);
+  }, [searchTerm, selectedCategory, priceRange.min, priceRange.max]);
+
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const handleCategoryChange = (e) => {
+    setSelectedCategory(e.target.value);
+  };
+
+  const handlePriceRangeChange = (field, value) => {
+    setPriceRange(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setSelectedCategory('');
+    setPriceRange({ min: '', max: '' });
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price);
+  };
+
+  if (loading && products.length === 0) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading products...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          Our Products
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          Discover our range of smart home solutions designed to make your life easier and more efficient.
+        </p>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={handleSearch}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+          </div>
+
+          {/* Category Filter */}
+          <div>
+            <select
+              value={selectedCategory}
+              onChange={handleCategoryChange}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            >
+              <option value="">All Categories</option>
+              {categories.map((category) => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Price Range */}
+          <div className="flex space-x-2">
+            <input
+              type="number"
+              placeholder="Min $"
+              value={priceRange.min}
+              onChange={(e) => handlePriceRangeChange('min', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+            <input
+              type="number"
+              placeholder="Max $"
+              value={priceRange.max}
+              onChange={(e) => handlePriceRangeChange('max', e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            />
+          </div>
+
+          {/* Clear Filters */}
+          <div>
+            <button
+              onClick={clearFilters}
+              className="w-full px-4 py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors"
+            >
+              Clear Filters
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-8">
+          <p className="text-red-800 dark:text-red-300">{error}</p>
+        </div>
+      )}
+
+      {/* Products Grid */}
+      {products.length > 0 ? (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} isAuthenticated={isAuthenticated} />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {pagination.total_pages > 1 && (
+            <div className="flex justify-center space-x-2">
+              {Array.from({ length: pagination.total_pages }, (_, i) => i + 1).map((page) => (
+                <button
+                  key={page}
+                  onClick={() => fetchProducts(page)}
+                  className={`px-3 py-2 rounded-lg ${
+                    page === pagination.page
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
+      ) : (
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-4">
+            <ShoppingCart className="w-16 h-16 mx-auto" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            No products found
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            Try adjusting your search criteria or filters.
+          </p>
+          <button
+            onClick={clearFilters}
+            className="btn-primary"
+          >
+            Clear All Filters
+          </button>
+        </div>
+      )}
+
+      {/* Loading overlay */}
+      {loading && products.length > 0 && (
+        <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+            <p className="text-gray-600 dark:text-gray-400">Updating products...</p>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Product Card Component
+const ProductCard = ({ product, isAuthenticated }) => {
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price);
+  };
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+      {/* Product Image */}
+      <div className="relative">
+        <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
+          {product.images && product.images.length > 0 ? (
+            <img
+              src={product.images[0]}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-2 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-2xl font-bold text-white">
+                  {product.name.charAt(0)}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-400">No Image</p>
+            </div>
+          )}
+        </div>
+        
+        {/* Stock Status */}
+        <div className="absolute top-2 right-2">
+          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+            product.is_in_stock
+              ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+              : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+          }`}>
+            {product.is_in_stock ? 'In Stock' : 'Out of Stock'}
+          </span>
+        </div>
+      </div>
+
+      {/* Product Info */}
+      <div className="p-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-1">
+          {product.name}
+        </h3>
+        
+        <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 line-clamp-2">
+          {product.description}
+        </p>
+
+        {/* Features */}
+        {product.features && (
+          <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
+            {product.features}
+          </p>
+        )}
+
+        {/* Price */}
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-2xl font-bold text-gray-900 dark:text-white">
+            {formatPrice(product.price)}
+          </span>
+          {product.stock_quantity && (
+            <span className="text-sm text-gray-500 dark:text-gray-400">
+              {product.stock_quantity} left
+            </span>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex space-x-2">
+          <Link
+            to={`/products/${product.id}`}
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+          >
+            <Eye className="w-4 h-4" />
+            <span>View Details</span>
+          </Link>
+          
+          {isAuthenticated && product.is_in_stock && (
+            <button className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors duration-200">
+              <ShoppingCart className="w-5 h-5" />
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProductsPage;
