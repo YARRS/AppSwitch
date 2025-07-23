@@ -212,12 +212,18 @@ function HomePage({ backendStatus }) {
               Alexa, and your smartphone. Control all your appliances from anywhere.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="btn-primary text-lg px-8 py-3">
+              <a
+                href="/products"
+                className="btn-primary text-lg px-8 py-3 text-center inline-block"
+              >
                 Shop Now
-              </button>
-              <button className="btn-secondary text-lg px-8 py-3">
+              </a>
+              <a
+                href="/about"
+                className="btn-secondary text-lg px-8 py-3 text-center inline-block"
+              >
                 Learn More
-              </button>
+              </a>
             </div>
           </div>
           
