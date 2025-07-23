@@ -64,6 +64,7 @@ function App() {
               <Routes>
                 <Route path="/" element={<HomePage backendStatus={backendStatus} />} />
                 <Route path="/products" element={<ProductsPage />} />
+                <Route path="/products/:id" element={<ProductDetail />} />
                 <Route path="/about" element={<AboutPage />} />
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/login" element={<Login />} />
