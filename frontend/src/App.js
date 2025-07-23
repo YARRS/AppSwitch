@@ -9,6 +9,8 @@ import { ProtectedRoute, AdminRoute, OptionalAuth } from './components/Protected
 import Login from './components/Login';
 import Register from './components/Register';
 import UserProfile from './components/UserProfile';
+import ProductsPage from './components/ProductsPage';
+import ProductDetail from './components/ProductDetail';
 
 // Theme context
 export const ThemeContext = React.createContext();
