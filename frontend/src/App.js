@@ -408,25 +408,25 @@ function Footer() {
           <div>
             <h4 className="font-semibold mb-4">Products</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white">Smart Switches</a></li>
-              <li><a href="#" className="hover:text-white">Dimmer Switches</a></li>
-              <li><a href="#" className="hover:text-white">Motion Sensors</a></li>
+              <li><a href="/products" className="hover:text-white">Smart Switches</a></li>
+              <li><a href="/products" className="hover:text-white">Dimmer Switches</a></li>
+              <li><a href="/products" className="hover:text-white">Motion Sensors</a></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white">Installation Guide</a></li>
-              <li><a href="#" className="hover:text-white">FAQ</a></li>
-              <li><a href="#" className="hover:text-white">Contact</a></li>
+              <li><a href="/about" className="hover:text-white">Installation Guide</a></li>
+              <li><a href="/contact" className="hover:text-white">FAQ</a></li>
+              <li><a href="/contact" className="hover:text-white">Contact</a></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="#" className="hover:text-white">About</a></li>
-              <li><a href="#" className="hover:text-white">Careers</a></li>
-              <li><a href="#" className="hover:text-white">Privacy</a></li>
+              <li><a href="/about" className="hover:text-white">About</a></li>
+              <li><a href="/contact" className="hover:text-white">Careers</a></li>
+              <li><a href="/contact" className="hover:text-white">Privacy</a></li>
             </ul>
           </div>
         </div>
