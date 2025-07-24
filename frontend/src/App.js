@@ -357,38 +357,6 @@ function ContactPage() {
   );
 }
 
-function AdminPage() {
-  return (
-    <div className="py-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Admin Dashboard</h1>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <DashboardCard icon={<Package />} title="Products" value="24" />
-          <DashboardCard icon={<Users />} title="Customers" value="1,234" />
-          <DashboardCard icon={<BarChart3 />} title="Orders" value="89" />
-          <DashboardCard icon={<Settings />} title="Settings" value="..." />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function DashboardCard({ icon, title, value }) {
-  return (
-    <div className="card">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 dark:text-white">{value}</p>
-        </div>
-        <div className="text-blue-600 dark:text-blue-400">
-          {icon}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // Footer Component
 function Footer() {
   return (
