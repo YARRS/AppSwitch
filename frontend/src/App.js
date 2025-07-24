@@ -11,6 +11,7 @@ import Register from './components/Register';
 import UserProfile from './components/UserProfile';
 import ProductsPage from './components/ProductsPage';
 import ProductDetail from './components/ProductDetail';
+import AdminDashboard from './components/admin/AdminDashboard';
 
 // Theme context
 export const ThemeContext = React.createContext();
