@@ -125,7 +125,7 @@ function Header({ darkMode, toggleDarkMode }) {
             <a href="/products" className="nav-link">Products</a>
             <a href="/about" className="nav-link">About</a>
             <a href="/contact" className="nav-link">Contact</a>
-            {isAuthenticated && user?.role === 'admin' && (
+            {isAuthenticated && (user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'store_owner') && (
               <a href="/admin" className="nav-link">Admin</a>
             )}
           </nav>
