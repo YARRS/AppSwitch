@@ -1,0 +1,629 @@
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
+import { 
+  Plus, Search, Filter, Edit, Trash2, Eye, Package, 
+  AlertTriangle, Star, TrendingUp, Image, Save, X
+} from 'lucide-react';
+
+const ProductManagement = () => {
+  const { getAuthenticatedAxios } = useAuth();
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, [currentPage, searchTerm, categoryFilter]);
+
+  const fetchProducts = async () => {
+    try {
+      const axios = getAuthenticatedAxios();
+      const params = {
+        page: currentPage,
+        per_page: 20,
+        ...(searchTerm && { search: searchTerm }),
+        ...(categoryFilter && { category: categoryFilter })
+      };
+      
+      const response = await axios.get('/api/products/', { params });
+      setProducts(response.data.data);
+      setTotalPages(response.data.total_pages);
+    } catch (error) {
+      console.error('Failed to fetch products:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const axios = getAuthenticatedAxios();
+      const response = await axios.get('/api/products/categories/available');
+      setCategories(response.data.data);
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    }
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) return;
+
+    try {
+      const axios = getAuthenticatedAxios();
+      await axios.delete(`/api/products/${productId}`);
+      fetchProducts();
+    } catch (error) {
+      console.error('Failed to delete product:', error);
+      alert('Failed to delete product');
+    }
+  };
+
+  const handleEditProduct = (product) => {
+    setSelectedProduct(product);
+    setShowEditModal(true);
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">Loading products...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-start">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            Product Management
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">
+            Manage your product catalog, inventory, and pricing
+          </p>
+        </div>
+        <button
+          onClick={() => setShowCreateModal(true)}
+          className="btn-primary flex items-center space-x-2"
+        >
+          <Plus className="w-5 h-5" />
+          <span>Add Product</span>
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="input-field pl-10"
+              />
+            </div>
+          </div>
+          <div className="w-full md:w-48">
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="input-field"
+            >
+              <option value="">All Categories</option>
+              {categories.map((category) => (
+                <option key={category.value} value={category.value}>
+                  {category.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Product Table */}
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-700">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Product
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Category
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Price
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Stock
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Status
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              {products.map((product) => (
+                <ProductRow
+                  key={product.id}
+                  product={product}
+                  onEdit={handleEditProduct}
+                  onDelete={handleDeleteProduct}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination */}
+        <div className="bg-white dark:bg-gray-800 px-4 py-3 border-t border-gray-200 dark:border-gray-700 sm:px-6">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-700 dark:text-gray-300">
+              Page {currentPage} of {totalPages}
+            </div>
+            <div className="flex space-x-2">
+              <button
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="btn-secondary disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="btn-secondary disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Create Product Modal */}
+      {showCreateModal && (
+        <ProductModal
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+          onSave={fetchProducts}
+          categories={categories}
+        />
+      )}
+
+      {/* Edit Product Modal */}
+      {showEditModal && selectedProduct && (
+        <ProductModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onSave={fetchProducts}
+          product={selectedProduct}
+          categories={categories}
+        />
+      )}
+    </div>
+  );
+};
+
+// Product Row Component
+const ProductRow = ({ product, onEdit, onDelete }) => {
+  const isLowStock = product.stock_quantity <= product.min_stock_level;
+
+  return (
+    <tr>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="flex items-center">
+          <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mr-4">
+            {product.images && product.images.length > 0 ? (
+              <img
+                src={`data:image/jpeg;base64,${product.images[0]}`}
+                alt={product.name}
+                className="w-12 h-12 object-cover rounded-lg"
+              />
+            ) : (
+              <Package className="w-6 h-6 text-gray-400" />
+            )}
+          </div>
+          <div>
+            <div className="text-sm font-medium text-gray-900 dark:text-white">
+              {product.name}
+            </div>
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              SKU: {product.sku}
+            </div>
+          </div>
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+        <span className="capitalize">
+          {product.category.replace('_', ' ')}
+        </span>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+        <div className="flex flex-col">
+          <span className="font-medium">₹{product.price.toLocaleString()}</span>
+          {product.discount_price && (
+            <span className="text-xs text-gray-500 line-through">
+              ₹{product.discount_price.toLocaleString()}
+            </span>
+          )}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-sm">
+        <div className="flex items-center space-x-2">
+          <span className={`font-medium ${isLowStock ? 'text-red-600' : 'text-gray-900 dark:text-white'}`}>
+            {product.stock_quantity}
+          </span>
+          {isLowStock && (
+            <AlertTriangle className="w-4 h-4 text-red-500" title="Low Stock" />
+          )}
+        </div>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap">
+        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+          product.is_active
+            ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+            : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+        }`}>
+          {product.is_active ? 'Active' : 'Inactive'}
+        </span>
+      </td>
+      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => onEdit(product)}
+            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+          >
+            <Edit className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onDelete(product.id)}
+            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+};
+
+// Product Modal Component
+const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) => {
+  const { getAuthenticatedAxios } = useAuth();
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    category: '',
+    price: '',
+    discount_price: '',
+    sku: '',
+    brand: 'SmartSwitch',
+    stock_quantity: '',
+    min_stock_level: '5',
+    is_active: true,
+    features: [''],
+    specifications: {},
+    images: []
+  });
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (product) {
+      setFormData({
+        name: product.name || '',
+        description: product.description || '',
+        category: product.category || '',
+        price: product.price?.toString() || '',
+        discount_price: product.discount_price?.toString() || '',
+        sku: product.sku || '',
+        brand: product.brand || 'SmartSwitch',
+        stock_quantity: product.stock_quantity?.toString() || '',
+        min_stock_level: product.min_stock_level?.toString() || '5',
+        is_active: product.is_active ?? true,
+        features: product.features?.length > 0 ? product.features : [''],
+        specifications: product.specifications || {},
+        images: product.images || []
+      });
+    }
+  }, [product]);
+
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFeatureChange = (index, value) => {
+    const newFeatures = [...formData.features];
+    newFeatures[index] = value;
+    setFormData(prev => ({ ...prev, features: newFeatures }));
+  };
+
+  const addFeature = () => {
+    setFormData(prev => ({ ...prev, features: [...prev.features, ''] }));
+  };
+
+  const removeFeature = (index) => {
+    const newFeatures = formData.features.filter((_, i) => i !== index);
+    setFormData(prev => ({ ...prev, features: newFeatures }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const axios = getAuthenticatedAxios();
+      const cleanedFormData = {
+        ...formData,
+        price: parseFloat(formData.price),
+        discount_price: formData.discount_price ? parseFloat(formData.discount_price) : undefined,
+        stock_quantity: parseInt(formData.stock_quantity),
+        min_stock_level: parseInt(formData.min_stock_level),
+        features: formData.features.filter(f => f.trim() !== '')
+      };
+
+      if (product) {
+        await axios.put(`/api/products/${product.id}`, cleanedFormData);
+      } else {
+        await axios.post('/api/products/', cleanedFormData);
+      }
+
+      onSave();
+      onClose();
+    } catch (error) {
+      console.error('Failed to save product:', error);
+      alert('Failed to save product');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {product ? 'Edit Product' : 'Create Product'}
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Basic Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Product Name *
+                </label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  className="input-field"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  SKU *
+                </label>
+                <input
+                  type="text"
+                  value={formData.sku}
+                  onChange={(e) => handleInputChange('sku', e.target.value)}
+                  className="input-field"
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Description *
+              </label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                rows={3}
+                className="input-field"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Category *
+                </label>
+                <select
+                  value={formData.category}
+                  onChange={(e) => handleInputChange('category', e.target.value)}
+                  className="input-field"
+                  required
+                >
+                  <option value="">Select Category</option>
+                  {categories.map((category) => (
+                    <option key={category.value} value={category.value}>
+                      {category.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Brand
+                </label>
+                <input
+                  type="text"
+                  value={formData.brand}
+                  onChange={(e) => handleInputChange('brand', e.target.value)}
+                  className="input-field"
+                />
+              </div>
+            </div>
+
+            {/* Pricing */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Price (₹) *
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) => handleInputChange('price', e.target.value)}
+                  className="input-field"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Discount Price (₹)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={formData.discount_price}
+                  onChange={(e) => handleInputChange('discount_price', e.target.value)}
+                  className="input-field"
+                />
+              </div>
+            </div>
+
+            {/* Inventory */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Stock Quantity *
+                </label>
+                <input
+                  type="number"
+                  value={formData.stock_quantity}
+                  onChange={(e) => handleInputChange('stock_quantity', e.target.value)}
+                  className="input-field"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Min Stock Level *
+                </label>
+                <input
+                  type="number"
+                  value={formData.min_stock_level}
+                  onChange={(e) => handleInputChange('min_stock_level', e.target.value)}
+                  className="input-field"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Features */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Features
+              </label>
+              {formData.features.map((feature, index) => (
+                <div key={index} className="flex items-center space-x-2 mb-2">
+                  <input
+                    type="text"
+                    value={feature}
+                    onChange={(e) => handleFeatureChange(index, e.target.value)}
+                    className="input-field flex-1"
+                    placeholder="Enter feature"
+                  />
+                  {formData.features.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeFeature(index)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={addFeature}
+                className="text-blue-600 hover:text-blue-800 text-sm"
+              >
+                + Add Feature
+              </button>
+            </div>
+
+            {/* Status */}
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="is_active"
+                checked={formData.is_active}
+                onChange={(e) => handleInputChange('is_active', e.target.checked)}
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-white">
+                Active Product
+              </label>
+            </div>
+
+            {/* Submit Buttons */}
+            <div className="flex justify-end space-x-3 pt-6">
+              <button
+                type="button"
+                onClick={onClose}
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary disabled:opacity-50"
+              >
+                {loading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Saving...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Save className="w-4 h-4" />
+                    <span>{product ? 'Update' : 'Create'} Product</span>
+                  </div>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ProductManagement;
