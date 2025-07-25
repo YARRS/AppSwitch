@@ -342,7 +342,8 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
         is_active: product.is_active ?? true,
         features: product.features?.length > 0 ? product.features : [''],
         specifications: product.specifications || {},
-        images: product.images || []
+        images: product.images || [],
+        videos: product.videos || []
       });
     }
   }, [product]);
