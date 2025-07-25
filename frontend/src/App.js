@@ -307,12 +307,21 @@ function AboutPage() {
   return (
     <div className="py-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">About SmartSwitch</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">About Vallmark</h1>
         <div className="prose prose-lg dark:prose-invert max-w-none">
           <p>
-            SmartSwitch is revolutionizing the way we interact with our homes. Our innovative IoT solutions 
-            transform ordinary wall switches into intelligent, connected devices that put you in complete 
-            control of your home environment.
+            Vallmark is your premier destination for exquisite gift articles that bring joy and meaning to 
+            every occasion. We specialize in curating unique, high-quality items that help you express your 
+            sentiments and create lasting memories with your loved ones.
+          </p>
+          <p>
+            From elegant home decor pieces to personalized keepsakes, our carefully selected collection 
+            ensures that you'll find the perfect gift for birthdays, anniversaries, holidays, or any 
+            special moment worth celebrating.
+          </p>
+          <p>
+            At Vallmark, we believe that every gift tells a story, and we're here to help you tell yours 
+            beautifully.
           </p>
         </div>
       </div>
