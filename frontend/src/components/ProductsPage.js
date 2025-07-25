@@ -381,8 +381,16 @@ const ProductCard = ({ product, isAuthenticated }) => {
           )}
         </div>
         
-        {/* Stock Status */}
-        <div className="absolute top-2 right-2">
+        {/* Stock Status & New Badge */}
+        <div className="absolute top-2 right-2 flex flex-col gap-1">
+          {/* New Badge */}
+          {isNewProduct() && (
+            <span className="px-2 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg animate-pulse">
+              NEW
+            </span>
+          )}
+          
+          {/* Stock Status */}
           <span className={`px-2 py-1 text-xs font-medium rounded-full ${
             product.is_in_stock
               ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
