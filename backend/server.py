@@ -98,7 +98,7 @@ async def health_check():
 # Root endpoint
 @app.get("/api/")
 async def root():
-    return {"message": "Smart Switch IoT API", "version": "1.0.0"}
+    return {"message": "Vallmark Gift Articles API", "version": "1.0.0"}
 
 # Test endpoint for frontend connection
 @app.get("/api/test")
