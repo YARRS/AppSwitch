@@ -1285,7 +1285,51 @@ class BackendTester:
         except Exception as e:
             self.log_result("Auto-Seed Disabled Test", "FAIL", f"Error testing disabled behavior: {str(e)}")
     
-    def test_startup_logs_verification(self):
+    def test_admin_user_management(self):
+        """Test admin user management API to verify seeded users"""
+        try:
+            # Authenticate as super admin
+            super_admin_token = self.authenticate_auto_seeded_user("superadmin@vallmark.com", "SuperAdmin123!")
+            
+            if not super_admin_token:
+                self.log_result("Admin User Management", "FAIL", "Could not authenticate super admin")
+                return
+            
+            headers = {"Authorization": f"Bearer {super_admin_token}"}
+            
+            # Test user list endpoint
+            response = requests.get(f"{API_BASE}/auth/users", headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    users = data.get("data", [])
+                    vallmark_users = [user for user in users if "@vallmark.com" in user.get("email", "")]
+                    
+                    if len(vallmark_users) >= 9:
+                        self.log_result(
+                            "Admin User Management", 
+                            "PASS", 
+                            f"Found {len(vallmark_users)} Vallmark users in system",
+                            {"total_users": len(users), "vallmark_users": len(vallmark_users)}
+                        )
+                    else:
+                        self.log_result(
+                            "Admin User Management", 
+                            "FAIL", 
+                            f"Only found {len(vallmark_users)} Vallmark users, expected 9",
+                            {"total_users": len(users), "vallmark_users": len(vallmark_users)}
+                        )
+                else:
+                    self.log_result("Admin User Management", "FAIL", "API returned success=false", data)
+            elif response.status_code == 404:
+                self.log_result("Admin User Management", "SKIP", "User management endpoint not implemented")
+            else:
+                self.log_result("Admin User Management", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Admin User Management", "FAIL", f"Error testing user management: {str(e)}")
+    
         """Test that startup logs show correct auto-seeding behavior"""
         try:
             # We can verify the system is working by checking health and user existence
