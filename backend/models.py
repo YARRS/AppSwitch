@@ -154,6 +154,7 @@ class ProductUpdate(BaseModel):
     specifications: Optional[Dict[str, Any]] = None
     features: Optional[List[str]] = None
     images: Optional[List[str]] = None
+    videos: Optional[List[str]] = None
     is_active: Optional[bool] = None
     stock_quantity: Optional[int] = None
     min_stock_level: Optional[int] = None
