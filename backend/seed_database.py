@@ -26,7 +26,7 @@ MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/smartswitch_db")
 # Default users to create
 DEFAULT_USERS = [
     {
-        "email": "superadmin@smartswitch.com",
+        "email": "superadmin@vallmark.com",
         "username": "superadmin",
         "password": "SuperAdmin123!",
         "full_name": "Super Administrator",
@@ -36,7 +36,7 @@ DEFAULT_USERS = [
         "email_verified": True
     },
     {
-        "email": "admin@smartswitch.com", 
+        "email": "admin@vallmark.com", 
         "username": "admin",
         "password": "Admin123!",
         "full_name": "System Administrator",
@@ -46,7 +46,7 @@ DEFAULT_USERS = [
         "email_verified": True
     },
     {
-        "email": "storeowner@smartswitch.com",
+        "email": "storeowner@vallmark.com",
         "username": "storeowner", 
         "password": "StoreOwner123!",
         "full_name": "Store Owner",
@@ -56,7 +56,7 @@ DEFAULT_USERS = [
         "email_verified": True
     },
     {
-        "email": "storemanager@smartswitch.com",
+        "email": "storemanager@vallmark.com",
         "username": "storemanager",
         "password": "StoreManager123!",
         "full_name": "Store Manager", 
@@ -66,7 +66,7 @@ DEFAULT_USERS = [
         "email_verified": True
     },
     {
-        "email": "salesperson@smartswitch.com",
+        "email": "salesperson@vallmark.com",
         "username": "salesperson",
         "password": "Salesperson123!",
         "full_name": "Sales Person",
@@ -76,7 +76,7 @@ DEFAULT_USERS = [
         "email_verified": True
     },
     {
-        "email": "salesmanager@smartswitch.com",
+        "email": "salesmanager@vallmark.com",
         "username": "salesmanager",
         "password": "SalesManager123!",
         "full_name": "Sales Manager",
@@ -86,7 +86,7 @@ DEFAULT_USERS = [
         "email_verified": True
     },
     {
-        "email": "support@smartswitch.com",
+        "email": "support@vallmark.com",
         "username": "support",
         "password": "Support123!",
         "full_name": "Support Executive", 
@@ -96,7 +96,7 @@ DEFAULT_USERS = [
         "email_verified": True
     },
     {
-        "email": "marketing@smartswitch.com",
+        "email": "marketing@vallmark.com",
         "username": "marketing",
         "password": "Marketing123!",
         "full_name": "Marketing Manager",
@@ -106,7 +106,7 @@ DEFAULT_USERS = [
         "email_verified": True
     },
     {
-        "email": "customer@smartswitch.com",
+        "email": "customer@vallmark.com",
         "username": "customer",
         "password": "Customer123!",
         "full_name": "Test Customer",
