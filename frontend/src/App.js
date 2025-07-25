@@ -120,8 +120,7 @@ function Header({ darkMode, toggleDarkMode }) {
           </div>
           
           <nav className="hidden md:flex space-x-8">
-            <a href="/" className="nav-link">Home</a>
-            <a href="/products" className="nav-link">Products</a>
+            <a href="/" className="nav-link">Shop</a>
             <a href="/about" className="nav-link">About</a>
             <a href="/contact" className="nav-link">Contact</a>
             {isAuthenticated && (user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'store_owner') && (
