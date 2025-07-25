@@ -333,8 +333,12 @@ function ContactPage() {
   return (
     <div className="py-20">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Contact Us</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Contact Vallmark</h1>
         <div className="card">
+          <p className="text-gray-600 dark:text-gray-300 mb-6">
+            Have a question about our gift articles or need help finding the perfect gift? 
+            We'd love to help you create memorable moments.
+          </p>
           <form className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -352,7 +356,7 @@ function ContactPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Message
               </label>
-              <textarea rows="4" className="input-field"></textarea>
+              <textarea rows="4" className="input-field" placeholder="Tell us about the occasion or what kind of gift you're looking for..."></textarea>
             </div>
             <button type="submit" className="btn-primary">
               Send Message
