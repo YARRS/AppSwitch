@@ -44,7 +44,16 @@ const AdminDashboard = () => {
     ];
 
     // Add tabs based on user permissions
-    if (user?.role === 'super_admin' || user?.role === 'admin' || user?.role === 'store_owner') {
+    if (user?.role === 'super_admin') {
+      tabs.push(
+        { id: 'user-management', label: 'User Management', icon: Users },
+        { id: 'products', label: 'Products', icon: Package },
+        { id: 'orders', label: 'Orders', icon: ShoppingCart },
+        { id: 'customers', label: 'Customers', icon: Users },
+        { id: 'campaigns', label: 'Campaigns', icon: TrendingUp },
+        { id: 'settings', label: 'Settings', icon: Settings }
+      );
+    } else if (user?.role === 'admin' || user?.role === 'store_owner') {
       tabs.push(
         { id: 'products', label: 'Products', icon: Package },
         { id: 'orders', label: 'Orders', icon: ShoppingCart },
