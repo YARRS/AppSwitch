@@ -131,6 +131,7 @@ const AdminDashboard = () => {
           {activeTab === 'overview' && (
             <DashboardOverview stats={dashboardStats} userRole={user?.role} />
           )}
+          {activeTab === 'user-management' && <SuperAdminUserManagement />}
           {activeTab === 'products' && <ProductManagement />}
           {activeTab === 'orders' && <OrderManagement />}
           {activeTab === 'customers' && <CustomerManagement />}
