@@ -1245,6 +1245,7 @@ class BackendTester:
                 
         except Exception as e:
             self.log_result("Customer User Functionality", "FAIL", f"Error testing customer functionality: {str(e)}")
+    def run_salesperson_dashboard_tests(self):
         """Run Salesperson Dashboard specific tests"""
         print("🚀 Starting Salesperson Dashboard Backend API Tests")
         print(f"Backend URL: {BACKEND_URL}")
