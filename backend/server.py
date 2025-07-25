@@ -69,7 +69,7 @@ app.include_router(inquiries_router)
 @app.on_event("startup")
 async def startup_event():
     """Handle application startup tasks"""
-    logger.info("🚀 SmartSwitch IoT Backend starting up...")
+    logger.info("🚀 Vallmark Gift Articles Backend starting up...")
     
     try:
         # Import and run startup tasks
