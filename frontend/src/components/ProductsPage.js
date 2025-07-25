@@ -71,11 +71,11 @@ const ProductsPage = () => {
       console.error('Error fetching categories:', err);
       // Fallback categories
       setCategories([
-        { value: 'smart_switch', label: 'Smart Switch' },
-        { value: 'dimmer_switch', label: 'Dimmer Switch' },
-        { value: 'motion_sensor', label: 'Motion Sensor' },
-        { value: 'smart_plug', label: 'Smart Plug' },
-        { value: 'gateway', label: 'Gateway' },
+        { value: 'home_decor', label: 'Home Decor' },
+        { value: 'personalized_gifts', label: 'Personalized Gifts' },
+        { value: 'jewelry', label: 'Jewelry' },
+        { value: 'keepsakes', label: 'Keepsakes' },
+        { value: 'special_occasions', label: 'Special Occasions' },
         { value: 'accessories', label: 'Accessories' }
       ]);
     }
