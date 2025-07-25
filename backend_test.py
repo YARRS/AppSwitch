@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Backend API Testing Script for SmartSwitch IoT Advanced E-commerce System
-Tests all new API endpoints including inventory, campaigns, commissions, dashboard, and inquiries
-SPECIAL FOCUS: Auto-seeding functionality testing
+Backend API Testing Script for Vallmark Gift Articles E-commerce System
+Tests all API endpoints including inventory, campaigns, commissions, dashboard, and inquiries
+SPECIAL FOCUS: Vallmark branding verification and auto-seeding functionality testing
 """
 
 import requests
