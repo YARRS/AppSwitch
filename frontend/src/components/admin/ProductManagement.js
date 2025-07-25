@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
   Plus, Search, Filter, Edit, Trash2, Eye, Package, 
-  AlertTriangle, Star, TrendingUp, Image, Save, X
+  AlertTriangle, Star, TrendingUp, Image, Save, X, Upload, Video, FileImage
 } from 'lucide-react';
 
 const ProductManagement = () => {
