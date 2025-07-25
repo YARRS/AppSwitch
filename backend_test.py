@@ -254,19 +254,28 @@ class BackendTester:
             )
     
     def test_root_endpoint(self):
-        """Test /api/ endpoint for basic API info"""
+        """Test /api/ endpoint for basic API info and Vallmark branding"""
         try:
             response = requests.get(f"{API_BASE}/", timeout=10)
             
             if response.status_code == 200:
                 data = response.json()
                 if "message" in data and "version" in data:
-                    self.log_result(
-                        "Root Endpoint", 
-                        "PASS", 
-                        "API info returned successfully",
-                        data
-                    )
+                    # Verify Vallmark branding
+                    if "Vallmark Gift Articles API" in data.get("message", ""):
+                        self.log_result(
+                            "Root Endpoint", 
+                            "PASS", 
+                            "API info returned successfully with correct Vallmark branding",
+                            data
+                        )
+                    else:
+                        self.log_result(
+                            "Root Endpoint", 
+                            "FAIL", 
+                            f"Incorrect branding - expected 'Vallmark Gift Articles API', got: {data.get('message', '')}",
+                            data
+                        )
                 else:
                     self.log_result(
                         "Root Endpoint", 
