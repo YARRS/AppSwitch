@@ -59,7 +59,7 @@ function App() {
     <AuthProvider>
       <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
         <Router>
-          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
+          <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
             <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
             <main className="relative">
               <Routes>
