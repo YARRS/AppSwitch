@@ -948,7 +948,7 @@ class BackendTester:
         """Test that all 9 auto-seeded users exist in the database"""
         try:
             # First, authenticate as super admin to access user management
-            super_admin_token = self.authenticate_auto_seeded_user("superadmin@smartswitch.com", "SuperAdmin123!")
+            super_admin_token = self.authenticate_auto_seeded_user("superadmin@vallmark.com", "SuperAdmin123!")
             
             if not super_admin_token:
                 self.log_result("Auto-Seeded Users Exist", "FAIL", "Could not authenticate super admin to check users")
