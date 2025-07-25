@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Initialize FastAPI app
-app = FastAPI(title="Smart Switch IoT API", version="1.0.0")
+app = FastAPI(title="Vallmark Gift Articles API", version="1.0.0")
 
 # CORS middleware
 app.add_middleware(
