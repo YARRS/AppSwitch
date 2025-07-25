@@ -65,6 +65,25 @@ app.include_router(commissions_router)
 app.include_router(dashboard_router)
 app.include_router(inquiries_router)
 
+# Startup event handler
+@app.on_event("startup")
+async def startup_event():
+    """Handle application startup tasks"""
+    logger.info("🚀 SmartSwitch IoT Backend starting up...")
+    
+    try:
+        # Import and run startup tasks
+        from startup_tasks import StartupTasks
+        
+        startup_tasks = StartupTasks(db)
+        await startup_tasks.run_startup_tasks()
+        
+        logger.info("✅ Backend startup completed successfully")
+        
+    except Exception as e:
+        logger.error(f"❌ Startup failed: {e}")
+        # Don't fail the entire application
+
 # Health check endpoint
 @app.get("/api/health")
 async def health_check():
