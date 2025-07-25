@@ -204,10 +204,10 @@ const ProductsPage = () => {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-          Our Products
+          Gift Articles Collection
         </h1>
         <p className="text-gray-600 dark:text-gray-300">
-          Discover our range of smart home solutions designed to make your life easier and more efficient.
+          Discover our curated selection of exquisite gift articles for every special occasion and cherished relationship.
         </p>
       </div>
 
