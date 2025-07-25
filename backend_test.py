@@ -1318,11 +1318,11 @@ class BackendTester:
         """Test that each role has appropriate permissions"""
         try:
             role_permission_tests = {
-                "superadmin@smartswitch.com": {"role": "super_admin", "should_access_admin": True},
-                "admin@smartswitch.com": {"role": "admin", "should_access_admin": True},
-                "storeowner@smartswitch.com": {"role": "store_owner", "should_access_admin": False},
-                "salesperson@smartswitch.com": {"role": "salesperson", "should_access_admin": False},
-                "customer@smartswitch.com": {"role": "customer", "should_access_admin": False}
+                "superadmin@vallmark.com": {"role": "super_admin", "should_access_admin": True},
+                "admin@vallmark.com": {"role": "admin", "should_access_admin": True},
+                "storeowner@vallmark.com": {"role": "store_owner", "should_access_admin": False},
+                "salesperson@vallmark.com": {"role": "salesperson", "should_access_admin": False},
+                "customer@vallmark.com": {"role": "customer", "should_access_admin": False}
             }
             
             passed_tests = 0
