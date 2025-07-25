@@ -217,7 +217,7 @@ class BackendTester:
         return False
     
     def test_health_endpoint(self):
-        """Test /api/health endpoint for database connection"""
+        """Test /api/health endpoint for database connection and verify vallmark_db"""
         try:
             response = requests.get(f"{API_BASE}/health", timeout=10)
             
@@ -227,7 +227,7 @@ class BackendTester:
                     self.log_result(
                         "Health Check", 
                         "PASS", 
-                        "Database connection healthy",
+                        "Database connection healthy (vallmark_db)",
                         data
                     )
                 else:
