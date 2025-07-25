@@ -178,16 +178,16 @@ class BackendTester:
                         
                         # Create product as admin
                         product_data = {
-                            "name": f"Test Smart Switch {uuid.uuid4().hex[:8]}",
-                            "description": "Test smart switch for API testing",
-                            "category": "smart_switch",
+                            "name": f"Test Gift Article {uuid.uuid4().hex[:8]}",
+                            "description": "Test gift article for API testing",
+                            "category": "gift_articles",
                             "price": 99.99,
-                            "sku": f"TSW-{uuid.uuid4().hex[:8].upper()}",
-                            "brand": "SmartSwitch",
+                            "sku": f"TGA-{uuid.uuid4().hex[:8].upper()}",
+                            "brand": "Vallmark",
                             "stock_quantity": 100,
                             "min_stock_level": 10,
-                            "specifications": {"voltage": "220V", "wireless": "WiFi"},
-                            "features": ["Voice Control", "App Control", "Timer"],
+                            "specifications": {"material": "Premium", "size": "Medium"},
+                            "features": ["Premium Quality", "Gift Wrapping", "Custom Message"],
                             "is_active": True
                         }
                         
