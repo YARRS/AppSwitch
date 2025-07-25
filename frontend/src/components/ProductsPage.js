@@ -349,6 +349,15 @@ const ProductCard = ({ product, isAuthenticated }) => {
     }).format(price);
   };
 
+  // Check if product is new (within last 7 days)
+  const isNewProduct = () => {
+    if (!product.created_at) return false;
+    const createdDate = new Date(product.created_at);
+    const currentDate = new Date();
+    const daysDifference = (currentDate - createdDate) / (1000 * 60 * 60 * 24);
+    return daysDifference <= 7;
+  };
+
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
       {/* Product Image */}
