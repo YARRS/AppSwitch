@@ -367,6 +367,78 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
     setFormData(prev => ({ ...prev, features: newFeatures }));
   };
 
+  // File upload handlers
+  const handleFileUpload = useCallback(async (files, type) => {
+    if (!files || files.length === 0) return;
+    
+    setUploadingFiles(true);
+    
+    try {
+      const axios = getAuthenticatedAxios();
+      const formDataUpload = new FormData();
+      
+      // Add files to FormData
+      Array.from(files).forEach(file => {
+        formDataUpload.append('files', file);
+      });
+
+      const endpoint = type === 'images' ? '/api/uploads/images' : '/api/uploads/videos';
+      const response = await axios.post(endpoint, formDataUpload, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.data.success) {
+        const uploadedFiles = response.data.data.uploaded_files || [];
+        const base64Files = uploadedFiles.map(file => file.base64_data);
+        
+        setFormData(prev => ({
+          ...prev,
+          [type]: [...(prev[type] || []), ...base64Files]
+        }));
+        
+        // Show success message
+        if (response.data.data.errors?.length > 0) {
+          alert(`Uploaded ${uploadedFiles.length} ${type} successfully. ${response.data.data.errors.length} files failed.`);
+        }
+      }
+    } catch (error) {
+      console.error(`Error uploading ${type}:`, error);
+      alert(`Failed to upload ${type}. Please try again.`);
+    } finally {
+      setUploadingFiles(false);
+    }
+  }, [getAuthenticatedAxios]);
+
+  const handleImageUpload = useCallback((e) => {
+    const files = e.target.files;
+    if (files) {
+      handleFileUpload(files, 'images');
+    }
+  }, [handleFileUpload]);
+
+  const handleVideoUpload = useCallback((e) => {
+    const files = e.target.files;
+    if (files) {
+      handleFileUpload(files, 'videos');
+    }
+  }, [handleFileUpload]);
+
+  const removeImage = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
+
+  const removeVideo = (index) => {
+    setFormData(prev => ({
+      ...prev,
+      videos: prev.videos.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
