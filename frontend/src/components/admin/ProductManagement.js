@@ -321,9 +321,11 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
     is_active: true,
     features: [''],
     specifications: {},
-    images: []
+    images: [],
+    videos: []
   });
   const [loading, setLoading] = useState(false);
+  const [uploadingFiles, setUploadingFiles] = useState(false);
 
   useEffect(() => {
     if (product) {
