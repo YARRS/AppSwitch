@@ -137,6 +137,7 @@ class ProductBase(BaseModel):
     specifications: Dict[str, Any] = {}
     features: List[str] = []
     images: List[str] = []  # Base64 encoded images
+    videos: List[str] = []  # Base64 encoded videos
     is_active: bool = True
     stock_quantity: int = 0
     min_stock_level: int = 5
