@@ -196,6 +196,9 @@ class DatabaseSeeder:
         print(f"   Created: {created_count} users")
         print(f"   Skipped: {skipped_count} users (already existed)")
         print(f"   Total: {len(DEFAULT_USERS)} users processed")
+        
+        # Return counts for logging
+        return created_count, skipped_count
     
     async def display_login_credentials(self):
         """Display login credentials for all created users"""
