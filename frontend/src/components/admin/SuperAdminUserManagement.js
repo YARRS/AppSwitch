@@ -4,7 +4,7 @@ import {
   Users, Search, Filter, Eye, Edit, Mail, Phone, 
   Calendar, ShoppingCart, DollarSign, MapPin, User,
   Star, Package, Clock, TrendingUp, Plus, Trash2,
-  UserPlus, UserMinus, Shield, Crown
+  UserPlus, UserMinus, Shield, Crown, UserCheck
 } from 'lucide-react';
 
 const SuperAdminUserManagement = () => {
