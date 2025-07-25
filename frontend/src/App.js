@@ -372,27 +372,27 @@ function Footer() {
         <div className="grid md:grid-cols-4 gap-8">
           <div>
             <div className="flex items-center space-x-2 mb-4">
-              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
+              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg">
                 <Zap className="w-5 h-5 text-yellow-300" />
               </div>
-              <h3 className="text-lg font-bold">SmartSwitch</h3>
+              <h3 className="text-lg font-bold">Vallmark</h3>
             </div>
             <p className="text-gray-400">
-              Making homes smarter, one switch at a time.
+              Your premier destination for exquisite gift articles that create lasting memories.
             </p>
           </div>
           <div>
-            <h4 className="font-semibold mb-4">Products</h4>
+            <h4 className="font-semibold mb-4">Categories</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="/products" className="hover:text-white">Smart Switches</a></li>
-              <li><a href="/products" className="hover:text-white">Dimmer Switches</a></li>
-              <li><a href="/products" className="hover:text-white">Motion Sensors</a></li>
+              <li><a href="/" className="hover:text-white">Home Decor</a></li>
+              <li><a href="/" className="hover:text-white">Personalized Gifts</a></li>
+              <li><a href="/" className="hover:text-white">Special Occasions</a></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-2 text-gray-400">
-              <li><a href="/about" className="hover:text-white">Installation Guide</a></li>
+              <li><a href="/about" className="hover:text-white">Gift Guide</a></li>
               <li><a href="/contact" className="hover:text-white">FAQ</a></li>
               <li><a href="/contact" className="hover:text-white">Contact</a></li>
             </ul>
@@ -407,7 +407,7 @@ function Footer() {
           </div>
         </div>
         <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 SmartSwitch IoT. All rights reserved.</p>
+          <p>&copy; 2024 Vallmark Gift Articles. All rights reserved.</p>
         </div>
       </div>
     </footer>
