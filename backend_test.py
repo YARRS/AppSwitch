@@ -75,7 +75,7 @@ class BackendTester:
         """Create a test user for authentication"""
         try:
             user_data = {
-                "email": f"testuser_{uuid.uuid4().hex[:8]}@smartswitch.com",
+                "email": f"testuser_{uuid.uuid4().hex[:8]}@vallmark.com",
                 "username": f"testuser_{uuid.uuid4().hex[:8]}",
                 "password": "TestPass123!",
                 "full_name": "Test User",
