@@ -1177,7 +1177,7 @@ class BackendTester:
     def test_admin_user_functionality(self):
         """Test admin user functionality with auto-seeded admin"""
         try:
-            admin_token = self.authenticate_auto_seeded_user("admin@smartswitch.com", "Admin123!")
+            admin_token = self.authenticate_auto_seeded_user("admin@vallmark.com", "Admin123!")
             
             if not admin_token:
                 self.log_result("Admin User Functionality", "FAIL", "Could not authenticate admin user")
