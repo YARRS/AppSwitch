@@ -18,17 +18,17 @@ import time
 BACKEND_URL = "https://89a50f3c-4d7c-4ffd-8f8b-c2c3ee47d827.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
-# Auto-seeded user credentials for testing
+# Auto-seeded user credentials for testing (Vallmark Gift Articles)
 AUTO_SEEDED_USERS = [
-    {"email": "superadmin@smartswitch.com", "password": "SuperAdmin123!", "role": "super_admin"},
-    {"email": "admin@smartswitch.com", "password": "Admin123!", "role": "admin"},
-    {"email": "storeowner@smartswitch.com", "password": "StoreOwner123!", "role": "store_owner"},
-    {"email": "storemanager@smartswitch.com", "password": "StoreManager123!", "role": "store_admin"},
-    {"email": "salesperson@smartswitch.com", "password": "Salesperson123!", "role": "salesperson"},
-    {"email": "salesmanager@smartswitch.com", "password": "SalesManager123!", "role": "sales_manager"},
-    {"email": "support@smartswitch.com", "password": "Support123!", "role": "support_executive"},
-    {"email": "marketing@smartswitch.com", "password": "Marketing123!", "role": "marketing_manager"},
-    {"email": "customer@smartswitch.com", "password": "Customer123!", "role": "customer"}
+    {"email": "superadmin@vallmark.com", "password": "SuperAdmin123!", "role": "super_admin"},
+    {"email": "admin@vallmark.com", "password": "Admin123!", "role": "admin"},
+    {"email": "storeowner@vallmark.com", "password": "StoreOwner123!", "role": "store_owner"},
+    {"email": "storemanager@vallmark.com", "password": "StoreManager123!", "role": "store_admin"},
+    {"email": "salesperson@vallmark.com", "password": "Salesperson123!", "role": "salesperson"},
+    {"email": "salesmanager@vallmark.com", "password": "SalesManager123!", "role": "sales_manager"},
+    {"email": "support@vallmark.com", "password": "Support123!", "role": "support_executive"},
+    {"email": "marketing@vallmark.com", "password": "Marketing123!", "role": "marketing_manager"},
+    {"email": "customer@vallmark.com", "password": "Customer123!", "role": "customer"}
 ]
 
 class BackendTester:
