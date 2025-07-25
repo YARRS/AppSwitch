@@ -368,12 +368,7 @@ function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-4 gap-8">
           <div>
-            <div className="flex items-center space-x-2 mb-4">
-              <div className="flex items-center justify-center w-8 h-8 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg">
-                <Zap className="w-5 h-5 text-yellow-300" />
-              </div>
-              <h3 className="text-lg font-bold">Vallmark</h3>
-            </div>
+            <Logo size="small" className="mb-4" />
             <p className="text-gray-400">
               Your premier destination for exquisite gift articles that create lasting memories.
             </p>
