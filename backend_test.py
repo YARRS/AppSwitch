@@ -13,7 +13,7 @@ import string
 import uuid
 
 # Backend URL from frontend .env
-BACKEND_URL = "https://085ec35c-1b47-46b5-8cf3-dc66147debd3.preview.emergentagent.com"
+BACKEND_URL = "https://b2d09da6-8d48-43e7-900d-bc8a25d35ae7.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 class BackendTester:
