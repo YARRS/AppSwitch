@@ -148,7 +148,7 @@ class BackendTester:
         try:
             # Create admin user
             admin_data = {
-                "email": f"admin_{uuid.uuid4().hex[:8]}@smartswitch.com",
+                "email": f"admin_{uuid.uuid4().hex[:8]}@vallmark.com",
                 "username": f"admin_{uuid.uuid4().hex[:8]}",
                 "password": "AdminPass123!",
                 "full_name": "Test Admin",
