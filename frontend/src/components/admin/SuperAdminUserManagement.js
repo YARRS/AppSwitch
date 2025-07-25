@@ -60,7 +60,7 @@ const SuperAdminUserManagement = () => {
         {
           id: '1',
           username: 'superadmin',
-          email: 'superadmin@smartswitch.com',
+          email: 'superadmin@vallmark.com',
           full_name: 'Super Admin',
           phone: '+91-9876543210',
           role: 'super_admin',
@@ -71,7 +71,7 @@ const SuperAdminUserManagement = () => {
         {
           id: '2',
           username: 'admin',
-          email: 'admin@smartswitch.com',
+          email: 'admin@vallmark.com',
           full_name: 'Admin User',
           phone: '+91-9876543211',
           role: 'admin',
@@ -82,7 +82,7 @@ const SuperAdminUserManagement = () => {
         {
           id: '3',
           username: 'storeowner',
-          email: 'storeowner@smartswitch.com',
+          email: 'storeowner@vallmark.com',
           full_name: 'Store Owner',
           phone: '+91-9876543212',
           role: 'store_owner',
@@ -93,7 +93,7 @@ const SuperAdminUserManagement = () => {
         {
           id: '4',
           username: 'salesmanager',
-          email: 'salesmanager@smartswitch.com',
+          email: 'salesmanager@vallmark.com',
           full_name: 'Sales Manager',
           phone: '+91-9876543213',
           role: 'sales_manager',
@@ -104,7 +104,7 @@ const SuperAdminUserManagement = () => {
         {
           id: '5',
           username: 'customer',
-          email: 'customer@smartswitch.com',
+          email: 'customer@vallmark.com',
           full_name: 'Customer User',
           phone: '+91-9876543214',
           role: 'customer',
