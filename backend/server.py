@@ -49,6 +49,7 @@ from routes.campaigns import router as campaigns_router
 from routes.commissions import router as commissions_router
 from routes.dashboard import router as dashboard_router
 from routes.inquiries import router as inquiries_router
+from routes.uploads import router as uploads_router
 
 # Make db available globally for imports
 import sys
