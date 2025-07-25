@@ -1203,7 +1203,7 @@ class BackendTester:
     def test_salesperson_user_functionality(self):
         """Test salesperson user functionality with auto-seeded salesperson"""
         try:
-            salesperson_token = self.authenticate_auto_seeded_user("salesperson@smartswitch.com", "Salesperson123!")
+            salesperson_token = self.authenticate_auto_seeded_user("salesperson@vallmark.com", "Salesperson123!")
             
             if not salesperson_token:
                 self.log_result("Salesperson User Functionality", "FAIL", "Could not authenticate salesperson user")
