@@ -1416,12 +1416,17 @@ class BackendTester:
         print(f"Backend URL: {BACKEND_URL}")
         print("=" * 60)
         
-        # Run salesperson dashboard specific tests
-        self.run_salesperson_dashboard_tests()
+        # Run auto-seeding tests first (primary focus)
+        print("\n🌱 PRIORITY: Auto-Seeding Functionality Tests")
+        print("=" * 60)
+        self.run_auto_seeding_tests()
         
-        # Print summary
+        # Run other tests if needed
+        # self.run_salesperson_dashboard_tests()
+        
+        # Print final summary
         print("\n" + "=" * 60)
-        print("📊 TEST SUMMARY")
+        print("📊 FINAL TEST SUMMARY")
         print("=" * 60)
         print(f"Total Tests: {self.total_tests}")
         print(f"Passed: {self.passed_tests}")
