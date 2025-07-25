@@ -85,69 +85,69 @@ const ProductsPage = () => {
   const getSampleProducts = () => [
     {
       id: '1',
-      name: 'SmartSwitch Pro',
-      description: 'Professional grade smart switch with advanced features',
-      price: 29.99,
-      category: 'smart_switch',
+      name: 'Elegant Crystal Vase',
+      description: 'Beautiful hand-crafted crystal vase perfect for any home decor',
+      price: 89.99,
+      category: 'home_decor',
       images: [],
       is_in_stock: true,
-      stock_quantity: 50,
-      features: 'WiFi enabled, voice control, smartphone app'
+      stock_quantity: 15,
+      features: 'Hand-crafted crystal, elegant design, perfect for flowers'
     },
     {
       id: '2',
-      name: 'SmartSwitch Basic',
-      description: 'Entry-level smart switch perfect for home automation',
-      price: 19.99,
-      category: 'smart_switch',
-      images: [],
-      is_in_stock: true,
-      stock_quantity: 75,
-      features: 'WiFi enabled, smartphone app'
-    },
-    {
-      id: '3',
-      name: 'Dimmer Switch Pro',
-      description: 'Smart dimmer switch with adjustable brightness control',
+      name: 'Personalized Photo Frame',
+      description: 'Custom engraved wooden photo frame for cherished memories',
       price: 34.99,
-      category: 'dimmer_switch',
-      images: [],
-      is_in_stock: true,
-      stock_quantity: 30,
-      features: 'Adjustable brightness, WiFi enabled, voice control'
-    },
-    {
-      id: '4',
-      name: 'Motion Sensor',
-      description: 'Smart motion sensor for automated lighting control',
-      price: 24.99,
-      category: 'motion_sensor',
-      images: [],
-      is_in_stock: true,
-      stock_quantity: 40,
-      features: 'Motion detection, automated control, battery powered'
-    },
-    {
-      id: '5',
-      name: 'Smart Plug',
-      description: 'WiFi-enabled smart plug for any device',
-      price: 14.99,
-      category: 'smart_plug',
-      images: [],
-      is_in_stock: true,
-      stock_quantity: 100,
-      features: 'WiFi enabled, remote control, scheduling'
-    },
-    {
-      id: '6',
-      name: 'Smart Home Gateway',
-      description: 'Central hub for all your smart home devices',
-      price: 79.99,
-      category: 'gateway',
+      category: 'personalized_gifts',
       images: [],
       is_in_stock: true,
       stock_quantity: 25,
-      features: 'Central hub, multiple device support, cloud connectivity'
+      features: 'Custom engraving, premium wood, multiple sizes available'
+    },
+    {
+      id: '3',
+      name: 'Sterling Silver Pendant',
+      description: 'Exquisite sterling silver pendant with intricate design',
+      price: 124.99,
+      category: 'jewelry',
+      images: [],
+      is_in_stock: true,
+      stock_quantity: 8,
+      features: 'Sterling silver, hypoallergenic, comes with gift box'
+    },
+    {
+      id: '4',
+      name: 'Memory Box Set',
+      description: 'Beautiful keepsake box set for storing precious memories',
+      price: 59.99,
+      category: 'keepsakes',
+      images: [],
+      is_in_stock: true,
+      stock_quantity: 20,
+      features: 'Multiple compartments, velvet lining, lock and key included'
+    },
+    {
+      id: '5',
+      name: 'Anniversary Wine Glasses',
+      description: 'Elegant pair of wine glasses perfect for celebrating love',
+      price: 45.99,
+      category: 'special_occasions',
+      images: [],
+      is_in_stock: true,
+      stock_quantity: 30,
+      features: 'Premium crystal, dishwasher safe, comes in gift packaging'
+    },
+    {
+      id: '6',
+      name: 'Luxury Scented Candle Set',
+      description: 'Premium scented candle collection for relaxation and ambiance',
+      price: 67.99,
+      category: 'accessories',
+      images: [],
+      is_in_stock: true,
+      stock_quantity: 18,
+      features: 'Natural soy wax, long burning time, beautiful packaging'
     }
   ];
 
