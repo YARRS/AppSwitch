@@ -59,6 +59,7 @@ sys.modules['server'].db = db
 # Include routers
 app.include_router(auth_router)
 app.include_router(products_router)
+app.include_router(categories_router)
 app.include_router(cart_router)
 app.include_router(orders_router)
 app.include_router(inventory_router)
