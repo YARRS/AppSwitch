@@ -8,6 +8,7 @@ import {
 
 // Component imports
 import ProductManagement from './ProductManagement';
+import CategoryManagement from './CategoryManagement';
 import OrderManagement from './OrderManagement';
 import CustomerManagement from './CustomerManagement';
 import CampaignManagement from './CampaignManagement';
