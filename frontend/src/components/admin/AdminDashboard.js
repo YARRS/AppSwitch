@@ -246,18 +246,18 @@ const DashboardOverview = ({ stats, userRole }) => {
   return (
     <div className="space-y-6">
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {statsCards.map((card, index) => (
           <StatsCard key={index} {...card} />
         ))}
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 lg:p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Quick Actions
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4">
           <QuickActionButton
             title="Add Product"
             description="Create new product"
@@ -286,7 +286,7 @@ const DashboardOverview = ({ stats, userRole }) => {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 lg:p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Recent Activity
         </h3>
