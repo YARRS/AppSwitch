@@ -73,7 +73,7 @@ const CategoryManagement = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-start">
+      <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
         <div>
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             Category Management
@@ -84,7 +84,7 @@ const CategoryManagement = () => {
         </div>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="btn-primary flex items-center space-x-2"
+          className="btn-primary flex items-center space-x-2 w-full sm:w-auto justify-center"
         >
           <Plus className="w-5 h-5" />
           <span>Add Category</span>
@@ -92,8 +92,8 @@ const CategoryManagement = () => {
       </div>
 
       {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-        <div className="flex flex-col md:flex-row gap-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 lg:p-6">
+        <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
