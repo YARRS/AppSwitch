@@ -3,7 +3,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { 
   Package, Users, ShoppingCart, Settings, BarChart3, 
   TrendingUp, AlertTriangle, Clock, DollarSign,
-  Star, Eye, Plus, Filter, Search, Edit, Trash2
+  Star, Eye, Plus, Filter, Search, Edit, Trash2, Tag
 } from 'lucide-react';
 
 // Component imports
