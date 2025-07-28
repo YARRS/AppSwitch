@@ -300,18 +300,19 @@ const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
     try {
       const axios = getAuthenticatedAxios();
       const formDataUpload = new FormData();
-      formDataUpload.append('file', file);
+      formDataUpload.append('files', file);
 
-      const response = await axios.post('/api/uploads/image', formDataUpload, {
+      const response = await axios.post('/api/uploads/images', formDataUpload, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      if (response.data.success) {
+      if (response.data.success && response.data.data.uploaded_files?.length > 0) {
+        const uploadedFile = response.data.data.uploaded_files[0];
         setFormData(prev => ({
           ...prev,
-          image: response.data.data.base64_data
+          image: uploadedFile.base64_data
         }));
       }
     } catch (error) {
