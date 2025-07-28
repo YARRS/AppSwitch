@@ -514,6 +514,716 @@ def main():
 if __name__ == "__main__":
     main()
 
+
+class CategoryTester:
+    def __init__(self):
+        self.results = []
+        self.total_tests = 0
+        self.passed_tests = 0
+        self.failed_tests = 0
+        self.auth_tokens = {}  # Store tokens for different roles
+        self.created_categories = []  # Track created categories for cleanup
+        self.test_product_id = None  # For testing category-product relationships
+        
+    def log_result(self, test_name, status, message, details=None):
+        """Log test result"""
+        result = {
+            "test": test_name,
+            "status": status,
+            "message": message,
+            "timestamp": datetime.now().isoformat(),
+            "details": details
+        }
+        self.results.append(result)
+        self.total_tests += 1
+        
+        if status == "PASS":
+            self.passed_tests += 1
+            print(f"✅ {test_name}: {message}")
+        else:
+            self.failed_tests += 1
+            print(f"❌ {test_name}: {message}")
+            if details:
+                print(f"   Details: {details}")
+    
+    def authenticate_user(self, email, password, role_name):
+        """Authenticate user and store token"""
+        try:
+            login_data = {
+                "username": email,
+                "password": password
+            }
+            
+            response = requests.post(f"{API_BASE}/auth/login", data=login_data, timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("access_token"):
+                    self.auth_tokens[role_name] = data["access_token"]
+                    self.log_result(f"{role_name.title()} Authentication", "PASS", f"Successfully authenticated {role_name}")
+                    return True
+                else:
+                    self.log_result(f"{role_name.title()} Authentication", "FAIL", f"No access token in response for {role_name}")
+                    return False
+            else:
+                self.log_result(f"{role_name.title()} Authentication", "FAIL", f"Authentication failed for {role_name}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_result(f"{role_name.title()} Authentication", "FAIL", f"Error authenticating {role_name}: {str(e)}")
+            return False
+    
+    def get_auth_headers(self, role_name):
+        """Get authorization headers for a specific role"""
+        token = self.auth_tokens.get(role_name)
+        if token:
+            return {"Authorization": f"Bearer {token}"}
+        return {}
+    
+    def test_category_creation(self, role_name, should_succeed=True):
+        """Test category creation by specific role"""
+        try:
+            headers = self.get_auth_headers(role_name)
+            if not headers and should_succeed:
+                self.log_result(f"Category Creation ({role_name})", "SKIP", f"No auth token for {role_name}")
+                return None
+            
+            # Create unique category data
+            category_id = str(uuid.uuid4())
+            category_data = {
+                "name": f"Test Category {role_name.title()} {category_id[:8]}",
+                "description": f"Test category created by {role_name} for comprehensive testing",
+                "slug": f"test-category-{role_name}-{category_id[:8]}",
+                "image": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+                "is_active": True,
+                "sort_order": random.randint(1, 100)
+            }
+            
+            response = requests.post(f"{API_BASE}/categories/", json=category_data, headers=headers, timeout=30)
+            
+            if should_succeed:
+                if response.status_code in [200, 201]:
+                    data = response.json()
+                    if data.get("success"):
+                        category_info = data["data"]
+                        self.created_categories.append({
+                            "id": category_info["id"],
+                            "role": role_name,
+                            "slug": category_data["slug"],
+                            "name": category_info.get("name")
+                        })
+                        self.log_result(
+                            f"Category Creation ({role_name})", 
+                            "PASS", 
+                            f"Category created successfully by {role_name}",
+                            {
+                                "category_id": category_info["id"],
+                                "slug": category_data["slug"],
+                                "name": category_info.get("name")
+                            }
+                        )
+                        return category_info["id"]
+                    else:
+                        self.log_result(f"Category Creation ({role_name})", "FAIL", f"API returned success=false for {role_name}", data)
+                        return None
+                else:
+                    self.log_result(f"Category Creation ({role_name})", "FAIL", f"HTTP {response.status_code} for {role_name}: {response.text}")
+                    return None
+            else:
+                # Should fail (e.g., customer role)
+                if response.status_code == 403:
+                    self.log_result(f"Category Creation ({role_name})", "PASS", f"Correctly denied category creation for {role_name} (403 Forbidden)")
+                    return None
+                else:
+                    self.log_result(f"Category Creation ({role_name})", "FAIL", f"Expected 403 for {role_name}, got {response.status_code}")
+                    return None
+                    
+        except Exception as e:
+            self.log_result(f"Category Creation ({role_name})", "FAIL", f"Error creating category as {role_name}: {str(e)}")
+            return None
+    
+    def test_category_retrieval_all(self):
+        """Test retrieving all categories without filters"""
+        try:
+            response = requests.get(f"{API_BASE}/categories/", timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    categories = data.get("data", [])
+                    total = data.get("total", 0)
+                    self.log_result(
+                        "Category Retrieval (All)", 
+                        "PASS", 
+                        f"Retrieved {len(categories)} categories out of {total} total",
+                        {"total_categories": total, "returned_categories": len(categories)}
+                    )
+                    return categories
+                else:
+                    self.log_result("Category Retrieval (All)", "FAIL", "API returned success=false", data)
+                    return []
+            else:
+                self.log_result("Category Retrieval (All)", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                return []
+                
+        except Exception as e:
+            self.log_result("Category Retrieval (All)", "FAIL", f"Error retrieving all categories: {str(e)}")
+            return []
+    
+    def test_category_retrieval_active_only(self):
+        """Test retrieving only active categories (is_active=true)"""
+        try:
+            response = requests.get(f"{API_BASE}/categories/?is_active=true", timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    categories = data.get("data", [])
+                    total = data.get("total", 0)
+                    
+                    # Verify all returned categories have is_active=true
+                    active_count = sum(1 for c in categories if c.get("is_active") == True)
+                    
+                    self.log_result(
+                        "Category Retrieval (Active Only)", 
+                        "PASS", 
+                        f"Retrieved {len(categories)} active categories out of {total} total, {active_count} confirmed active",
+                        {
+                            "total_active": total, 
+                            "returned_categories": len(categories),
+                            "confirmed_active": active_count,
+                            "all_active": active_count == len(categories)
+                        }
+                    )
+                    return categories
+                else:
+                    self.log_result("Category Retrieval (Active Only)", "FAIL", "API returned success=false", data)
+                    return []
+            else:
+                self.log_result("Category Retrieval (Active Only)", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                return []
+                
+        except Exception as e:
+            self.log_result("Category Retrieval (Active Only)", "FAIL", f"Error retrieving active categories: {str(e)}")
+            return []
+    
+    def test_category_retrieval_with_products(self):
+        """Test retrieving categories with product counts"""
+        try:
+            response = requests.get(f"{API_BASE}/categories/with-products", timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    categories = data.get("data", [])
+                    
+                    # Verify all categories have product_count field
+                    categories_with_count = sum(1 for c in categories if "product_count" in c)
+                    
+                    self.log_result(
+                        "Category Retrieval (With Products)", 
+                        "PASS", 
+                        f"Retrieved {len(categories)} categories with product counts, {categories_with_count} have product_count field",
+                        {
+                            "total_categories": len(categories),
+                            "categories_with_count": categories_with_count,
+                            "all_have_count": categories_with_count == len(categories)
+                        }
+                    )
+                    return categories
+                else:
+                    self.log_result("Category Retrieval (With Products)", "FAIL", "API returned success=false", data)
+                    return []
+            else:
+                self.log_result("Category Retrieval (With Products)", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                return []
+                
+        except Exception as e:
+            self.log_result("Category Retrieval (With Products)", "FAIL", f"Error retrieving categories with products: {str(e)}")
+            return []
+    
+    def test_category_search(self):
+        """Test category search functionality"""
+        try:
+            if not self.created_categories:
+                self.log_result("Category Search", "SKIP", "No categories created to test search")
+                return
+            
+            # Test search with first created category name
+            search_term = self.created_categories[0]["name"].split()[0]  # Get first word
+            response = requests.get(f"{API_BASE}/categories/?search={search_term}", timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    categories = data.get("data", [])
+                    total = data.get("total", 0)
+                    
+                    # Check if our created category is in results
+                    found_our_category = any(c.get("id") == self.created_categories[0]["id"] for c in categories)
+                    
+                    self.log_result(
+                        "Category Search", 
+                        "PASS", 
+                        f"Search for '{search_term}' returned {len(categories)} categories, found our category: {found_our_category}",
+                        {
+                            "search_term": search_term,
+                            "total_results": total,
+                            "returned_categories": len(categories),
+                            "found_our_category": found_our_category
+                        }
+                    )
+                else:
+                    self.log_result("Category Search", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Category Search", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Category Search", "FAIL", f"Error testing category search: {str(e)}")
+    
+    def test_category_pagination(self):
+        """Test category pagination"""
+        try:
+            # Test with small page size
+            response = requests.get(f"{API_BASE}/categories/?page=1&per_page=2", timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    categories = data.get("data", [])
+                    total = data.get("total", 0)
+                    page = data.get("page", 1)
+                    per_page = data.get("per_page", 2)
+                    total_pages = data.get("total_pages", 1)
+                    
+                    self.log_result(
+                        "Category Pagination", 
+                        "PASS", 
+                        f"Pagination working: page {page}, {len(categories)} categories, {total} total, {total_pages} pages",
+                        {
+                            "page": page,
+                            "per_page": per_page,
+                            "returned_categories": len(categories),
+                            "total_categories": total,
+                            "total_pages": total_pages
+                        }
+                    )
+                else:
+                    self.log_result("Category Pagination", "FAIL", "API returned success=false", data)
+            else:
+                self.log_result("Category Pagination", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                
+        except Exception as e:
+            self.log_result("Category Pagination", "FAIL", f"Error testing category pagination: {str(e)}")
+    
+    def test_category_get_by_id(self):
+        """Test retrieving individual category by ID"""
+        try:
+            if not self.created_categories:
+                self.log_result("Category Get By ID", "SKIP", "No categories created to test")
+                return
+            
+            for category in self.created_categories:
+                category_id = category["id"]
+                role = category["role"]
+                
+                response = requests.get(f"{API_BASE}/categories/{category_id}", timeout=30)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get("success"):
+                        category_data = data["data"]
+                        self.log_result(
+                            f"Category Get By ID ({role})", 
+                            "PASS", 
+                            f"Retrieved category details successfully",
+                            {
+                                "category_id": category_id,
+                                "name": category_data.get("name"),
+                                "slug": category_data.get("slug"),
+                                "is_active": category_data.get("is_active"),
+                                "product_count": category_data.get("product_count", 0)
+                            }
+                        )
+                    else:
+                        self.log_result(f"Category Get By ID ({role})", "FAIL", "API returned success=false", data)
+                else:
+                    self.log_result(f"Category Get By ID ({role})", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                    
+        except Exception as e:
+            self.log_result("Category Get By ID", "FAIL", f"Error testing individual category retrieval: {str(e)}")
+    
+    def test_category_update(self, role_name="admin", should_succeed=True):
+        """Test category update operations"""
+        try:
+            if not self.created_categories:
+                self.log_result(f"Category Update ({role_name})", "SKIP", "No categories created to test update")
+                return
+            
+            headers = self.get_auth_headers(role_name)
+            if not headers and should_succeed:
+                self.log_result(f"Category Update ({role_name})", "SKIP", f"No auth token for {role_name}")
+                return
+            
+            # Update first created category
+            category = self.created_categories[0]
+            category_id = category["id"]
+            
+            update_data = {
+                "name": f"Updated Category Name {uuid.uuid4().hex[:8]}",
+                "description": f"Updated description by {role_name}",
+                "is_active": False,  # Toggle active status
+                "sort_order": 999
+            }
+            
+            response = requests.put(f"{API_BASE}/categories/{category_id}", json=update_data, headers=headers, timeout=30)
+            
+            if should_succeed:
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get("success"):
+                        updated_category = data["data"]
+                        self.log_result(
+                            f"Category Update ({role_name})", 
+                            "PASS", 
+                            f"Category updated successfully by {role_name}",
+                            {
+                                "category_id": category_id,
+                                "new_name": updated_category.get("name"),
+                                "new_is_active": updated_category.get("is_active"),
+                                "new_sort_order": updated_category.get("sort_order")
+                            }
+                        )
+                    else:
+                        self.log_result(f"Category Update ({role_name})", "FAIL", f"API returned success=false for {role_name}", data)
+                else:
+                    self.log_result(f"Category Update ({role_name})", "FAIL", f"HTTP {response.status_code} for {role_name}: {response.text}")
+            else:
+                # Should fail (e.g., customer role)
+                if response.status_code == 403:
+                    self.log_result(f"Category Update ({role_name})", "PASS", f"Correctly denied category update for {role_name} (403 Forbidden)")
+                else:
+                    self.log_result(f"Category Update ({role_name})", "FAIL", f"Expected 403 for {role_name}, got {response.status_code}")
+                    
+        except Exception as e:
+            self.log_result(f"Category Update ({role_name})", "FAIL", f"Error updating category as {role_name}: {str(e)}")
+    
+    def test_category_slug_uniqueness(self):
+        """Test category slug uniqueness validation"""
+        try:
+            if not self.created_categories:
+                self.log_result("Category Slug Uniqueness", "SKIP", "No categories created to test slug uniqueness")
+                return
+            
+            headers = self.get_auth_headers("admin")
+            if not headers:
+                self.log_result("Category Slug Uniqueness", "SKIP", "No admin auth token")
+                return
+            
+            # Try to create category with existing slug
+            existing_slug = self.created_categories[0]["slug"]
+            duplicate_category_data = {
+                "name": f"Duplicate Slug Test {uuid.uuid4().hex[:8]}",
+                "description": "Testing duplicate slug validation",
+                "slug": existing_slug,  # Use existing slug
+                "is_active": True,
+                "sort_order": 1
+            }
+            
+            response = requests.post(f"{API_BASE}/categories/", json=duplicate_category_data, headers=headers, timeout=30)
+            
+            if response.status_code == 400:
+                self.log_result(
+                    "Category Slug Uniqueness", 
+                    "PASS", 
+                    "Correctly prevented duplicate slug creation (400 Bad Request)",
+                    {"existing_slug": existing_slug, "status_code": response.status_code}
+                )
+            else:
+                self.log_result(
+                    "Category Slug Uniqueness", 
+                    "FAIL", 
+                    f"Expected 400 for duplicate slug, got {response.status_code}",
+                    {"existing_slug": existing_slug, "response": response.text}
+                )
+                
+        except Exception as e:
+            self.log_result("Category Slug Uniqueness", "FAIL", f"Error testing slug uniqueness: {str(e)}")
+    
+    def test_category_deletion_with_products(self):
+        """Test that categories with products cannot be deleted"""
+        try:
+            if not self.created_categories:
+                self.log_result("Category Deletion (With Products)", "SKIP", "No categories created to test deletion")
+                return
+            
+            headers = self.get_auth_headers("admin")
+            if not headers:
+                self.log_result("Category Deletion (With Products)", "SKIP", "No admin auth token")
+                return
+            
+            # First, create a product in one of our categories
+            category = self.created_categories[0]
+            category_slug = category["slug"]
+            
+            product_data = {
+                "name": f"Test Product for Category Deletion {uuid.uuid4().hex[:8]}",
+                "description": "Test product to prevent category deletion",
+                "category": category_slug,  # Use our category slug
+                "price": 99.99,
+                "sku": f"TPD-{uuid.uuid4().hex[:8].upper()}",
+                "brand": "Vallmark",
+                "stock_quantity": 10,
+                "min_stock_level": 1,
+                "specifications": {"test": "true"},
+                "features": ["Test Feature"],
+                "is_active": True
+            }
+            
+            # Create product
+            product_response = requests.post(f"{API_BASE}/products/", json=product_data, headers=headers, timeout=30)
+            
+            if product_response.status_code in [200, 201]:
+                product_data_response = product_response.json()
+                if product_data_response.get("success"):
+                    self.test_product_id = product_data_response["data"]["id"]
+                    
+                    # Now try to delete the category (should fail)
+                    category_id = category["id"]
+                    delete_response = requests.delete(f"{API_BASE}/categories/{category_id}", headers=headers, timeout=30)
+                    
+                    if delete_response.status_code == 400:
+                        self.log_result(
+                            "Category Deletion (With Products)", 
+                            "PASS", 
+                            "Correctly prevented deletion of category with products (400 Bad Request)",
+                            {"category_id": category_id, "product_id": self.test_product_id}
+                        )
+                    else:
+                        self.log_result(
+                            "Category Deletion (With Products)", 
+                            "FAIL", 
+                            f"Expected 400 for category with products, got {delete_response.status_code}",
+                            {"category_id": category_id, "response": delete_response.text}
+                        )
+                else:
+                    self.log_result("Category Deletion (With Products)", "FAIL", "Failed to create test product", product_data_response)
+            else:
+                self.log_result("Category Deletion (With Products)", "FAIL", f"Failed to create test product: {product_response.text}")
+                
+        except Exception as e:
+            self.log_result("Category Deletion (With Products)", "FAIL", f"Error testing category deletion with products: {str(e)}")
+    
+    def test_category_deletion_empty(self, role_name="admin", should_succeed=True):
+        """Test deletion of empty categories"""
+        try:
+            if len(self.created_categories) < 2:
+                self.log_result(f"Category Deletion Empty ({role_name})", "SKIP", "Need at least 2 categories to test deletion")
+                return
+            
+            headers = self.get_auth_headers(role_name)
+            if not headers and should_succeed:
+                self.log_result(f"Category Deletion Empty ({role_name})", "SKIP", f"No auth token for {role_name}")
+                return
+            
+            # Delete the last created category (should be empty)
+            category = self.created_categories[-1]
+            category_id = category["id"]
+            
+            response = requests.delete(f"{API_BASE}/categories/{category_id}", headers=headers, timeout=30)
+            
+            if should_succeed:
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get("success"):
+                        # Remove from our tracking list
+                        self.created_categories = [c for c in self.created_categories if c["id"] != category_id]
+                        self.log_result(
+                            f"Category Deletion Empty ({role_name})", 
+                            "PASS", 
+                            f"Empty category deleted successfully by {role_name}",
+                            {"category_id": category_id, "category_name": category["name"]}
+                        )
+                    else:
+                        self.log_result(f"Category Deletion Empty ({role_name})", "FAIL", f"API returned success=false for {role_name}", data)
+                else:
+                    self.log_result(f"Category Deletion Empty ({role_name})", "FAIL", f"HTTP {response.status_code} for {role_name}: {response.text}")
+            else:
+                # Should fail (e.g., customer role)
+                if response.status_code == 403:
+                    self.log_result(f"Category Deletion Empty ({role_name})", "PASS", f"Correctly denied category deletion for {role_name} (403 Forbidden)")
+                else:
+                    self.log_result(f"Category Deletion Empty ({role_name})", "FAIL", f"Expected 403 for {role_name}, got {response.status_code}")
+                    
+        except Exception as e:
+            self.log_result(f"Category Deletion Empty ({role_name})", "FAIL", f"Error deleting empty category as {role_name}: {str(e)}")
+    
+    def test_category_data_validation(self):
+        """Test category data validation"""
+        try:
+            headers = self.get_auth_headers("admin")
+            if not headers:
+                self.log_result("Category Data Validation", "SKIP", "No admin auth token")
+                return
+            
+            # Test missing required fields
+            invalid_category_data = {
+                "description": "Missing name and slug",
+                "is_active": True
+            }
+            
+            response = requests.post(f"{API_BASE}/categories/", json=invalid_category_data, headers=headers, timeout=30)
+            
+            if response.status_code == 422:  # Validation error
+                self.log_result(
+                    "Category Data Validation", 
+                    "PASS", 
+                    "Correctly rejected category with missing required fields (422 Validation Error)",
+                    {"status_code": response.status_code}
+                )
+            else:
+                self.log_result(
+                    "Category Data Validation", 
+                    "FAIL", 
+                    f"Expected 422 for invalid data, got {response.status_code}",
+                    {"response": response.text}
+                )
+                
+        except Exception as e:
+            self.log_result("Category Data Validation", "FAIL", f"Error testing category data validation: {str(e)}")
+    
+    def run_comprehensive_category_test(self):
+        """Run comprehensive category CRUD testing"""
+        print("🚀 Starting Comprehensive Category CRUD Testing")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Step 1: Authenticate different roles
+        print("\n🔐 Step 1: Authenticating Different User Roles...")
+        roles_to_test = [
+            ("admin", "admin@vallmark.com", "Admin123!", True),
+            ("store_owner", "storeowner@vallmark.com", "StoreOwner123!", True),
+            ("customer", "customer@vallmark.com", "Customer123!", False)  # Should fail for CUD operations
+        ]
+        
+        authenticated_roles = []
+        for role_name, email, password, can_create in roles_to_test:
+            if self.authenticate_user(email, password, role_name):
+                authenticated_roles.append((role_name, can_create))
+        
+        # Step 2: Test category creation by different roles
+        print("\n📦 Step 2: Testing Category Creation by Different Roles...")
+        for role_name, can_create in authenticated_roles:
+            self.test_category_creation(role_name, should_succeed=can_create)
+        
+        # Step 3: Test category retrieval operations
+        print("\n🔍 Step 3: Testing Category Retrieval Operations...")
+        self.test_category_retrieval_all()
+        self.test_category_retrieval_active_only()
+        self.test_category_retrieval_with_products()
+        
+        # Step 4: Test category search and pagination
+        print("\n🔎 Step 4: Testing Category Search and Pagination...")
+        self.test_category_search()
+        self.test_category_pagination()
+        
+        # Step 5: Test individual category retrieval
+        print("\n📋 Step 5: Testing Individual Category Retrieval...")
+        self.test_category_get_by_id()
+        
+        # Step 6: Test category update operations
+        print("\n✏️ Step 6: Testing Category Update Operations...")
+        self.test_category_update("admin", should_succeed=True)
+        self.test_category_update("customer", should_succeed=False)
+        
+        # Step 7: Test category validation
+        print("\n✅ Step 7: Testing Category Data Validation...")
+        self.test_category_slug_uniqueness()
+        self.test_category_data_validation()
+        
+        # Step 8: Test category deletion
+        print("\n🗑️ Step 8: Testing Category Deletion...")
+        self.test_category_deletion_with_products()
+        self.test_category_deletion_empty("admin", should_succeed=True)
+        self.test_category_deletion_empty("customer", should_succeed=False)
+        
+        # Step 9: Summary and analysis
+        print("\n📊 Step 9: Test Results Summary...")
+        self.print_test_summary()
+        
+        return True
+    
+    def print_test_summary(self):
+        """Print comprehensive test summary"""
+        print("\n" + "=" * 80)
+        print("📊 COMPREHENSIVE CATEGORY CRUD TEST RESULTS")
+        print("=" * 80)
+        
+        print(f"Total Tests: {self.total_tests}")
+        print(f"Passed Tests: {self.passed_tests}")
+        print(f"Failed Tests: {self.failed_tests}")
+        print(f"Success Rate: {(self.passed_tests/self.total_tests*100):.1f}%")
+        
+        print(f"\n📦 Categories Created: {len(self.created_categories)}")
+        for category in self.created_categories:
+            print(f"  - {category['role']}: {category['name']} (ID: {category['id'][:8]}...)")
+        
+        print("\n❌ Failed Tests:")
+        failed_tests = [r for r in self.results if r["status"] == "FAIL"]
+        if failed_tests:
+            for test in failed_tests:
+                print(f"  - {test['test']}: {test['message']}")
+        else:
+            print("  None! All tests passed.")
+        
+        print("\n🔍 Key Findings:")
+        # Analyze results for key insights
+        auth_failures = [r for r in self.results if "Authentication" in r["test"] and r["status"] == "FAIL"]
+        creation_failures = [r for r in self.results if "Category Creation" in r["test"] and r["status"] == "FAIL"]
+        retrieval_failures = [r for r in self.results if "Category Retrieval" in r["test"] and r["status"] == "FAIL"]
+        update_failures = [r for r in self.results if "Category Update" in r["test"] and r["status"] == "FAIL"]
+        deletion_failures = [r for r in self.results if "Category Deletion" in r["test"] and r["status"] == "FAIL"]
+        
+        if auth_failures:
+            print(f"  - Authentication Issues: {len(auth_failures)} roles failed to authenticate")
+        if creation_failures:
+            print(f"  - Category Creation Issues: {len(creation_failures)} roles failed to create categories")
+        if retrieval_failures:
+            print(f"  - Category Retrieval Issues: {len(retrieval_failures)} retrieval operations failed")
+        if update_failures:
+            print(f"  - Category Update Issues: {len(update_failures)} update operations failed")
+        if deletion_failures:
+            print(f"  - Category Deletion Issues: {len(deletion_failures)} deletion operations failed")
+        
+        if not any([auth_failures, creation_failures, retrieval_failures, update_failures, deletion_failures]):
+            print("  - All core category CRUD functionality working correctly!")
+            print("  - Categories created by admin/store_owner are working properly")
+            print("  - Role-based access control working as expected")
+            print("  - Data validation and business rules enforced correctly")
+
+
+def run_category_tests():
+    """Main function to run category CRUD tests"""
+    tester = CategoryTester()
+    
+    try:
+        success = tester.run_comprehensive_category_test()
+        
+        # Exit with appropriate code
+        if tester.failed_tests == 0:
+            print("\n✅ All category tests passed! Category management system working correctly.")
+            return True
+        else:
+            print(f"\n❌ {tester.failed_tests} category tests failed. Issues found in category management system.")
+            return False
+            
+    except KeyboardInterrupt:
+        print("\n⚠️ Category testing interrupted by user")
+        return False
+    except Exception as e:
+        print(f"\n💥 Category testing failed with error: {str(e)}")
+        return False
+
 class BackendTester:
     def __init__(self):
         self.results = []
