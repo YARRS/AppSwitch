@@ -231,19 +231,19 @@ const CategoryCard = ({ category, onEdit, onDelete }) => {
         <div className="flex space-x-2">
           <button
             onClick={() => onEdit(category)}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-3 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-1 lg:space-x-2"
           >
             <Edit className="w-4 h-4" />
-            <span>Edit</span>
+            <span className="text-sm lg:text-base">Edit</span>
           </button>
           
           <button
             onClick={() => onDelete(category.id)}
-            className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors duration-200"
+            className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors duration-200 flex-shrink-0"
             disabled={category.product_count > 0}
             title={category.product_count > 0 ? "Cannot delete category with products" : "Delete category"}
           >
-            <Trash2 className="w-5 h-5" />
+            <Trash2 className="w-4 h-4 lg:w-5 lg:h-5" />
           </button>
         </div>
       </div>
