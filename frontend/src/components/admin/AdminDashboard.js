@@ -155,6 +155,7 @@ const AdminDashboard = () => {
           )}
           {activeTab === 'user-management' && <SuperAdminUserManagement />}
           {activeTab === 'products' && <ProductManagement />}
+          {activeTab === 'categories' && <CategoryManagement />}
           {activeTab === 'orders' && <OrderManagement />}
           {activeTab === 'customers' && <CustomerManagement />}
           {activeTab === 'campaigns' && <CampaignManagement />}
