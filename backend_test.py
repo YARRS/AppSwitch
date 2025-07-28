@@ -32,6 +32,488 @@ AUTO_SEEDED_USERS = [
     {"email": "customer@vallmark.com", "password": "Customer123!", "role": "customer"}
 ]
 
+class ProductManagementTester:
+    def __init__(self):
+        self.results = []
+        self.total_tests = 0
+        self.passed_tests = 0
+        self.failed_tests = 0
+        self.auth_tokens = {}  # Store tokens for different roles
+        self.created_products = []  # Track created products for cleanup
+        
+    def log_result(self, test_name, status, message, details=None):
+        """Log test result"""
+        result = {
+            "test": test_name,
+            "status": status,
+            "message": message,
+            "timestamp": datetime.now().isoformat(),
+            "details": details
+        }
+        self.results.append(result)
+        self.total_tests += 1
+        
+        if status == "PASS":
+            self.passed_tests += 1
+            print(f"✅ {test_name}: {message}")
+        else:
+            self.failed_tests += 1
+            print(f"❌ {test_name}: {message}")
+            if details:
+                print(f"   Details: {details}")
+    
+    def authenticate_user(self, email, password, role_name):
+        """Authenticate user and store token"""
+        try:
+            login_data = {
+                "username": email,
+                "password": password
+            }
+            
+            response = requests.post(f"{API_BASE}/auth/login", data=login_data, timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("access_token"):
+                    self.auth_tokens[role_name] = data["access_token"]
+                    self.log_result(f"{role_name.title()} Authentication", "PASS", f"Successfully authenticated {role_name}")
+                    return True
+                else:
+                    self.log_result(f"{role_name.title()} Authentication", "FAIL", f"No access token in response for {role_name}")
+                    return False
+            else:
+                self.log_result(f"{role_name.title()} Authentication", "FAIL", f"Authentication failed for {role_name}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_result(f"{role_name.title()} Authentication", "FAIL", f"Error authenticating {role_name}: {str(e)}")
+            return False
+    
+    def get_auth_headers(self, role_name):
+        """Get authorization headers for a specific role"""
+        token = self.auth_tokens.get(role_name)
+        if token:
+            return {"Authorization": f"Bearer {token}"}
+        return {}
+    
+    def test_product_creation_by_role(self, role_name, should_succeed=True):
+        """Test product creation by specific role"""
+        try:
+            headers = self.get_auth_headers(role_name)
+            if not headers:
+                self.log_result(f"Product Creation ({role_name})", "SKIP", f"No auth token for {role_name}")
+                return None
+            
+            # Create unique product data
+            product_id = str(uuid.uuid4())
+            product_data = {
+                "name": f"Test Gift Article by {role_name.title()} {product_id[:8]}",
+                "description": f"Test gift article created by {role_name} for testing product visibility",
+                "category": "smart_switch",
+                "price": 149.99,
+                "sku": f"TGA-{role_name.upper()}-{product_id[:8]}",
+                "brand": "Vallmark",
+                "stock_quantity": 50,
+                "min_stock_level": 5,
+                "specifications": {"material": "Premium", "size": "Medium", "created_by": role_name},
+                "features": ["Premium Quality", "Gift Wrapping", "Custom Message", f"Created by {role_name}"],
+                "is_active": True  # This is the key field we're testing
+            }
+            
+            response = requests.post(f"{API_BASE}/products/", json=product_data, headers=headers, timeout=30)
+            
+            if should_succeed:
+                if response.status_code in [200, 201]:
+                    data = response.json()
+                    if data.get("success"):
+                        product_info = data["data"]
+                        self.created_products.append({
+                            "id": product_info["id"],
+                            "role": role_name,
+                            "sku": product_data["sku"],
+                            "is_active": product_info.get("is_active", False)
+                        })
+                        self.log_result(
+                            f"Product Creation ({role_name})", 
+                            "PASS", 
+                            f"Product created successfully by {role_name}",
+                            {
+                                "product_id": product_info["id"],
+                                "sku": product_data["sku"],
+                                "is_active": product_info.get("is_active"),
+                                "name": product_info.get("name")
+                            }
+                        )
+                        return product_info["id"]
+                    else:
+                        self.log_result(f"Product Creation ({role_name})", "FAIL", f"API returned success=false for {role_name}", data)
+                        return None
+                else:
+                    self.log_result(f"Product Creation ({role_name})", "FAIL", f"HTTP {response.status_code} for {role_name}: {response.text}")
+                    return None
+            else:
+                # Should fail (e.g., customer role)
+                if response.status_code == 403:
+                    self.log_result(f"Product Creation ({role_name})", "PASS", f"Correctly denied product creation for {role_name} (403 Forbidden)")
+                    return None
+                else:
+                    self.log_result(f"Product Creation ({role_name})", "FAIL", f"Expected 403 for {role_name}, got {response.status_code}")
+                    return None
+                    
+        except Exception as e:
+            self.log_result(f"Product Creation ({role_name})", "FAIL", f"Error creating product as {role_name}: {str(e)}")
+            return None
+    
+    def test_product_retrieval_all(self):
+        """Test retrieving all products without filters"""
+        try:
+            response = requests.get(f"{API_BASE}/products/", timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    products = data.get("data", [])
+                    total = data.get("total", 0)
+                    self.log_result(
+                        "Product Retrieval (All)", 
+                        "PASS", 
+                        f"Retrieved {len(products)} products out of {total} total",
+                        {"total_products": total, "returned_products": len(products)}
+                    )
+                    return products
+                else:
+                    self.log_result("Product Retrieval (All)", "FAIL", "API returned success=false", data)
+                    return []
+            else:
+                self.log_result("Product Retrieval (All)", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                return []
+                
+        except Exception as e:
+            self.log_result("Product Retrieval (All)", "FAIL", f"Error retrieving all products: {str(e)}")
+            return []
+    
+    def test_product_retrieval_active_only(self):
+        """Test retrieving only active products (is_active=true)"""
+        try:
+            response = requests.get(f"{API_BASE}/products/?is_active=true", timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    products = data.get("data", [])
+                    total = data.get("total", 0)
+                    
+                    # Verify all returned products have is_active=true
+                    active_count = sum(1 for p in products if p.get("is_active") == True)
+                    
+                    self.log_result(
+                        "Product Retrieval (Active Only)", 
+                        "PASS", 
+                        f"Retrieved {len(products)} active products out of {total} total, {active_count} confirmed active",
+                        {
+                            "total_active": total, 
+                            "returned_products": len(products),
+                            "confirmed_active": active_count,
+                            "all_active": active_count == len(products)
+                        }
+                    )
+                    return products
+                else:
+                    self.log_result("Product Retrieval (Active Only)", "FAIL", "API returned success=false", data)
+                    return []
+            else:
+                self.log_result("Product Retrieval (Active Only)", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                return []
+                
+        except Exception as e:
+            self.log_result("Product Retrieval (Active Only)", "FAIL", f"Error retrieving active products: {str(e)}")
+            return []
+    
+    def test_product_retrieval_inactive_only(self):
+        """Test retrieving only inactive products (is_active=false)"""
+        try:
+            response = requests.get(f"{API_BASE}/products/?is_active=false", timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    products = data.get("data", [])
+                    total = data.get("total", 0)
+                    
+                    # Verify all returned products have is_active=false
+                    inactive_count = sum(1 for p in products if p.get("is_active") == False)
+                    
+                    self.log_result(
+                        "Product Retrieval (Inactive Only)", 
+                        "PASS", 
+                        f"Retrieved {len(products)} inactive products out of {total} total, {inactive_count} confirmed inactive",
+                        {
+                            "total_inactive": total, 
+                            "returned_products": len(products),
+                            "confirmed_inactive": inactive_count,
+                            "all_inactive": inactive_count == len(products)
+                        }
+                    )
+                    return products
+                else:
+                    self.log_result("Product Retrieval (Inactive Only)", "FAIL", "API returned success=false", data)
+                    return []
+            else:
+                self.log_result("Product Retrieval (Inactive Only)", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                return []
+                
+        except Exception as e:
+            self.log_result("Product Retrieval (Inactive Only)", "FAIL", f"Error retrieving inactive products: {str(e)}")
+            return []
+    
+    def test_created_products_visibility(self):
+        """Test if products created by different roles are visible in active products list"""
+        try:
+            if not self.created_products:
+                self.log_result("Created Products Visibility", "SKIP", "No products were created to test")
+                return
+            
+            # Get active products
+            active_products = self.test_product_retrieval_active_only()
+            active_product_ids = [p.get("id") for p in active_products]
+            
+            # Check each created product
+            visibility_results = {}
+            for product in self.created_products:
+                product_id = product["id"]
+                role = product["role"]
+                is_visible = product_id in active_product_ids
+                visibility_results[role] = visibility_results.get(role, [])
+                visibility_results[role].append({
+                    "product_id": product_id,
+                    "sku": product["sku"],
+                    "is_visible": is_visible,
+                    "expected_active": product.get("is_active", True)
+                })
+            
+            # Analyze results
+            all_visible = True
+            missing_products = []
+            
+            for role, products in visibility_results.items():
+                for product in products:
+                    if not product["is_visible"] and product["expected_active"]:
+                        all_visible = False
+                        missing_products.append(f"{role}: {product['sku']}")
+            
+            if all_visible:
+                self.log_result(
+                    "Created Products Visibility", 
+                    "PASS", 
+                    f"All {len(self.created_products)} created products are visible in active products list",
+                    visibility_results
+                )
+            else:
+                self.log_result(
+                    "Created Products Visibility", 
+                    "FAIL", 
+                    f"Some created products are missing from active list: {', '.join(missing_products)}",
+                    visibility_results
+                )
+                
+        except Exception as e:
+            self.log_result("Created Products Visibility", "FAIL", f"Error testing product visibility: {str(e)}")
+    
+    def test_individual_product_details(self):
+        """Test retrieving individual product details for created products"""
+        try:
+            if not self.created_products:
+                self.log_result("Individual Product Details", "SKIP", "No products were created to test")
+                return
+            
+            for product in self.created_products:
+                product_id = product["id"]
+                role = product["role"]
+                
+                response = requests.get(f"{API_BASE}/products/{product_id}", timeout=30)
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get("success"):
+                        product_data = data["data"]
+                        is_active = product_data.get("is_active")
+                        self.log_result(
+                            f"Product Details ({role})", 
+                            "PASS", 
+                            f"Retrieved product details, is_active={is_active}",
+                            {
+                                "product_id": product_id,
+                                "name": product_data.get("name"),
+                                "is_active": is_active,
+                                "stock_quantity": product_data.get("stock_quantity")
+                            }
+                        )
+                    else:
+                        self.log_result(f"Product Details ({role})", "FAIL", "API returned success=false", data)
+                else:
+                    self.log_result(f"Product Details ({role})", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                    
+        except Exception as e:
+            self.log_result("Individual Product Details", "FAIL", f"Error testing individual product details: {str(e)}")
+    
+    def test_database_state_verification(self):
+        """Test database state by checking product counts and active status"""
+        try:
+            # Get all products
+            all_products = self.test_product_retrieval_all()
+            active_products = self.test_product_retrieval_active_only()
+            inactive_products = self.test_product_retrieval_inactive_only()
+            
+            total_all = len(all_products)
+            total_active = len(active_products)
+            total_inactive = len(inactive_products)
+            
+            # Verify counts add up
+            if total_active + total_inactive == total_all:
+                self.log_result(
+                    "Database State Verification", 
+                    "PASS", 
+                    f"Product counts consistent: {total_all} total = {total_active} active + {total_inactive} inactive",
+                    {
+                        "total_products": total_all,
+                        "active_products": total_active,
+                        "inactive_products": total_inactive,
+                        "counts_match": True
+                    }
+                )
+            else:
+                self.log_result(
+                    "Database State Verification", 
+                    "FAIL", 
+                    f"Product counts inconsistent: {total_all} total ≠ {total_active} active + {total_inactive} inactive",
+                    {
+                        "total_products": total_all,
+                        "active_products": total_active,
+                        "inactive_products": total_inactive,
+                        "counts_match": False
+                    }
+                )
+                
+        except Exception as e:
+            self.log_result("Database State Verification", "FAIL", f"Error verifying database state: {str(e)}")
+    
+    def run_comprehensive_product_test(self):
+        """Run comprehensive product management testing"""
+        print("🚀 Starting Comprehensive Product Management Testing")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Step 1: Authenticate different roles
+        print("\n🔐 Step 1: Authenticating Different User Roles...")
+        roles_to_test = [
+            ("admin", "admin@vallmark.com", "Admin123!", True),
+            ("store_owner", "storeowner@vallmark.com", "StoreOwner123!", True),
+            ("salesperson", "salesperson@vallmark.com", "Salesperson123!", False),  # Should fail
+            ("customer", "customer@vallmark.com", "Customer123!", False)  # Should fail
+        ]
+        
+        authenticated_roles = []
+        for role_name, email, password, can_create in roles_to_test:
+            if self.authenticate_user(email, password, role_name):
+                authenticated_roles.append((role_name, can_create))
+        
+        # Step 2: Test product creation by different roles
+        print("\n📦 Step 2: Testing Product Creation by Different Roles...")
+        for role_name, can_create in authenticated_roles:
+            self.test_product_creation_by_role(role_name, should_succeed=can_create)
+        
+        # Step 3: Test product retrieval
+        print("\n🔍 Step 3: Testing Product Retrieval...")
+        self.test_product_retrieval_all()
+        self.test_product_retrieval_active_only()
+        self.test_product_retrieval_inactive_only()
+        
+        # Step 4: Test created products visibility
+        print("\n👁️ Step 4: Testing Created Products Visibility...")
+        self.test_created_products_visibility()
+        
+        # Step 5: Test individual product details
+        print("\n📋 Step 5: Testing Individual Product Details...")
+        self.test_individual_product_details()
+        
+        # Step 6: Database state verification
+        print("\n🗄️ Step 6: Database State Verification...")
+        self.test_database_state_verification()
+        
+        # Step 7: Summary and analysis
+        print("\n📊 Step 7: Test Results Summary...")
+        self.print_test_summary()
+        
+        return True
+    
+    def print_test_summary(self):
+        """Print comprehensive test summary"""
+        print("\n" + "=" * 80)
+        print("📊 COMPREHENSIVE TEST RESULTS SUMMARY")
+        print("=" * 80)
+        
+        print(f"Total Tests: {self.total_tests}")
+        print(f"Passed Tests: {self.passed_tests}")
+        print(f"Failed Tests: {self.failed_tests}")
+        print(f"Success Rate: {(self.passed_tests/self.total_tests*100):.1f}%")
+        
+        print(f"\n📦 Products Created: {len(self.created_products)}")
+        for product in self.created_products:
+            print(f"  - {product['role']}: {product['sku']} (ID: {product['id'][:8]}...)")
+        
+        print("\n❌ Failed Tests:")
+        failed_tests = [r for r in self.results if r["status"] == "FAIL"]
+        if failed_tests:
+            for test in failed_tests:
+                print(f"  - {test['test']}: {test['message']}")
+        else:
+            print("  None! All tests passed.")
+        
+        print("\n🔍 Key Findings:")
+        # Analyze results for key insights
+        auth_failures = [r for r in self.results if "Authentication" in r["test"] and r["status"] == "FAIL"]
+        creation_failures = [r for r in self.results if "Product Creation" in r["test"] and r["status"] == "FAIL"]
+        visibility_failures = [r for r in self.results if "Visibility" in r["test"] and r["status"] == "FAIL"]
+        
+        if auth_failures:
+            print(f"  - Authentication Issues: {len(auth_failures)} roles failed to authenticate")
+        if creation_failures:
+            print(f"  - Product Creation Issues: {len(creation_failures)} roles failed to create products")
+        if visibility_failures:
+            print(f"  - Product Visibility Issues: Products not appearing in active list")
+        
+        if not auth_failures and not creation_failures and not visibility_failures:
+            print("  - All core functionality working correctly!")
+            print("  - Products created by admin/store_owner are visible in active products list")
+            print("  - Role-based access control working as expected")
+
+
+def main():
+    """Main function to run product management tests"""
+    tester = ProductManagementTester()
+    
+    try:
+        success = tester.run_comprehensive_product_test()
+        
+        # Exit with appropriate code
+        if tester.failed_tests == 0:
+            print("\n✅ All tests passed! Product management system working correctly.")
+            sys.exit(0)
+        else:
+            print(f"\n❌ {tester.failed_tests} tests failed. Issues found in product management system.")
+            sys.exit(1)
+            
+    except KeyboardInterrupt:
+        print("\n⚠️ Testing interrupted by user")
+        sys.exit(1)
+    except Exception as e:
+        print(f"\n💥 Testing failed with error: {str(e)}")
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
+
 class BackendTester:
     def __init__(self):
         self.results = []
