@@ -127,10 +127,10 @@ class ProductService:
 @router.post("/", response_model=APIResponse)
 async def create_product(
     product_data: ProductCreate,
-    admin_user: UserInDB = Depends(get_admin_user),
+    admin_user: UserInDB = Depends(get_admin_or_manager_user),
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """Create new product (admin only)"""
+    """Create new product (admin, store_owner, or manager)"""
     try:
         product_service = ProductService(db)
         
