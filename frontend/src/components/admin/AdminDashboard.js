@@ -339,14 +339,18 @@ const StatsCard = ({ title, value, icon: Icon, color, change }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 lg:p-6">
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 truncate">
             {title}
           </p>
-          <p className="text-3xl font-bold text-gray-900 dark:text-white">
-            {value}
+          <p className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white">
+            {typeof value === 'string' && value.length > 10 ? (
+              <span className="text-xl lg:text-2xl">{value}</span>
+            ) : (
+              value
+            )}
           </p>
           {change && (
             <p className="text-sm text-green-600 dark:text-green-400 mt-1">
@@ -354,8 +358,8 @@ const StatsCard = ({ title, value, icon: Icon, color, change }) => {
             </p>
           )}
         </div>
-        <div className={`p-3 rounded-full ${colorClasses[color]}`}>
-          <Icon className="w-6 h-6" />
+        <div className={`p-2 lg:p-3 rounded-full ${colorClasses[color]} flex-shrink-0 ml-2`}>
+          <Icon className="w-5 h-5 lg:w-6 lg:h-6" />
         </div>
       </div>
     </div>
