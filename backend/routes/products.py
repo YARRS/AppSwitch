@@ -302,10 +302,10 @@ async def update_product(
 @router.delete("/{product_id}", response_model=APIResponse)
 async def delete_product(
     product_id: str,
-    admin_user: UserInDB = Depends(get_admin_user),
+    admin_user: UserInDB = Depends(get_admin_or_manager_user),
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """Delete product (admin only)"""
+    """Delete product (admin, store_owner, or manager)"""
     try:
         product_service = ProductService(db)
         
