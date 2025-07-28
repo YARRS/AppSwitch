@@ -49,6 +49,7 @@ const AdminDashboard = () => {
       tabs.push(
         { id: 'user-management', label: 'User Management', icon: Users },
         { id: 'products', label: 'Products', icon: Package },
+        { id: 'categories', label: 'Categories', icon: Tag },
         { id: 'orders', label: 'Orders', icon: ShoppingCart },
         { id: 'customers', label: 'Customers', icon: Users },
         { id: 'campaigns', label: 'Campaigns', icon: TrendingUp },
@@ -57,6 +58,7 @@ const AdminDashboard = () => {
     } else if (user?.role === 'admin' || user?.role === 'store_owner') {
       tabs.push(
         { id: 'products', label: 'Products', icon: Package },
+        { id: 'categories', label: 'Categories', icon: Tag },
         { id: 'orders', label: 'Orders', icon: ShoppingCart },
         { id: 'customers', label: 'Customers', icon: Users },
         { id: 'campaigns', label: 'Campaigns', icon: TrendingUp },
@@ -65,6 +67,7 @@ const AdminDashboard = () => {
     } else if (user?.role === 'sales_manager' || user?.role === 'marketing_manager') {
       tabs.push(
         { id: 'products', label: 'Products', icon: Package },
+        { id: 'categories', label: 'Categories', icon: Tag },
         { id: 'orders', label: 'Orders', icon: ShoppingCart },
         { id: 'customers', label: 'Customers', icon: Users },
         { id: 'campaigns', label: 'Campaigns', icon: TrendingUp }
