@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
 Backend API Testing Script for Vallmark Gift Articles E-commerce System
-Tests all API endpoints including inventory, campaigns, commissions, dashboard, and inquiries
-SPECIAL FOCUS: Vallmark branding verification and auto-seeding functionality testing
+SPECIAL FOCUS: Product Management System Testing
+Testing why products added by salesman or shop owner through admin dashboard 
+are not appearing on the products homepage.
 """
 
 import requests
