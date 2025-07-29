@@ -37,7 +37,7 @@ const ProductsPage = () => {
       if (priceRange.min) params.append('min_price', priceRange.min);
       if (priceRange.max) params.append('max_price', priceRange.max);
 
-      const response = await axios.get(`${API_BASE_URL}/api/products?${params}`);
+      const response = await axios.get(`${API_BASE_URL}/api/products/?${params}`);
       
       if (response.data.success) {
         setProducts(response.data.data || []);
