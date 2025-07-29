@@ -359,13 +359,28 @@ const ProductCard = ({ product, isAuthenticated }) => {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 ${
+      isNewProduct() ? 'relative' : ''
+    }`}>
+      {/* Animated Golden Border for New Products */}
+      {isNewProduct() && (
+        <div className="absolute inset-0 rounded-lg overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 rounded-lg border-4 border-transparent bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-400 animate-pulse"></div>
+          <div className="absolute inset-1 rounded-lg bg-white dark:bg-gray-800"></div>
+          {/* Rotating Golden Border Animation */}
+          <div className="absolute inset-0 rounded-lg">
+            <div className="absolute inset-0 rounded-lg border-4 border-transparent bg-gradient-conic from-yellow-400 via-orange-500 via-yellow-300 to-yellow-400 animate-spin-slow opacity-75"></div>
+            <div className="absolute inset-1 rounded-lg bg-white dark:bg-gray-800"></div>
+          </div>
+        </div>
+      )}
+      
       {/* Product Image */}
-      <div className="relative">
+      <div className="relative z-10">
         <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
           {product.images && product.images.length > 0 ? (
             <img
-              src={product.images[0]}
+              src={product.images[0].startsWith('data:') ? product.images[0] : `data:image/jpeg;base64,${product.images[0]}`}
               alt={product.name}
               className="w-full h-full object-cover"
             />
@@ -382,11 +397,11 @@ const ProductCard = ({ product, isAuthenticated }) => {
         </div>
         
         {/* Stock Status & New Badge */}
-        <div className="absolute top-2 right-2 flex flex-col gap-1">
+        <div className="absolute top-2 right-2 flex flex-col gap-1 z-20">
           {/* New Badge */}
           {isNewProduct() && (
-            <span className="px-2 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg animate-pulse">
-              NEW
+            <span className="px-2 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg animate-bounce">
+              ✨ NEW
             </span>
           )}
           
@@ -402,7 +417,7 @@ const ProductCard = ({ product, isAuthenticated }) => {
       </div>
 
       {/* Product Info */}
-      <div className="p-4">
+      <div className="p-4 relative z-10">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-1">
           {product.name}
         </h3>
@@ -412,9 +427,9 @@ const ProductCard = ({ product, isAuthenticated }) => {
         </p>
 
         {/* Features */}
-        {product.features && (
+        {product.features && Array.isArray(product.features) && product.features.length > 0 && (
           <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
-            {product.features}
+            {product.features.join(', ')}
           </p>
         )}
 
