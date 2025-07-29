@@ -108,6 +108,9 @@ module.exports = {
           '100%': { transform: 'rotate(360deg)' },
         },
       },
+      backgroundImage: {
+        'gradient-conic': 'conic-gradient(var(--tw-gradient-stops))',
+      },
     },
   },
   plugins: [
