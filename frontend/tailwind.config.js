@@ -79,6 +79,10 @@ module.exports = {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-out',
         'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'spin-slow': 'spin 3s linear infinite',
+        'bounce-slow': 'bounce 2s infinite',
+        'gradient-x': 'gradient-x 3s ease infinite',
+        'gradient-conic': 'gradient-conic 4s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
