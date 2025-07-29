@@ -56,11 +56,11 @@ class InquiryStatus(str, Enum):
 
 # Product category enum
 class ProductCategory(str, Enum):
-    SMART_SWITCH = "smart_switch"
-    DIMMER_SWITCH = "dimmer_switch"
-    MOTION_SENSOR = "motion_sensor"
-    SMART_PLUG = "smart_plug"
-    GATEWAY = "gateway"
+    HOME_DECOR = "home_decor"
+    PERSONALIZED_GIFTS = "personalized_gifts"
+    JEWELRY = "jewelry"
+    KEEPSAKES = "keepsakes"
+    SPECIAL_OCCASIONS = "special_occasions"
     ACCESSORIES = "accessories"
 
 # Base models
