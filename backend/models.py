@@ -274,7 +274,7 @@ class CommissionRuleUpdate(BaseModel):
     effective_until: Optional[datetime] = None
 
 class CommissionRuleInDB(CommissionRuleBase, BaseDocument):
-    created_by: str
+    created_by: str  # Will be set in backend
     usage_count: int = 0  # How many times this rule has been applied
     total_commission_paid: float = 0.0  # Total commission paid using this rule
     
