@@ -35,6 +35,15 @@ class ProductService:
             product_data["assigned_to"] = user_id
         
         product_data["last_updated_by"] = user_id
+        
+        # Auto-assignment logic: If salesman creates product, find their store owner
+        if not product_data.get("assigned_by"):
+            user_doc = await self.users_collection.find_one({"id": user_id})
+            if user_doc and user_doc.get("role") == "salesperson" and user_doc.get("store_owner_id"):
+                product_data["assigned_by"] = user_doc["store_owner_id"]
+            else:
+                product_data["assigned_by"] = user_id
+        
         product = ProductInDB(**product_data)
         product_dict = product.dict()
         
