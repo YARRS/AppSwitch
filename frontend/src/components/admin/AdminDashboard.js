@@ -54,6 +54,7 @@ const AdminDashboard = () => {
         { id: 'orders', label: 'Orders', icon: ShoppingCart },
         { id: 'customers', label: 'Customers', icon: Users },
         { id: 'campaigns', label: 'Campaigns', icon: TrendingUp },
+        { id: 'commissions', label: 'Commissions', icon: DollarSign },
         { id: 'settings', label: 'Settings', icon: Settings }
       );
     } else if (user?.role === 'admin' || user?.role === 'store_owner') {
@@ -63,6 +64,7 @@ const AdminDashboard = () => {
         { id: 'orders', label: 'Orders', icon: ShoppingCart },
         { id: 'customers', label: 'Customers', icon: Users },
         { id: 'campaigns', label: 'Campaigns', icon: TrendingUp },
+        { id: 'commissions', label: 'Commissions', icon: DollarSign },
         { id: 'settings', label: 'Settings', icon: Settings }
       );
     } else if (user?.role === 'sales_manager' || user?.role === 'marketing_manager') {
@@ -71,12 +73,14 @@ const AdminDashboard = () => {
         { id: 'categories', label: 'Categories', icon: Tag },
         { id: 'orders', label: 'Orders', icon: ShoppingCart },
         { id: 'customers', label: 'Customers', icon: Users },
-        { id: 'campaigns', label: 'Campaigns', icon: TrendingUp }
+        { id: 'campaigns', label: 'Campaigns', icon: TrendingUp },
+        { id: 'commissions', label: 'Commissions', icon: DollarSign }
       );
     } else if (user?.role === 'salesperson') {
       tabs.push(
         { id: 'products', label: 'Products', icon: Package },
-        { id: 'orders', label: 'Orders', icon: ShoppingCart }
+        { id: 'orders', label: 'Orders', icon: ShoppingCart },
+        { id: 'commissions', label: 'My Commissions', icon: DollarSign }
       );
     }
 
