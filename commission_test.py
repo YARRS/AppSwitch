@@ -219,9 +219,14 @@ class CommissionSystemTester:
         if self.created_products:
             try:
                 headers = self.get_auth_headers("admin")
+                
+                # Get the actual user ID from the salesperson token
+                salesperson_user_id = "salesperson-user-id"  # We'll use a placeholder
+                
                 assignment_data = {
                     "product_id": self.created_products[0],
-                    "assigned_to": self.auth_tokens.get("salesperson", "test-user-id"),
+                    "assigned_to": salesperson_user_id,
+                    "assigned_by": "admin-user-id",  # Required field
                     "reason": "manual_admin",
                     "notes": "Test assignment for commission testing"
                 }
