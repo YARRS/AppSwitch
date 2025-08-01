@@ -109,7 +109,8 @@ class CommissionSystemTester:
                 "min_order_amount": 100.0,
                 "max_commission_amount": 500.0,
                 "priority": 10,
-                "is_active": True
+                "is_active": True,
+                "created_by": "admin-user-id"  # Required field
             }
             
             response = requests.post(f"{API_BASE}/commissions/rules", json=rule_data, headers=headers, timeout=30)
