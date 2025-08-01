@@ -202,8 +202,10 @@ class ProductResponse(ProductBase, BaseDocument):
     is_in_stock: bool
     uploaded_by: Optional[str] = None
     assigned_to: Optional[str] = None
+    assigned_by: Optional[str] = None
     assigned_salesman_name: Optional[str] = None
     uploader_name: Optional[str] = None
+    assigned_by_name: Optional[str] = None
     total_earnings: float = 0.0
     last_sale_date: Optional[datetime] = None
     
