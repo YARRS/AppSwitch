@@ -203,22 +203,28 @@ async def logout(current_user: UserInDB = Depends(get_current_active_user)):
 async def get_all_users(
     page: int = 1,
     per_page: int = 20,
+    role: Optional[str] = None,
     admin_user: UserInDB = Depends(get_admin_user),
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """Get all users (admin only)"""
+    """Get all users (admin only) - supports filtering by role"""
     try:
         users_collection = db.users
+        
+        # Build query
+        query = {}
+        if role:
+            query["role"] = role
         
         # Calculate skip value
         skip = (page - 1) * per_page
         
         # Get users with pagination
-        cursor = users_collection.find({}).skip(skip).limit(per_page)
+        cursor = users_collection.find(query).skip(skip).limit(per_page)
         users = await cursor.to_list(length=per_page)
         
         # Get total count
-        total = await users_collection.count_documents({})
+        total = await users_collection.count_documents(query)
         
         # Convert to response format
         user_responses = []
@@ -241,13 +247,7 @@ async def get_all_users(
         return APIResponse(
             success=True,
             message="Users retrieved successfully",
-            data={
-                "users": user_responses,
-                "total": total,
-                "page": page,
-                "per_page": per_page,
-                "total_pages": (total + per_page - 1) // per_page
-            }
+            data=user_responses
         )
         
     except Exception as e:
