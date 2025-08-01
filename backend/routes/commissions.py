@@ -428,6 +428,7 @@ class CommissionService:
     async def analyze_product_performance(self, days_back: int = 30) -> List[ProductPerformanceMetrics]:
         """Analyze product performance for reallocation decisions"""
         start_date = datetime.utcnow() - timedelta(days=days_back)
+        current_date = datetime.utcnow()
         
         # Get product performance metrics
         pipeline = [
@@ -464,7 +465,7 @@ class CommissionService:
                     "commission_earned": {"$sum": "$commission_data.commission_amount"},
                     "days_since_update": {
                         "$divide": [
-                            {"$subtract": [datetime.utcnow(), "$updated_at"]},
+                            {"$subtract": [current_date, "$updated_at"]},
                             86400000  # milliseconds in a day
                         ]
                     }
@@ -495,9 +496,12 @@ class CommissionService:
             }
         ]
         
-        results = await self.products_collection.aggregate(pipeline).to_list(length=1000)
-        
-        return [ProductPerformanceMetrics(**result) for result in results]
+        try:
+            results = await self.products_collection.aggregate(pipeline).to_list(length=1000)
+            return [ProductPerformanceMetrics(**result) for result in results]
+        except Exception as e:
+            # Return empty list if aggregation fails
+            return []
     
     async def get_reallocation_recommendations(
         self,
