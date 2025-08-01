@@ -330,6 +330,16 @@ const CommissionManagement = () => {
     }
   };
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'pending': return 'text-yellow-600 bg-yellow-100';
+      case 'approved': return 'text-green-600 bg-green-100';
+      case 'paid': return 'text-blue-600 bg-blue-100';
+      case 'cancelled': return 'text-red-600 bg-red-100';
+      default: return 'text-gray-600 bg-gray-100';
+    }
+  };
+
   const tabs = [
     { id: 'rules', label: 'Commission Rules', icon: Settings },
     { id: 'earnings', label: 'Earnings', icon: DollarSign },
