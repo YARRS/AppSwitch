@@ -12,6 +12,7 @@ import CategoryManagement from './CategoryManagement';
 import OrderManagement from './OrderManagement';
 import CustomerManagement from './CustomerManagement';
 import CampaignManagement from './CampaignManagement';
+import CommissionManagement from './CommissionManagement';
 import SystemSettings from './SystemSettings';
 import SuperAdminUserManagement from './SuperAdminUserManagement';
 
