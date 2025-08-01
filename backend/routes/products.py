@@ -530,7 +530,8 @@ async def update_product(
         # Create response
         product_response = ProductResponse(
             **enriched_product,
-            is_in_stock=updated_product.stock_quantity > 0
+            is_in_stock=updated_product.stock_quantity > 0,
+            assigned_by_name=enriched_product.get("assigned_by_name")
         )
         
         return APIResponse(
