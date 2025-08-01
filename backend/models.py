@@ -226,6 +226,7 @@ class ProductAssignmentUpdate(BaseModel):
     end_date: Optional[datetime] = None
 
 class ProductAssignmentInDB(ProductAssignmentBase, BaseDocument):
+    assigned_by: str  # Will be set in backend
     start_date: datetime = None
     end_date: Optional[datetime] = None
     performance_data: Dict[str, Any] = {}  # Sales, revenue, etc.
