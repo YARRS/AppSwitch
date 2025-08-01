@@ -164,6 +164,7 @@ const AdminDashboard = () => {
           {activeTab === 'orders' && <OrderManagement />}
           {activeTab === 'customers' && <CustomerManagement />}
           {activeTab === 'campaigns' && <CampaignManagement />}
+          {activeTab === 'commissions' && <CommissionManagement />}
           {activeTab === 'settings' && <SystemSettings />}
         </div>
       </div>
