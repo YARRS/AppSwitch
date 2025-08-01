@@ -145,7 +145,7 @@ class ProductService:
         }
     
     async def get_products_with_user_details(self, products: List[dict]) -> List[dict]:
-        """Enrich products with user details for assigned_to and uploaded_by"""
+        """Enrich products with user details for assigned_to, uploaded_by, and assigned_by"""
         # Get unique user IDs
         user_ids = set()
         for product in products:
@@ -153,6 +153,8 @@ class ProductService:
                 user_ids.add(product["assigned_to"])
             if product.get("uploaded_by"):
                 user_ids.add(product["uploaded_by"])
+            if product.get("assigned_by"):
+                user_ids.add(product["assigned_by"])
         
         # Get user details
         user_details = {}
@@ -173,9 +175,11 @@ class ProductService:
         for product in products:
             assigned_to = product.get("assigned_to")
             uploaded_by = product.get("uploaded_by")
+            assigned_by = product.get("assigned_by")
             
             product["assigned_salesman_name"] = None
             product["uploader_name"] = None
+            product["assigned_by_name"] = None
             
             if assigned_to and assigned_to in user_details:
                 user = user_details[assigned_to]
@@ -184,6 +188,10 @@ class ProductService:
             if uploaded_by and uploaded_by in user_details:
                 user = user_details[uploaded_by]
                 product["uploader_name"] = user.get("full_name") or user["username"]
+            
+            if assigned_by and assigned_by in user_details:
+                user = user_details[assigned_by]
+                product["assigned_by_name"] = user.get("full_name") or user["username"]
             
             enriched_products.append(product)
         
