@@ -260,7 +260,7 @@ class CommissionRuleBase(BaseModel):
     effective_until: Optional[datetime] = None
 
 class CommissionRuleCreate(CommissionRuleBase):
-    created_by: str  # Admin who created the rule
+    pass  # created_by will be set automatically in backend
 
 class CommissionRuleUpdate(BaseModel):
     rule_name: Optional[str] = None
