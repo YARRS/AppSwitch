@@ -124,6 +124,7 @@ class UserInDB(UserBase, BaseDocument):
     password_hash: str
     email_verified: bool = False
     last_login: Optional[datetime] = None
+    store_owner_id: Optional[str] = None  # For salespeople, ID of their store owner
 
 class UserResponse(UserBase, BaseDocument):
     email_verified: bool
