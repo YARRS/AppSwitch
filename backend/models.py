@@ -212,7 +212,7 @@ class ProductResponse(ProductBase, BaseDocument):
 class ProductAssignmentBase(BaseModel):
     product_id: str
     assigned_to: str  # User ID of salesman
-    assigned_by: str  # User ID of admin who made assignment
+    assigned_by: Optional[str] = None  # User ID of admin who made assignment (set automatically)
     reason: ReallocationReason
     status: ProductAssignmentStatus = ProductAssignmentStatus.ACTIVE
     notes: Optional[str] = None
