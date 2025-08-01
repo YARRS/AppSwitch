@@ -63,6 +63,21 @@ class ProductCategory(str, Enum):
     SPECIAL_OCCASIONS = "special_occasions"
     ACCESSORIES = "accessories"
 
+# Product assignment status enum
+class ProductAssignmentStatus(str, Enum):
+    ACTIVE = "active"
+    REASSIGNED = "reassigned"
+    REVOKED = "revoked"
+    PENDING = "pending"
+
+# Reallocation reason enum
+class ReallocationReason(str, Enum):
+    TIME_BASED = "time_based"
+    PERFORMANCE_BASED = "performance_based"
+    MANUAL_ADMIN = "manual_admin"
+    INVENTORY_ISSUES = "inventory_issues"
+    HIGH_PERFORMER_ROTATION = "high_performer_rotation"
+
 # Base models
 class BaseDocument(BaseModel):
     id: str = None
@@ -133,7 +148,7 @@ class ProductBase(BaseModel):
     price: float
     discount_price: Optional[float] = None
     sku: str
-    brand: str = "SmartSwitch"
+    brand: str = "Vallmark"
     specifications: Dict[str, Any] = {}
     features: List[str] = []
     images: List[str] = []  # Base64 encoded images
@@ -143,7 +158,9 @@ class ProductBase(BaseModel):
     min_stock_level: int = 5
 
 class ProductCreate(ProductBase):
-    pass
+    # Fields for salesman assignment
+    uploaded_by: Optional[str] = None  # User ID of the salesman who uploaded
+    assigned_to: Optional[str] = None  # User ID of the salesman assigned to manage
 
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
@@ -158,12 +175,21 @@ class ProductUpdate(BaseModel):
     is_active: Optional[bool] = None
     stock_quantity: Optional[int] = None
     min_stock_level: Optional[int] = None
+    # Assignment fields
+    assigned_to: Optional[str] = None
 
 class ProductInDB(ProductBase, BaseDocument):
     views: int = 0
     sales_count: int = 0
     rating: float = 0.0
     review_count: int = 0
+    # Enhanced fields for salesman assignment
+    uploaded_by: Optional[str] = None  # User ID of the salesman who uploaded
+    assigned_to: Optional[str] = None  # Current assigned salesman
+    last_updated_by: Optional[str] = None  # Last person to update product
+    assignment_history: List[str] = []  # List of assignment record IDs
+    total_earnings: float = 0.0  # Total commission earned from this product
+    last_sale_date: Optional[datetime] = None  # Last time this product was sold
 
 class ProductResponse(ProductBase, BaseDocument):
     views: int
@@ -171,10 +197,132 @@ class ProductResponse(ProductBase, BaseDocument):
     rating: float
     review_count: int
     is_in_stock: bool
+    uploaded_by: Optional[str] = None
+    assigned_to: Optional[str] = None
+    assigned_salesman_name: Optional[str] = None
+    uploader_name: Optional[str] = None
+    total_earnings: float = 0.0
+    last_sale_date: Optional[datetime] = None
     
     @validator('is_in_stock', pre=True, always=True)
     def calculate_stock_status(cls, v, values):
         return values.get('stock_quantity', 0) > 0
+
+# Product Assignment History Models
+class ProductAssignmentBase(BaseModel):
+    product_id: str
+    assigned_to: str  # User ID of salesman
+    assigned_by: str  # User ID of admin who made assignment
+    reason: ReallocationReason
+    status: ProductAssignmentStatus = ProductAssignmentStatus.ACTIVE
+    notes: Optional[str] = None
+
+class ProductAssignmentCreate(ProductAssignmentBase):
+    pass
+
+class ProductAssignmentUpdate(BaseModel):
+    status: Optional[ProductAssignmentStatus] = None
+    notes: Optional[str] = None
+    end_date: Optional[datetime] = None
+
+class ProductAssignmentInDB(ProductAssignmentBase, BaseDocument):
+    start_date: datetime = None
+    end_date: Optional[datetime] = None
+    performance_data: Dict[str, Any] = {}  # Sales, revenue, etc.
+    
+    def __init__(self, **data):
+        if not data.get('start_date'):
+            data['start_date'] = datetime.utcnow()
+        super().__init__(**data)
+
+class ProductAssignmentResponse(ProductAssignmentBase, BaseDocument):
+    start_date: datetime
+    end_date: Optional[datetime] = None
+    assigned_to_name: Optional[str] = None
+    assigned_by_name: Optional[str] = None
+    product_name: Optional[str] = None
+    performance_data: Dict[str, Any] = {}
+
+# Enhanced Commission Management Models
+class CommissionRuleBase(BaseModel):
+    rule_name: str
+    user_id: Optional[str] = None  # Specific user (if individual rule)
+    user_role: Optional[UserRole] = None  # Role-based rule
+    product_id: Optional[str] = None  # Individual product rule
+    product_category: Optional[ProductCategory] = None  # Category-based rule
+    commission_type: str  # "percentage" or "fixed"
+    commission_value: float
+    min_order_amount: Optional[float] = None
+    max_commission_amount: Optional[float] = None
+    priority: int = 0  # Higher priority rules take precedence
+    is_active: bool = True
+    effective_from: datetime = None
+    effective_until: Optional[datetime] = None
+
+class CommissionRuleCreate(CommissionRuleBase):
+    created_by: str  # Admin who created the rule
+
+class CommissionRuleUpdate(BaseModel):
+    rule_name: Optional[str] = None
+    commission_type: Optional[str] = None
+    commission_value: Optional[float] = None
+    min_order_amount: Optional[float] = None
+    max_commission_amount: Optional[float] = None
+    priority: Optional[int] = None
+    is_active: Optional[bool] = None
+    effective_from: Optional[datetime] = None
+    effective_until: Optional[datetime] = None
+
+class CommissionRuleInDB(CommissionRuleBase, BaseDocument):
+    created_by: str
+    usage_count: int = 0  # How many times this rule has been applied
+    total_commission_paid: float = 0.0  # Total commission paid using this rule
+    
+    def __init__(self, **data):
+        if not data.get('effective_from'):
+            data['effective_from'] = datetime.utcnow()
+        super().__init__(**data)
+
+class CommissionRuleResponse(CommissionRuleBase, BaseDocument):
+    created_by: str
+    created_by_name: Optional[str] = None
+    user_name: Optional[str] = None
+    product_name: Optional[str] = None
+    usage_count: int = 0
+    total_commission_paid: float = 0.0
+
+class CommissionEarningBase(BaseModel):
+    user_id: str
+    order_id: str
+    product_id: str
+    commission_rule_id: str
+    order_amount: float
+    commission_amount: float
+    commission_rate: float
+    commission_type: str  # "percentage" or "fixed"
+    status: CommissionStatus = CommissionStatus.PENDING
+    approved_by: Optional[str] = None
+    paid_at: Optional[datetime] = None
+
+class CommissionEarningCreate(CommissionEarningBase):
+    pass
+
+class CommissionEarningUpdate(BaseModel):
+    status: Optional[CommissionStatus] = None
+    approved_by: Optional[str] = None
+    notes: Optional[str] = None
+
+class CommissionEarningInDB(CommissionEarningBase, BaseDocument):
+    notes: Optional[str] = None
+    payment_reference: Optional[str] = None
+
+class CommissionEarningResponse(CommissionEarningBase, BaseDocument):
+    notes: Optional[str] = None
+    payment_reference: Optional[str] = None
+    user_name: Optional[str] = None
+    product_name: Optional[str] = None
+    order_number: Optional[str] = None
+    approved_by_name: Optional[str] = None
 
 # Shopping cart models
 class CartItem(BaseModel):
@@ -371,60 +519,6 @@ class CampaignInDB(CampaignBase, BaseDocument):
 class CampaignResponse(CampaignBase, BaseDocument):
     pass
 
-# Commission Management Models
-class CommissionRuleBase(BaseModel):
-    user_id: str
-    user_role: UserRole
-    commission_type: str  # "percentage" or "fixed"
-    commission_value: float
-    min_order_amount: Optional[float] = None
-    max_commission_amount: Optional[float] = None
-    product_categories: List[str] = []  # Empty means all categories
-    is_active: bool = True
-
-class CommissionRuleCreate(CommissionRuleBase):
-    pass
-
-class CommissionRuleUpdate(BaseModel):
-    commission_type: Optional[str] = None
-    commission_value: Optional[float] = None
-    min_order_amount: Optional[float] = None
-    max_commission_amount: Optional[float] = None
-    product_categories: Optional[List[str]] = None
-    is_active: Optional[bool] = None
-
-class CommissionRuleInDB(CommissionRuleBase, BaseDocument):
-    pass
-
-class CommissionRuleResponse(CommissionRuleBase, BaseDocument):
-    pass
-
-class CommissionEarningBase(BaseModel):
-    user_id: str
-    order_id: str
-    product_id: str
-    commission_rule_id: str
-    order_amount: float
-    commission_amount: float
-    commission_rate: float
-    status: CommissionStatus = CommissionStatus.PENDING
-    approved_by: Optional[str] = None
-    paid_at: Optional[datetime] = None
-
-class CommissionEarningCreate(CommissionEarningBase):
-    pass
-
-class CommissionEarningUpdate(BaseModel):
-    status: Optional[CommissionStatus] = None
-    approved_by: Optional[str] = None
-    notes: Optional[str] = None
-
-class CommissionEarningInDB(CommissionEarningBase, BaseDocument):
-    notes: Optional[str] = None
-
-class CommissionEarningResponse(CommissionEarningBase, BaseDocument):
-    notes: Optional[str] = None
-
 # Dashboard Analytics Models
 class DashboardStatsBase(BaseModel):
     total_products: int = 0
@@ -465,3 +559,39 @@ class MarketingManagerDashboard(DashboardStatsBase):
     conversion_rate: float = 0.0
     customer_acquisition: int = 0
     email_campaigns: int = 0
+
+# Product Reallocation Analytics Models
+class ProductPerformanceMetrics(BaseModel):
+    product_id: str
+    assigned_to: str
+    sales_count: int = 0
+    revenue: float = 0.0
+    commission_earned: float = 0.0
+    last_update: Optional[datetime] = None
+    days_since_update: int = 0
+    performance_score: float = 0.0  # Calculated score for reallocation decisions
+
+class ReallocationCandidate(BaseModel):
+    product_id: str
+    current_assignee: str
+    suggested_assignee: Optional[str] = None
+    reason: ReallocationReason
+    performance_metrics: ProductPerformanceMetrics
+    priority_score: float = 0.0
+
+class ReallocationRecommendation(BaseModel):
+    candidates: List[ReallocationCandidate]
+    generated_at: datetime
+    criteria: Dict[str, Any]  # Criteria used for recommendations
+    total_candidates: int = 0
+
+# Bulk Operations Models
+class BulkCommissionRuleUpdate(BaseModel):
+    rule_ids: List[str]
+    updates: CommissionRuleUpdate
+
+class BulkProductReassignment(BaseModel):
+    product_ids: List[str]
+    new_assignee: str
+    reason: ReallocationReason
+    notes: Optional[str] = None
