@@ -330,7 +330,8 @@ async def get_products(
                 **product.dict(),
                 is_in_stock=product.stock_quantity > 0,
                 assigned_salesman_name=product_doc.get("assigned_salesman_name"),
-                uploader_name=product_doc.get("uploader_name")
+                uploader_name=product_doc.get("uploader_name"),
+                assigned_by_name=product_doc.get("assigned_by_name")
             ).dict())
         
         return PaginatedResponse(
