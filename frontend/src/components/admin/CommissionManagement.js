@@ -661,7 +661,11 @@ const CommissionEarningsTab = ({ earnings, onUpdateStatus, filters, onFiltersCha
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  getStatusColor(earning.status)
+                  earning.status === 'pending' ? 'text-yellow-600 bg-yellow-100' :
+                  earning.status === 'approved' ? 'text-green-600 bg-green-100' :
+                  earning.status === 'paid' ? 'text-blue-600 bg-blue-100' :
+                  earning.status === 'cancelled' ? 'text-red-600 bg-red-100' :
+                  'text-gray-600 bg-gray-100'
                 }`}>
                   {earning.status}
                 </span>
