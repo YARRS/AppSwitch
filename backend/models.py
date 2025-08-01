@@ -188,6 +188,7 @@ class ProductInDB(ProductBase, BaseDocument):
     # Enhanced fields for salesman assignment
     uploaded_by: Optional[str] = None  # User ID of the salesman who uploaded
     assigned_to: Optional[str] = None  # Current assigned salesman
+    assigned_by: Optional[str] = None  # User ID who assigned the product (usually store owner)
     last_updated_by: Optional[str] = None  # Last person to update product
     assignment_history: List[str] = []  # List of assignment record IDs
     total_earnings: float = 0.0  # Total commission earned from this product
