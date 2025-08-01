@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import Optional, List
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from models import (
     ProductCreate, ProductUpdate, ProductResponse, ProductInDB,
