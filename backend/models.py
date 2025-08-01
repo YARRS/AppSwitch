@@ -129,6 +129,7 @@ class UserInDB(UserBase, BaseDocument):
 class UserResponse(UserBase, BaseDocument):
     email_verified: bool
     last_login: Optional[datetime] = None
+    store_owner_id: Optional[str] = None  # For salespeople, ID of their store owner
 
 # Authentication models
 class Token(BaseModel):
