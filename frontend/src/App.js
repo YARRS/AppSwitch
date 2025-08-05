@@ -59,40 +59,42 @@ function App() {
 
   return (
     <AuthProvider>
-      <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
-        <Router>
-          <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
-            <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-            <main className="relative">
-              <Routes>
-                <Route path="/" element={<ProductsPage />} />
-                <Route path="/products/:id" element={<ProductDetail />} />
-                <Route path="/about" element={<AboutPage />} />
-                <Route path="/contact" element={<ContactPage />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route 
-                  path="/profile" 
-                  element={
-                    <ProtectedRoute>
-                      <UserProfile />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin" 
-                  element={
-                    <AdminRoute>
-                      <AdminDashboard />
-                    </AdminRoute>
-                  } 
-                />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-        </Router>
-      </ThemeContext.Provider>
+      <CartProvider>
+        <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
+          <Router>
+            <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
+              <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
+              <main className="relative">
+                <Routes>
+                  <Route path="/" element={<ProductsPage />} />
+                  <Route path="/products/:id" element={<ProductDetail />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route 
+                    path="/profile" 
+                    element={
+                      <ProtectedRoute>
+                        <UserProfile />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/admin" 
+                    element={
+                      <AdminRoute>
+                        <AdminDashboard />
+                      </AdminRoute>
+                    } 
+                  />
+                </Routes>
+              </main>
+              <Footer />
+            </div>
+          </Router>
+        </ThemeContext.Provider>
+      </CartProvider>
     </AuthProvider>
   );
 }
