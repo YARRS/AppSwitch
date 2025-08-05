@@ -432,10 +432,10 @@ async def get_my_products(
 @router.get("/{product_id}", response_model=APIResponse)
 async def get_product(
     product_id: str,
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: Optional[UserInDB] = Depends(get_optional_current_user),
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """Get product by ID"""
+    """Get product by ID - accessible to guests and authenticated users"""
     try:
         product_service = ProductService(db)
         
@@ -448,7 +448,10 @@ async def get_product(
         
         # Check if user can view this product
         can_view = True
-        if current_user.role == "salesperson":
+        if current_user is None:
+            # Guests can only view active products
+            can_view = product.is_active
+        elif current_user.role == "salesperson":
             can_view = (product.assigned_to == current_user.id or 
                        product.uploaded_by == current_user.id or
                        product.is_active)  # Allow viewing active products for sales
