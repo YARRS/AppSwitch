@@ -282,7 +282,7 @@ const ProductsPage = () => {
       {/* Products Grid */}
       {products.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6 mb-8">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} isAuthenticated={isAuthenticated} />
             ))}
@@ -290,20 +290,59 @@ const ProductsPage = () => {
 
           {/* Pagination */}
           {pagination.total_pages > 1 && (
-            <div className="flex justify-center space-x-2">
-              {Array.from({ length: pagination.total_pages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  onClick={() => fetchProducts(page)}
-                  className={`px-3 py-2 rounded-lg ${
-                    page === pagination.page
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                  }`}
-                >
-                  {page}
-                </button>
-              ))}
+            <div className="flex justify-center items-center space-x-2 flex-wrap gap-2">
+              <button
+                onClick={() => fetchProducts(Math.max(1, pagination.page - 1))}
+                disabled={pagination.page === 1}
+                className="px-3 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              
+              {/* Page Numbers - Show limited on mobile */}
+              <div className="hidden sm:flex space-x-1">
+                {Array.from({ length: Math.min(pagination.total_pages, 7) }, (_, i) => {
+                  let page;
+                  if (pagination.total_pages <= 7) {
+                    page = i + 1;
+                  } else if (pagination.page <= 4) {
+                    page = i + 1;
+                  } else if (pagination.page >= pagination.total_pages - 3) {
+                    page = pagination.total_pages - 6 + i;
+                  } else {
+                    page = pagination.page - 3 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => fetchProducts(page)}
+                      className={`px-3 py-2 rounded-lg ${
+                        page === pagination.page
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  );
+                })}
+              </div>
+              
+              {/* Mobile page indicator */}
+              <div className="sm:hidden px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  Page {pagination.page} of {pagination.total_pages}
+                </span>
+              </div>
+              
+              <button
+                onClick={() => fetchProducts(Math.min(pagination.total_pages, pagination.page + 1))}
+                disabled={pagination.page === pagination.total_pages}
+                className="px-3 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
             </div>
           )}
         </>
