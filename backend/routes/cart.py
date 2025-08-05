@@ -258,7 +258,7 @@ class CartService:
         return updated_cart
     
     async def remove_item_from_cart(self, user_id: str, product_id: str) -> CartInDB:
-        """Remove item from cart"""
+        """Remove item from user cart"""
         cart = await self.get_cart(user_id)
         if not cart:
             raise HTTPException(
@@ -272,8 +272,23 @@ class CartService:
         # Update cart
         return await self.update_cart(cart)
     
+    async def remove_item_from_guest_cart(self, session_id: str, product_id: str) -> GuestCart:
+        """Remove item from guest cart"""
+        cart = await self.get_guest_cart(session_id)
+        if not cart:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cart not found"
+            )
+        
+        # Remove item
+        cart.items = [item for item in cart.items if item.product_id != product_id]
+        
+        # Update cart
+        return await self.update_guest_cart(cart)
+    
     async def update_item_quantity(self, user_id: str, product_id: str, quantity: int) -> CartInDB:
-        """Update item quantity in cart"""
+        """Update item quantity in user cart"""
         cart = await self.get_cart(user_id)
         if not cart:
             raise HTTPException(
@@ -314,14 +329,65 @@ class CartService:
         # Update cart
         return await self.update_cart(cart)
     
+    async def update_guest_item_quantity(self, session_id: str, product_id: str, quantity: int) -> GuestCart:
+        """Update item quantity in guest cart"""
+        cart = await self.get_guest_cart(session_id)
+        if not cart:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cart not found"
+            )
+        
+        # Find item
+        item = None
+        for cart_item in cart.items:
+            if cart_item.product_id == product_id:
+                item = cart_item
+                break
+        
+        if not item:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Item not found in cart"
+            )
+        
+        # Check stock
+        product_doc = await self.products_collection.find_one({"id": product_id})
+        if product_doc:
+            product = ProductInDB(**product_doc)
+            if quantity > product.stock_quantity:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Insufficient stock"
+                )
+        
+        # Update quantity
+        if quantity <= 0:
+            # Remove item if quantity is 0 or negative
+            cart.items = [item for item in cart.items if item.product_id != product_id]
+        else:
+            item.quantity = quantity
+        
+        # Update cart
+        return await self.update_guest_cart(cart)
+    
     async def clear_cart(self, user_id: str) -> CartInDB:
-        """Clear all items from cart"""
+        """Clear all items from user cart"""
         cart = await self.get_cart(user_id)
         if not cart:
             cart = await self.create_cart(user_id)
         
         cart.items = []
         return await self.update_cart(cart)
+    
+    async def clear_guest_cart(self, session_id: str) -> GuestCart:
+        """Clear all items from guest cart"""
+        cart = await self.get_guest_cart(session_id)
+        if not cart:
+            cart = await self.create_guest_cart(session_id)
+        
+        cart.items = []
+        return await self.update_guest_cart(cart)
 
 @router.get("/", response_model=APIResponse)
 async def get_cart(
