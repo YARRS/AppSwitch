@@ -387,10 +387,12 @@ const QuickActionButton = ({ title, description, icon: Icon, color }) => {
   };
 
   return (
-    <button className={`p-3 lg:p-4 rounded-lg transition-colors ${colorClasses[color]}`}>
-      <Icon className="w-6 h-6 lg:w-8 lg:h-8 mx-auto mb-2" />
-      <h4 className="font-semibold text-xs lg:text-sm">{title}</h4>
-      <p className="text-xs opacity-75 hidden sm:block">{description}</p>
+    <button className={`p-4 lg:p-4 rounded-lg transition-colors text-center min-h-[80px] flex flex-col items-center justify-center space-y-2 ${colorClasses[color]}`}>
+      <Icon className="w-6 h-6 lg:w-8 lg:h-8" />
+      <div>
+        <h4 className="font-semibold text-xs lg:text-sm">{title}</h4>
+        <p className="text-xs opacity-75 hidden lg:block mt-1">{description}</p>
+      </div>
     </button>
   );
 };
