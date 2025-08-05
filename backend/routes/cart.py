@@ -325,25 +325,47 @@ class CartService:
 
 @router.get("/", response_model=APIResponse)
 async def get_cart(
-    current_user: UserInDB = Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends()
+    session_id: Optional[str] = Header(None, alias="X-Session-Id"),
+    current_user: Optional[UserInDB] = Depends(get_optional_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """Get user's shopping cart"""
+    """Get cart - works for both authenticated users and guests"""
     try:
         cart_service = CartService(db)
         
-        cart = await cart_service.get_cart(current_user.id)
-        if not cart:
-            cart = await cart_service.create_cart(current_user.id)
-        
-        cart_response = CartResponse(
-            **cart.dict()
-        )
+        if current_user:
+            # Authenticated user cart
+            cart = await cart_service.get_cart(current_user.id)
+            if not cart:
+                cart = await cart_service.create_cart(current_user.id)
+            
+            cart_response = CartResponse(**cart.dict())
+            
+        else:
+            # Guest cart
+            if not session_id:
+                # Return empty cart if no session ID
+                return APIResponse(
+                    success=True,
+                    message="Empty cart - no session ID provided",
+                    data={"items": [], "total_amount": 0.0, "total_items": 0}
+                )
+            
+            guest_cart = await cart_service.get_guest_cart(session_id)
+            if not guest_cart:
+                guest_cart = await cart_service.create_guest_cart(session_id)
+            
+            cart_response = {
+                "items": guest_cart.items,
+                "total_amount": guest_cart.total_amount,
+                "total_items": guest_cart.total_items,
+                "session_id": guest_cart.session_id
+            }
         
         return APIResponse(
             success=True,
             message="Cart retrieved successfully",
-            data=cart_response.dict()
+            data=cart_response if current_user else cart_response
         )
         
     except Exception as e:
@@ -356,25 +378,49 @@ async def get_cart(
 async def add_to_cart(
     product_id: str,
     quantity: int = 1,
-    current_user: UserInDB = Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends()
+    session_id: Optional[str] = Header(None, alias="X-Session-Id"),
+    current_user: Optional[UserInDB] = Depends(get_optional_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """Add item to cart"""
+    """Add item to cart - works for both authenticated users and guests"""
     try:
         cart_service = CartService(db)
         
-        cart = await cart_service.add_item_to_cart(
-            current_user.id,
-            product_id,
-            quantity
-        )
-        
-        cart_response = CartResponse(**cart.dict())
+        if current_user:
+            # Authenticated user
+            cart = await cart_service.add_item_to_cart(
+                current_user.id,
+                product_id,
+                quantity
+            )
+            
+            cart_response = CartResponse(**cart.dict())
+            
+        else:
+            # Guest user
+            if not session_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Session ID required for guest cart"
+                )
+            
+            guest_cart = await cart_service.add_item_to_guest_cart(
+                session_id,
+                product_id,
+                quantity
+            )
+            
+            cart_response = {
+                "items": guest_cart.items,
+                "total_amount": guest_cart.total_amount,
+                "total_items": guest_cart.total_items,
+                "session_id": guest_cart.session_id
+            }
         
         return APIResponse(
             success=True,
             message="Item added to cart successfully",
-            data=cart_response.dict()
+            data=cart_response if current_user else cart_response
         )
         
     except HTTPException:
@@ -383,6 +429,35 @@ async def add_to_cart(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to add item to cart"
+        )
+
+@router.post("/merge", response_model=APIResponse)
+async def merge_guest_cart(
+    merge_request: CartMergeRequest,
+    current_user: UserInDB = Depends(get_current_active_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Merge guest cart with user cart when user logs in"""
+    try:
+        cart_service = CartService(db)
+        
+        merged_cart = await cart_service.merge_guest_cart_with_user_cart(
+            current_user.id,
+            merge_request.guest_session_id
+        )
+        
+        cart_response = CartResponse(**merged_cart.dict())
+        
+        return APIResponse(
+            success=True,
+            message="Carts merged successfully",
+            data=cart_response.dict()
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to merge carts"
         )
 
 @router.delete("/items/{product_id}", response_model=APIResponse)
