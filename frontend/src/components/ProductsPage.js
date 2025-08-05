@@ -272,6 +272,16 @@ const ProductsPage = () => {
         </div>
       </div>
 
+      {/* Featured Categories Carousel */}
+      {categories.length > 0 && (
+        <FeaturedCategoriesCarousel 
+          categories={categories} 
+          products={products}
+          onCategorySelect={setSelectedCategory}
+          selectedCategory={selectedCategory}
+        />
+      )}
+
       {/* Error Message */}
       {error && (
         <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-8">
