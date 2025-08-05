@@ -112,21 +112,20 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = async () => {
-    if (!isAuthenticated) {
-      navigate('/login', { state: { from: { pathname: `/products/${id}` } } });
-      return;
-    }
+    if (!product) return;
 
     try {
       setAddingToCart(true);
-      // Add to cart API call would go here
-      console.log('Adding to cart:', { productId: id, quantity });
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await addToCart(product.id, quantity);
       
-      // Show success message (you can implement a toast notification system)
-      alert('Product added to cart successfully!');
+      if (result.success) {
+        alert('Product added to cart successfully!');
+        // Reset quantity to 1 after successful addition
+        setQuantity(1);
+      } else {
+        alert(result.error || 'Failed to add product to cart. Please try again.');
+      }
     } catch (err) {
       console.error('Error adding to cart:', err);
       alert('Failed to add product to cart. Please try again.');
