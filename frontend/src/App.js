@@ -250,90 +250,132 @@ function Header({ darkMode, toggleDarkMode }) {
         <>
           {/* Backdrop */}
           <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden transition-opacity duration-300"
             onClick={closeMobileMenu}
           ></div>
           
           {/* Mobile Menu */}
-          <div className="fixed top-16 left-0 right-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-40 md:hidden">
-            <div className="px-4 py-6 space-y-4">
+          <div className="fixed top-16 left-0 right-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-40 md:hidden shadow-xl animate-slide-down">
+            <div className="px-6 py-8 space-y-6 max-h-[calc(100vh-4rem)] overflow-y-auto">
               {/* Navigation Links */}
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <a 
                   href="/" 
-                  className="block text-lg font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="group flex items-center justify-center w-full text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 py-4 px-6 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 active:scale-95 transform"
                   onClick={closeMobileMenu}
                 >
-                  Shop
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                    <span>Shop</span>
+                  </div>
                 </a>
                 <a 
                   href="/about" 
-                  className="block text-lg font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="group flex items-center justify-center w-full text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 py-4 px-6 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 active:scale-95 transform"
                   onClick={closeMobileMenu}
                 >
-                  About
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                    <span>About</span>
+                  </div>
                 </a>
                 <a 
                   href="/contact" 
-                  className="block text-lg font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  className="group flex items-center justify-center w-full text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 py-4 px-6 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 active:scale-95 transform"
                   onClick={closeMobileMenu}
                 >
-                  Contact
+                  <div className="flex items-center space-x-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                    <span>Contact</span>
+                  </div>
                 </a>
                 {isAuthenticated && (user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'store_owner') && (
                   <a 
                     href="/admin" 
-                    className="block text-lg font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    className="group flex items-center justify-center w-full text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 py-4 px-6 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 active:scale-95 transform"
                     onClick={closeMobileMenu}
                   >
-                    Admin Dashboard
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                      <span>Admin Dashboard</span>
+                    </div>
                   </a>
                 )}
               </div>
 
+              {/* Divider */}
+              <div className="border-t border-gray-200 dark:border-gray-600"></div>
+
               {/* User Section */}
-              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="space-y-3">
                 {isAuthenticated ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3">
-                      <UserIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
-                      <span className="text-lg font-medium text-gray-900 dark:text-white">
-                        {user?.username}
-                      </span>
+                  <>
+                    {/* User Info */}
+                    <div className="flex items-center justify-center space-x-3 py-3 px-6 bg-gray-50 dark:bg-gray-700/50 rounded-xl">
+                      <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                        <UserIcon className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="text-center">
+                        <span className="text-lg font-semibold text-gray-900 dark:text-white block">
+                          {user?.username}
+                        </span>
+                        <span className="text-sm text-gray-600 dark:text-gray-400 capitalize">
+                          {user?.role?.replace('_', ' ')}
+                        </span>
+                      </div>
                     </div>
+                    
+                    {/* Profile Link */}
                     <a
                       href="/profile"
-                      className="block text-base text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors ml-9"
+                      className="group flex items-center justify-center w-full text-base font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 py-3 px-6 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-700/50 active:scale-95 transform"
                       onClick={closeMobileMenu}
                     >
-                      Profile
+                      <div className="flex items-center space-x-3">
+                        <UserIcon className="w-5 h-5" />
+                        <span>My Profile</span>
+                      </div>
                     </a>
+                    
+                    {/* Sign Out Button */}
                     <button
                       onClick={handleLogout}
-                      className="block text-base text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors ml-9"
+                      className="group flex items-center justify-center w-full text-base font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200 py-3 px-6 rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95 transform"
                     >
-                      Sign Out
+                      <div className="flex items-center space-x-3">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Sign Out</span>
+                      </div>
                     </button>
-                  </div>
+                  </>
                 ) : (
-                  <div className="space-y-4">
+                  <>
+                    {/* Sign In Button */}
                     <a
                       href="/login"
-                      className="flex items-center space-x-3 text-lg font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      className="group flex items-center justify-center w-full text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-all duration-200 py-4 px-6 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 active:scale-95 transform"
                       onClick={closeMobileMenu}
                     >
-                      <LogIn className="w-6 h-6" />
-                      <span>Sign In</span>
+                      <div className="flex items-center space-x-3">
+                        <LogIn className="w-6 h-6" />
+                        <span>Sign In</span>
+                      </div>
                     </a>
+                    
+                    {/* Sign Up Button */}
                     <a
                       href="/register"
-                      className="flex items-center space-x-3 text-lg font-medium bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                      className="group flex items-center justify-center w-full text-lg font-semibold bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 px-6 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl active:scale-95 transform"
                       onClick={closeMobileMenu}
                     >
-                      <UserPlus className="w-6 h-6" />
-                      <span>Sign Up</span>
+                      <div className="flex items-center space-x-3">
+                        <UserPlus className="w-6 h-6" />
+                        <span>Sign Up</span>
+                      </div>
                     </a>
-                  </div>
+                  </>
                 )}
               </div>
             </div>
