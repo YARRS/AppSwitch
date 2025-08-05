@@ -339,7 +339,8 @@ class CartItem(BaseModel):
     product_image: Optional[str] = None
 
 class CartBase(BaseModel):
-    user_id: str
+    user_id: Optional[str] = None  # None for guest carts
+    session_id: Optional[str] = None  # For guest cart identification
     items: List[CartItem] = []
     total_amount: float = 0.0
     total_items: int = 0
@@ -349,6 +350,32 @@ class CartInDB(CartBase, BaseDocument):
 
 class CartResponse(CartBase, BaseDocument):
     pass
+
+# Guest cart models for session-based storage
+class GuestCartItem(BaseModel):
+    product_id: str
+    quantity: int = 1
+    price: float
+    product_name: str
+    product_image: Optional[str] = None
+
+class GuestCart(BaseModel):
+    session_id: str
+    items: List[GuestCartItem] = []
+    total_amount: float = 0.0
+    total_items: int = 0
+    created_at: datetime = None
+    updated_at: datetime = None
+    
+    def __init__(self, **data):
+        if not data.get('created_at'):
+            data['created_at'] = datetime.utcnow()
+        if not data.get('updated_at'):
+            data['updated_at'] = datetime.utcnow()
+        super().__init__(**data)
+
+class CartMergeRequest(BaseModel):
+    guest_session_id: str
 
 # Order models
 class OrderItem(BaseModel):
