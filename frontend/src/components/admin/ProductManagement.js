@@ -603,24 +603,26 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full my-8 max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white dark:bg-gray-800 p-4 lg:p-6 border-b border-gray-200 dark:border-gray-700 rounded-t-lg">
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg lg:text-xl font-semibold text-gray-900 dark:text-white">
               {product ? 'Edit Product' : 'Create Product'}
             </h3>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <X className="w-6 h-6" />
             </button>
           </div>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="p-4 lg:p-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Product Name *
@@ -660,7 +662,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Category *
@@ -693,7 +695,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
             </div>
 
             {/* Pricing */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Price (₹) *
@@ -722,7 +724,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
             </div>
 
             {/* Inventory */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Stock Quantity *
@@ -767,7 +769,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
                     <button
                       type="button"
                       onClick={() => removeFeature(index)}
-                      className="text-red-600 hover:text-red-800"
+                      className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
                     >
                       <X className="w-4 h-4" />
                     </button>
@@ -777,7 +779,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
               <button
                 type="button"
                 onClick={addFeature}
-                className="text-blue-600 hover:text-blue-800 text-sm"
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium"
               >
                 + Add Feature
               </button>
@@ -791,10 +793,10 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
               
               {/* Upload Button */}
               <div className="mb-4">
-                <label className="flex items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <FileImage className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" />
-                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                <label className="flex items-center justify-center w-full h-24 lg:h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600">
+                  <div className="flex flex-col items-center justify-center pt-3 pb-3 lg:pt-5 lg:pb-6">
+                    <FileImage className="w-6 h-6 lg:w-8 lg:h-8 mb-2 lg:mb-4 text-gray-500 dark:text-gray-400" />
+                    <p className="mb-1 lg:mb-2 text-xs lg:text-sm text-gray-500 dark:text-gray-400">
                       <span className="font-semibold">Click to upload images</span>
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -814,18 +816,18 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
 
               {/* Image Previews */}
               {formData.images.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div className="grid grid-cols-3 lg:grid-cols-4 gap-2 lg:gap-4 mb-4">
                   {formData.images.map((image, index) => (
                     <div key={index} className="relative group">
                       <img
                         src={`data:image/jpeg;base64,${image}`}
                         alt={`Product ${index + 1}`}
-                        className="w-full h-20 object-cover rounded-lg"
+                        className="w-full h-16 lg:h-20 object-cover rounded-lg"
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -843,10 +845,10 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
               
               {/* Upload Button */}
               <div className="mb-4">
-                <label className="flex items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600">
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Video className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" />
-                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400">
+                <label className="flex items-center justify-center w-full h-24 lg:h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600">
+                  <div className="flex flex-col items-center justify-center pt-3 pb-3 lg:pt-5 lg:pb-6">
+                    <Video className="w-6 h-6 lg:w-8 lg:h-8 mb-2 lg:mb-4 text-gray-500 dark:text-gray-400" />
+                    <p className="mb-1 lg:mb-2 text-xs lg:text-sm text-gray-500 dark:text-gray-400">
                       <span className="font-semibold">Click to upload videos</span>
                     </p>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -866,12 +868,12 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
 
               {/* Video Previews */}
               {formData.videos.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
                   {formData.videos.map((video, index) => (
                     <div key={index} className="relative group">
                       <video
                         controls
-                        className="w-full h-32 object-cover rounded-lg bg-gray-100 dark:bg-gray-600"
+                        className="w-full h-24 lg:h-32 object-cover rounded-lg bg-gray-100 dark:bg-gray-600"
                       >
                         <source src={`data:video/mp4;base64,${video}`} type="video/mp4" />
                         Your browser does not support video playback.
@@ -879,7 +881,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
                       <button
                         type="button"
                         onClick={() => removeVideo(index)}
-                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -914,35 +916,38 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
                 Active Product
               </label>
             </div>
-
-            {/* Submit Buttons */}
-            <div className="flex justify-end space-x-3 pt-6">
-              <button
-                type="button"
-                onClick={onClose}
-                className="btn-secondary"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn-primary disabled:opacity-50"
-              >
-                {loading ? (
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Saving...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center space-x-2">
-                    <Save className="w-4 h-4" />
-                    <span>{product ? 'Update' : 'Create'} Product</span>
-                  </div>
-                )}
-              </button>
-            </div>
           </form>
+        </div>
+
+        {/* Submit Buttons - Sticky Footer */}
+        <div className="sticky bottom-0 bg-white dark:bg-gray-800 p-4 lg:p-6 border-t border-gray-200 dark:border-gray-700 rounded-b-lg">
+          <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full sm:w-auto btn-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              onClick={handleSubmit}
+              disabled={loading}
+              className="w-full sm:w-auto btn-primary disabled:opacity-50"
+            >
+              {loading ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  <span>Saving...</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center space-x-2">
+                  <Save className="w-4 h-4" />
+                  <span>{product ? 'Update' : 'Create'} Product</span>
+                </div>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
