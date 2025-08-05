@@ -529,24 +529,47 @@ async def merge_guest_cart(
 @router.delete("/items/{product_id}", response_model=APIResponse)
 async def remove_from_cart(
     product_id: str,
-    current_user: UserInDB = Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends()
+    session_id: Optional[str] = Header(None, alias="X-Session-Id"),
+    current_user: Optional[UserInDB] = Depends(get_optional_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """Remove item from cart"""
+    """Remove item from cart - works for both authenticated users and guests"""
     try:
         cart_service = CartService(db)
         
-        cart = await cart_service.remove_item_from_cart(
-            current_user.id,
-            product_id
-        )
-        
-        cart_response = CartResponse(**cart.dict())
+        if current_user:
+            # Authenticated user
+            cart = await cart_service.remove_item_from_cart(
+                current_user.id,
+                product_id
+            )
+            
+            cart_response = CartResponse(**cart.dict())
+            
+        else:
+            # Guest user
+            if not session_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Session ID required for guest cart"
+                )
+            
+            guest_cart = await cart_service.remove_item_from_guest_cart(
+                session_id,
+                product_id
+            )
+            
+            cart_response = {
+                "items": guest_cart.items,
+                "total_amount": guest_cart.total_amount,
+                "total_items": guest_cart.total_items,
+                "session_id": guest_cart.session_id
+            }
         
         return APIResponse(
             success=True,
             message="Item removed from cart successfully",
-            data=cart_response.dict()
+            data=cart_response if current_user else cart_response
         )
         
     except HTTPException:
@@ -561,25 +584,49 @@ async def remove_from_cart(
 async def update_cart_item(
     product_id: str,
     quantity: int,
-    current_user: UserInDB = Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends()
+    session_id: Optional[str] = Header(None, alias="X-Session-Id"),
+    current_user: Optional[UserInDB] = Depends(get_optional_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """Update item quantity in cart"""
+    """Update item quantity in cart - works for both authenticated users and guests"""
     try:
         cart_service = CartService(db)
         
-        cart = await cart_service.update_item_quantity(
-            current_user.id,
-            product_id,
-            quantity
-        )
-        
-        cart_response = CartResponse(**cart.dict())
+        if current_user:
+            # Authenticated user
+            cart = await cart_service.update_item_quantity(
+                current_user.id,
+                product_id,
+                quantity
+            )
+            
+            cart_response = CartResponse(**cart.dict())
+            
+        else:
+            # Guest user
+            if not session_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Session ID required for guest cart"
+                )
+            
+            guest_cart = await cart_service.update_guest_item_quantity(
+                session_id,
+                product_id,
+                quantity
+            )
+            
+            cart_response = {
+                "items": guest_cart.items,
+                "total_amount": guest_cart.total_amount,
+                "total_items": guest_cart.total_items,
+                "session_id": guest_cart.session_id
+            }
         
         return APIResponse(
             success=True,
             message="Cart item updated successfully",
-            data=cart_response.dict()
+            data=cart_response if current_user else cart_response
         )
         
     except HTTPException:
@@ -592,21 +639,40 @@ async def update_cart_item(
 
 @router.delete("/", response_model=APIResponse)
 async def clear_cart(
-    current_user: UserInDB = Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends()
+    session_id: Optional[str] = Header(None, alias="X-Session-Id"),
+    current_user: Optional[UserInDB] = Depends(get_optional_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """Clear all items from cart"""
+    """Clear all items from cart - works for both authenticated users and guests"""
     try:
         cart_service = CartService(db)
         
-        cart = await cart_service.clear_cart(current_user.id)
-        
-        cart_response = CartResponse(**cart.dict())
+        if current_user:
+            # Authenticated user
+            cart = await cart_service.clear_cart(current_user.id)
+            cart_response = CartResponse(**cart.dict())
+            
+        else:
+            # Guest user
+            if not session_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Session ID required for guest cart"
+                )
+            
+            guest_cart = await cart_service.clear_guest_cart(session_id)
+            
+            cart_response = {
+                "items": guest_cart.items,
+                "total_amount": guest_cart.total_amount,
+                "total_items": guest_cart.total_items,
+                "session_id": guest_cart.session_id
+            }
         
         return APIResponse(
             success=True,
             message="Cart cleared successfully",
-            data=cart_response.dict()
+            data=cart_response if current_user else cart_response
         )
         
     except Exception as e:
