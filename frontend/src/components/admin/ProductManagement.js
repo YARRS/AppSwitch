@@ -340,6 +340,101 @@ const ProductRow = ({ product, onEdit, onDelete }) => {
   );
 };
 
+// Product Card Component for Mobile
+const ProductCard = ({ product, onEdit, onDelete }) => {
+  const isLowStock = product.stock_quantity <= product.min_stock_level;
+
+  return (
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
+      {/* Product Header */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center space-x-3">
+          <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
+            {product.images && product.images.length > 0 ? (
+              <img
+                src={`data:image/jpeg;base64,${product.images[0]}`}
+                alt={product.name}
+                className="w-12 h-12 object-cover rounded-lg"
+              />
+            ) : (
+              <Package className="w-6 h-6 text-gray-400" />
+            )}
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-medium text-gray-900 dark:text-white line-clamp-1">
+              {product.name}
+            </h3>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              SKU: {product.sku}
+            </p>
+          </div>
+        </div>
+        
+        {/* Actions */}
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => onEdit(product)}
+            className="p-2 text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+          >
+            <Edit className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onDelete(product.id)}
+            className="p-2 text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Product Info Grid */}
+      <div className="grid grid-cols-2 gap-4 text-sm">
+        <div>
+          <p className="text-gray-500 dark:text-gray-400 text-xs">Category</p>
+          <p className="text-gray-900 dark:text-white font-medium capitalize">
+            {product.category.replace('_', ' ')}
+          </p>
+        </div>
+        
+        <div>
+          <p className="text-gray-500 dark:text-gray-400 text-xs">Price</p>
+          <div className="flex flex-col">
+            <span className="text-gray-900 dark:text-white font-medium">₹{product.price.toLocaleString()}</span>
+            {product.discount_price && (
+              <span className="text-xs text-gray-500 line-through">
+                ₹{product.discount_price.toLocaleString()}
+              </span>
+            )}
+          </div>
+        </div>
+        
+        <div>
+          <p className="text-gray-500 dark:text-gray-400 text-xs">Stock</p>
+          <div className="flex items-center space-x-2">
+            <span className={`font-medium ${isLowStock ? 'text-red-600' : 'text-gray-900 dark:text-white'}`}>
+              {product.stock_quantity}
+            </span>
+            {isLowStock && (
+              <AlertTriangle className="w-4 h-4 text-red-500" title="Low Stock" />
+            )}
+          </div>
+        </div>
+        
+        <div>
+          <p className="text-gray-500 dark:text-gray-400 text-xs">Status</p>
+          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+            product.is_active
+              ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+              : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+          }`}>
+            {product.is_active ? 'Active' : 'Inactive'}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Product Modal Component
 const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) => {
   const { getAuthenticatedAxios } = useAuth();
