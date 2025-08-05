@@ -510,8 +510,518 @@ def main():
         sys.exit(1)
 
 
+class CartMergeTester:
+    def __init__(self):
+        self.results = []
+        self.total_tests = 0
+        self.passed_tests = 0
+        self.failed_tests = 0
+        self.auth_tokens = {}  # Store tokens for different users
+        self.test_products = []  # Store test products for cart testing
+        self.guest_session_id = None  # For guest cart testing
+        
+    def log_result(self, test_name, status, message, details=None):
+        """Log test result"""
+        result = {
+            "test": test_name,
+            "status": status,
+            "message": message,
+            "timestamp": datetime.now().isoformat(),
+            "details": details
+        }
+        self.results.append(result)
+        self.total_tests += 1
+        
+        if status == "PASS":
+            self.passed_tests += 1
+            print(f"✅ {test_name}: {message}")
+        elif status == "FAIL":
+            self.failed_tests += 1
+            print(f"❌ {test_name}: {message}")
+            if details:
+                print(f"   Details: {details}")
+        else:  # SKIP or other
+            print(f"⚠️ {test_name}: {message}")
+            if details:
+                print(f"   Details: {details}")
+    
+    def authenticate_user(self, email, password, role_name):
+        """Authenticate user and store token"""
+        try:
+            login_data = {
+                "username": email,
+                "password": password
+            }
+            
+            response = requests.post(f"{API_BASE}/auth/login", data=login_data, timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("access_token"):
+                    self.auth_tokens[role_name] = {
+                        "token": data["access_token"],
+                        "user": data.get("user", {})
+                    }
+                    self.log_result(f"{role_name.title()} Authentication", "PASS", f"Successfully authenticated {role_name}")
+                    return True
+                else:
+                    self.log_result(f"{role_name.title()} Authentication", "FAIL", f"No access token in response for {role_name}")
+                    return False
+            else:
+                self.log_result(f"{role_name.title()} Authentication", "FAIL", f"Authentication failed for {role_name}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_result(f"{role_name.title()} Authentication", "FAIL", f"Error authenticating {role_name}: {str(e)}")
+            return False
+    
+    def get_auth_headers(self, role_name):
+        """Get authorization headers for a specific role"""
+        token_data = self.auth_tokens.get(role_name)
+        if token_data:
+            return {"Authorization": f"Bearer {token_data['token']}"}
+        return {}
+    
+    def get_test_products(self):
+        """Get available products for cart testing"""
+        try:
+            response = requests.get(f"{API_BASE}/products/?is_active=true&per_page=5", timeout=30)
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    products = data.get("data", [])
+                    self.test_products = products[:3]  # Use first 3 products for testing
+                    self.log_result(
+                        "Get Test Products", 
+                        "PASS", 
+                        f"Retrieved {len(self.test_products)} products for cart testing",
+                        {"product_count": len(self.test_products)}
+                    )
+                    return True
+                else:
+                    self.log_result("Get Test Products", "FAIL", "API returned success=false", data)
+                    return False
+            else:
+                self.log_result("Get Test Products", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_result("Get Test Products", "FAIL", f"Error retrieving products: {str(e)}")
+            return False
+    
+    def test_guest_cart_add_item(self):
+        """Test adding items to cart as guest user (should fail with current implementation)"""
+        try:
+            if not self.test_products:
+                self.log_result("Guest Cart Add Item", "SKIP", "No test products available")
+                return False
+            
+            product = self.test_products[0]
+            product_id = product["id"]
+            
+            # Try to add item to cart without authentication
+            response = requests.post(f"{API_BASE}/cart/items/{product_id}?quantity=2", timeout=30)
+            
+            if response.status_code == 401:
+                self.log_result(
+                    "Guest Cart Add Item", 
+                    "FAIL", 
+                    "Guest cart functionality not implemented - returns 401 Unauthorized",
+                    {
+                        "expected": "Guest should be able to add items to cart",
+                        "actual": "401 Unauthorized - authentication required",
+                        "product_id": product_id,
+                        "status_code": response.status_code
+                    }
+                )
+                return False
+            elif response.status_code == 200:
+                self.log_result(
+                    "Guest Cart Add Item", 
+                    "PASS", 
+                    "Guest successfully added item to cart",
+                    {"product_id": product_id}
+                )
+                return True
+            else:
+                self.log_result(
+                    "Guest Cart Add Item", 
+                    "FAIL", 
+                    f"Unexpected response: HTTP {response.status_code}",
+                    {"response": response.text}
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result("Guest Cart Add Item", "FAIL", f"Error testing guest cart: {str(e)}")
+            return False
+    
+    def test_guest_cart_view(self):
+        """Test viewing cart as guest user (should fail with current implementation)"""
+        try:
+            # Try to view cart without authentication
+            response = requests.get(f"{API_BASE}/cart/", timeout=30)
+            
+            if response.status_code == 401:
+                self.log_result(
+                    "Guest Cart View", 
+                    "FAIL", 
+                    "Guest cart view not implemented - returns 401 Unauthorized",
+                    {
+                        "expected": "Guest should be able to view their cart",
+                        "actual": "401 Unauthorized - authentication required",
+                        "status_code": response.status_code
+                    }
+                )
+                return False
+            elif response.status_code == 200:
+                data = response.json()
+                self.log_result(
+                    "Guest Cart View", 
+                    "PASS", 
+                    "Guest successfully viewed cart",
+                    {"cart_data": data}
+                )
+                return True
+            else:
+                self.log_result(
+                    "Guest Cart View", 
+                    "FAIL", 
+                    f"Unexpected response: HTTP {response.status_code}",
+                    {"response": response.text}
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result("Guest Cart View", "FAIL", f"Error testing guest cart view: {str(e)}")
+            return False
+    
+    def test_authenticated_cart_functionality(self, role_name="customer"):
+        """Test authenticated cart functionality"""
+        try:
+            headers = self.get_auth_headers(role_name)
+            if not headers:
+                self.log_result(f"Authenticated Cart ({role_name})", "SKIP", f"No auth token for {role_name}")
+                return False
+            
+            if not self.test_products:
+                self.log_result(f"Authenticated Cart ({role_name})", "SKIP", "No test products available")
+                return False
+            
+            # Test 1: View empty cart
+            response = requests.get(f"{API_BASE}/cart/", headers=headers, timeout=30)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    cart_data = data.get("data", {})
+                    self.log_result(
+                        f"Authenticated Cart View ({role_name})", 
+                        "PASS", 
+                        f"Successfully viewed cart with {cart_data.get('total_items', 0)} items"
+                    )
+                else:
+                    self.log_result(f"Authenticated Cart View ({role_name})", "FAIL", "API returned success=false")
+                    return False
+            else:
+                self.log_result(f"Authenticated Cart View ({role_name})", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                return False
+            
+            # Test 2: Add items to cart
+            product1 = self.test_products[0]
+            product2 = self.test_products[1] if len(self.test_products) > 1 else self.test_products[0]
+            
+            # Add first product
+            response = requests.post(f"{API_BASE}/cart/items/{product1['id']}?quantity=2", headers=headers, timeout=30)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result(
+                        f"Add Item 1 to Cart ({role_name})", 
+                        "PASS", 
+                        f"Successfully added {product1['name']} to cart"
+                    )
+                else:
+                    self.log_result(f"Add Item 1 to Cart ({role_name})", "FAIL", "API returned success=false")
+                    return False
+            else:
+                self.log_result(f"Add Item 1 to Cart ({role_name})", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                return False
+            
+            # Add second product
+            response = requests.post(f"{API_BASE}/cart/items/{product2['id']}?quantity=1", headers=headers, timeout=30)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    cart_data = data.get("data", {})
+                    total_items = cart_data.get("total_items", 0)
+                    self.log_result(
+                        f"Add Item 2 to Cart ({role_name})", 
+                        "PASS", 
+                        f"Successfully added {product2['name']} to cart. Total items: {total_items}"
+                    )
+                    return True
+                else:
+                    self.log_result(f"Add Item 2 to Cart ({role_name})", "FAIL", "API returned success=false")
+                    return False
+            else:
+                self.log_result(f"Add Item 2 to Cart ({role_name})", "FAIL", f"HTTP {response.status_code}: {response.text}")
+                return False
+                
+        except Exception as e:
+            self.log_result(f"Authenticated Cart ({role_name})", "FAIL", f"Error testing authenticated cart: {str(e)}")
+            return False
+    
+    def test_cart_merge_on_login(self):
+        """Test cart merge functionality when guest logs in (should fail - not implemented)"""
+        try:
+            # This test simulates the expected behavior but will fail with current implementation
+            self.log_result(
+                "Cart Merge on Login", 
+                "FAIL", 
+                "Cart merge functionality not implemented",
+                {
+                    "expected_behavior": [
+                        "Guest adds items to cart without authentication",
+                        "Guest logs in with existing user account",
+                        "Guest cart items merge with existing user cart items",
+                        "No items are lost during merge process",
+                        "Duplicate products have quantities combined"
+                    ],
+                    "current_implementation": [
+                        "No guest cart support - authentication required for all cart operations",
+                        "No session-based cart storage",
+                        "No merge logic in login process",
+                        "Cart is tied to user_id only"
+                    ],
+                    "missing_endpoints": [
+                        "POST /api/cart/add (without authentication)",
+                        "GET /api/cart/ (without authentication)", 
+                        "POST /api/cart/merge (merge guest cart with user cart)",
+                        "Session-based cart storage"
+                    ]
+                }
+            )
+            return False
+                
+        except Exception as e:
+            self.log_result("Cart Merge on Login", "FAIL", f"Error testing cart merge: {str(e)}")
+            return False
+    
+    def test_cart_edge_cases(self):
+        """Test cart edge cases"""
+        try:
+            headers = self.get_auth_headers("customer")
+            if not headers:
+                self.log_result("Cart Edge Cases", "SKIP", "No customer auth token")
+                return False
+            
+            if not self.test_products:
+                self.log_result("Cart Edge Cases", "SKIP", "No test products available")
+                return False
+            
+            product = self.test_products[0]
+            
+            # Test 1: Add same product multiple times (should update quantity)
+            response1 = requests.post(f"{API_BASE}/cart/items/{product['id']}?quantity=1", headers=headers, timeout=30)
+            response2 = requests.post(f"{API_BASE}/cart/items/{product['id']}?quantity=2", headers=headers, timeout=30)
+            
+            if response2.status_code == 200:
+                data = response2.json()
+                if data.get("success"):
+                    cart_data = data.get("data", {})
+                    # Find the product in cart items
+                    product_in_cart = None
+                    for item in cart_data.get("items", []):
+                        if item.get("product_id") == product["id"]:
+                            product_in_cart = item
+                            break
+                    
+                    if product_in_cart and product_in_cart.get("quantity") == 3:  # 1 + 2
+                        self.log_result(
+                            "Cart Quantity Update", 
+                            "PASS", 
+                            f"Successfully updated quantity to {product_in_cart['quantity']}"
+                        )
+                    else:
+                        self.log_result(
+                            "Cart Quantity Update", 
+                            "FAIL", 
+                            f"Quantity not updated correctly. Expected: 3, Got: {product_in_cart.get('quantity') if product_in_cart else 'Not found'}"
+                        )
+                else:
+                    self.log_result("Cart Quantity Update", "FAIL", "API returned success=false")
+            else:
+                self.log_result("Cart Quantity Update", "FAIL", f"HTTP {response2.status_code}: {response2.text}")
+            
+            # Test 2: Remove item from cart
+            response = requests.delete(f"{API_BASE}/cart/items/{product['id']}", headers=headers, timeout=30)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result("Remove Item from Cart", "PASS", "Successfully removed item from cart")
+                else:
+                    self.log_result("Remove Item from Cart", "FAIL", "API returned success=false")
+            else:
+                self.log_result("Remove Item from Cart", "FAIL", f"HTTP {response.status_code}: {response.text}")
+            
+            # Test 3: Clear cart
+            response = requests.delete(f"{API_BASE}/cart/", headers=headers, timeout=30)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    cart_data = data.get("data", {})
+                    if cart_data.get("total_items", 0) == 0:
+                        self.log_result("Clear Cart", "PASS", "Successfully cleared cart")
+                        return True
+                    else:
+                        self.log_result("Clear Cart", "FAIL", f"Cart not cleared. Items remaining: {cart_data.get('total_items', 0)}")
+                else:
+                    self.log_result("Clear Cart", "FAIL", "API returned success=false")
+            else:
+                self.log_result("Clear Cart", "FAIL", f"HTTP {response.status_code}: {response.text}")
+            
+            return False
+                
+        except Exception as e:
+            self.log_result("Cart Edge Cases", "FAIL", f"Error testing cart edge cases: {str(e)}")
+            return False
+    
+    def run_comprehensive_cart_merge_test(self):
+        """Run comprehensive cart merge functionality testing"""
+        print("🚀 Starting Comprehensive Cart Merge Functionality Testing")
+        print(f"Backend URL: {BACKEND_URL}")
+        print("=" * 80)
+        
+        # Step 1: Get test products
+        print("\n📦 Step 1: Getting Test Products...")
+        if not self.get_test_products():
+            print("❌ Cannot proceed without test products")
+            return False
+        
+        # Step 2: Authenticate customer user
+        print("\n🔐 Step 2: Authenticating Customer User...")
+        customer_email = "customer@vallmark.com"
+        customer_password = "Customer123!"
+        
+        if not self.authenticate_user(customer_email, customer_password, "customer"):
+            print("❌ Cannot proceed without customer authentication")
+            return False
+        
+        # Step 3: Test guest cart functionality (expected to fail)
+        print("\n👤 Step 3: Testing Guest Cart Functionality...")
+        self.test_guest_cart_add_item()
+        self.test_guest_cart_view()
+        
+        # Step 4: Test authenticated cart functionality
+        print("\n🔒 Step 4: Testing Authenticated Cart Functionality...")
+        self.test_authenticated_cart_functionality("customer")
+        
+        # Step 5: Test cart merge functionality (expected to fail - not implemented)
+        print("\n🔄 Step 5: Testing Cart Merge Functionality...")
+        self.test_cart_merge_on_login()
+        
+        # Step 6: Test cart edge cases
+        print("\n⚠️ Step 6: Testing Cart Edge Cases...")
+        self.test_cart_edge_cases()
+        
+        # Step 7: Summary and analysis
+        print("\n📊 Step 7: Test Results Summary...")
+        self.print_test_summary()
+        
+        return True
+    
+    def print_test_summary(self):
+        """Print comprehensive test summary"""
+        print("\n" + "=" * 80)
+        print("📊 CART MERGE FUNCTIONALITY TEST RESULTS")
+        print("=" * 80)
+        
+        print(f"Total Tests: {self.total_tests}")
+        print(f"Passed Tests: {self.passed_tests}")
+        print(f"Failed Tests: {self.failed_tests}")
+        print(f"Success Rate: {(self.passed_tests/self.total_tests*100):.1f}%")
+        
+        print("\n❌ Failed Tests:")
+        failed_tests = [r for r in self.results if r["status"] == "FAIL"]
+        if failed_tests:
+            for test in failed_tests:
+                print(f"  - {test['test']}: {test['message']}")
+        else:
+            print("  None! All tests passed.")
+        
+        print("\n🔍 Key Findings:")
+        
+        # Analyze critical missing functionality
+        guest_cart_failures = [r for r in self.results if "Guest Cart" in r["test"] and r["status"] == "FAIL"]
+        merge_failures = [r for r in self.results if "Merge" in r["test"] and r["status"] == "FAIL"]
+        auth_cart_successes = [r for r in self.results if "Authenticated Cart" in r["test"] and r["status"] == "PASS"]
+        
+        if guest_cart_failures:
+            print(f"  - ❌ CRITICAL: Guest cart functionality missing ({len(guest_cart_failures)} tests failed)")
+            print("    • Guests cannot add items to cart without authentication")
+            print("    • All cart endpoints require user authentication")
+        
+        if merge_failures:
+            print(f"  - ❌ CRITICAL: Cart merge functionality missing ({len(merge_failures)} tests failed)")
+            print("    • No session-based cart storage for guests")
+            print("    • No merge logic when guest users log in")
+            print("    • Missing cart merge endpoints")
+        
+        if auth_cart_successes:
+            print(f"  - ✅ Authenticated cart functionality working ({len(auth_cart_successes)} tests passed)")
+            print("    • Users can add/remove/update cart items when logged in")
+            print("    • Cart persistence working for authenticated users")
+        
+        print("\n🚨 CRITICAL ISSUES IDENTIFIED:")
+        print("  1. Guest cart functionality is completely missing")
+        print("  2. Cart merge functionality is not implemented")
+        print("  3. Session-based cart storage is not available")
+        print("  4. Current implementation only supports authenticated users")
+        
+        print("\n💡 REQUIRED IMPLEMENTATIONS:")
+        print("  1. Session-based guest cart storage (Redis/MongoDB)")
+        print("  2. Guest cart endpoints (without authentication)")
+        print("  3. Cart merge logic in login process")
+        print("  4. Session ID generation and management")
+        print("  5. Cart merge endpoint for manual merging")
+
+
+def run_cart_merge_tests():
+    """Main function to run cart merge tests"""
+    tester = CartMergeTester()
+    
+    try:
+        success = tester.run_comprehensive_cart_merge_test()
+        
+        # Exit with appropriate code
+        if tester.failed_tests == 0:
+            print("\n✅ All cart merge tests passed! Cart merge functionality working correctly.")
+            return True
+        else:
+            print(f"\n❌ {tester.failed_tests} cart merge tests failed. Critical issues found in cart merge functionality.")
+            return False
+            
+    except KeyboardInterrupt:
+        print("\n⚠️ Cart merge testing interrupted by user")
+        return False
+    except Exception as e:
+        print(f"\n💥 Cart merge testing failed with error: {str(e)}")
+        return False
+
+
 if __name__ == "__main__":
-    main()
+    # Run cart merge tests
+    print("🛒 CART MERGE FUNCTIONALITY TESTING")
+    print("=" * 50)
+    cart_success = run_cart_merge_tests()
+    
+    if not cart_success:
+        print("\n❌ Cart merge functionality testing failed")
+        sys.exit(1)
+    else:
+        print("\n✅ Cart merge functionality testing completed")
+        sys.exit(0)
 
 
 class CategoryTester:
