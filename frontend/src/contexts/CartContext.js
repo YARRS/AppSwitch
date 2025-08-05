@@ -54,6 +54,21 @@ export const CartProvider = ({ children }) => {
     loadCart();
   }, [isAuthenticated, user]);
 
+  // Listen for user login events to trigger cart merge
+  useEffect(() => {
+    const handleUserLoggedIn = async () => {
+      if (isAuthenticated) {
+        await mergeGuestCart();
+      }
+    };
+
+    window.addEventListener('userLoggedIn', handleUserLoggedIn);
+    
+    return () => {
+      window.removeEventListener('userLoggedIn', handleUserLoggedIn);
+    };
+  }, [isAuthenticated]);
+
   // Load cart from API
   const loadCart = async () => {
     try {
