@@ -104,10 +104,16 @@ function Header({ darkMode, toggleDarkMode }) {
   const { user, logout, isAuthenticated } = useAuth();
   const { getCartItemCount } = useCart();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     setShowUserMenu(false);
+    setShowMobileMenu(false);
+  };
+
+  const closeMobileMenu = () => {
+    setShowMobileMenu(false);
   };
 
   return (
@@ -116,6 +122,7 @@ function Header({ darkMode, toggleDarkMode }) {
         <div className="flex justify-between items-center h-16">
           <Logo size="medium" />
           
+          {/* Desktop Navigation */}
           <nav className="hidden md:flex space-x-8">
             <a href="/" className="nav-link">Shop</a>
             <a href="/about" className="nav-link">About</a>
@@ -125,7 +132,8 @@ function Header({ darkMode, toggleDarkMode }) {
             )}
           </nav>
           
-          <div className="flex items-center space-x-4">
+          {/* Desktop Right Side */}
+          <div className="hidden md:flex items-center space-x-4">
             {/* Shopping Cart Icon */}
             <button className="relative p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
               <ShoppingCart className="w-5 h-5 text-gray-700 dark:text-gray-300" />
@@ -196,8 +204,141 @@ function Header({ darkMode, toggleDarkMode }) {
               </div>
             )}
           </div>
+
+          {/* Mobile Right Side - Compact */}
+          <div className="flex md:hidden items-center space-x-2">
+            {/* Shopping Cart Icon - Mobile */}
+            <button className="relative p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+              <ShoppingCart className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              {getCartItemCount() > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center text-xs">
+                  {getCartItemCount()}
+                </span>
+              )}
+            </button>
+
+            {/* Dark Mode Toggle - Mobile */}
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            >
+              {darkMode ? (
+                <Sun className="w-5 h-5 text-yellow-500" />
+              ) : (
+                <Moon className="w-5 h-5 text-gray-700" />
+              )}
+            </button>
+
+            {/* Hamburger Menu Button */}
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            >
+              {showMobileMenu ? (
+                <X className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+              ) : (
+                <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile Navigation Drawer */}
+      {showMobileMenu && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+            onClick={closeMobileMenu}
+          ></div>
+          
+          {/* Mobile Menu */}
+          <div className="fixed top-16 left-0 right-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-40 md:hidden">
+            <div className="px-4 py-6 space-y-4">
+              {/* Navigation Links */}
+              <div className="space-y-4">
+                <a 
+                  href="/" 
+                  className="block text-lg font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  onClick={closeMobileMenu}
+                >
+                  Shop
+                </a>
+                <a 
+                  href="/about" 
+                  className="block text-lg font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  onClick={closeMobileMenu}
+                >
+                  About
+                </a>
+                <a 
+                  href="/contact" 
+                  className="block text-lg font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                  onClick={closeMobileMenu}
+                >
+                  Contact
+                </a>
+                {isAuthenticated && (user?.role === 'admin' || user?.role === 'super_admin' || user?.role === 'store_owner') && (
+                  <a 
+                    href="/admin" 
+                    className="block text-lg font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                    onClick={closeMobileMenu}
+                  >
+                    Admin Dashboard
+                  </a>
+                )}
+              </div>
+
+              {/* User Section */}
+              <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+                {isAuthenticated ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-3">
+                      <UserIcon className="w-6 h-6 text-gray-600 dark:text-gray-300" />
+                      <span className="text-lg font-medium text-gray-900 dark:text-white">
+                        {user?.username}
+                      </span>
+                    </div>
+                    <a
+                      href="/profile"
+                      className="block text-base text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors ml-9"
+                      onClick={closeMobileMenu}
+                    >
+                      Profile
+                    </a>
+                    <button
+                      onClick={handleLogout}
+                      className="block text-base text-gray-700 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 transition-colors ml-9"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <a
+                      href="/login"
+                      className="flex items-center space-x-3 text-lg font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      onClick={closeMobileMenu}
+                    >
+                      <LogIn className="w-6 h-6" />
+                      <span>Sign In</span>
+                    </a>
+                    <a
+                      href="/register"
+                      className="flex items-center space-x-3 text-lg font-medium bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                      onClick={closeMobileMenu}
+                    >
+                      <UserPlus className="w-6 h-6" />
+                      <span>Sign Up</span>
+                    </a>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </header>
   );
 }
