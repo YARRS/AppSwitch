@@ -337,7 +337,7 @@ async def get_inventory_user(current_user: UserInDB = Depends(get_current_active
     return current_user
 
 # Optional authentication dependency for public endpoints
-async def get_optional_current_user(token: Optional[str] = Depends(oauth2_scheme)) -> Optional[UserInDB]:
+async def get_optional_current_user(token: Optional[str] = Depends(oauth2_scheme_optional)) -> Optional[UserInDB]:
     """Get current user if authenticated, None if not"""
     if not token:
         return None
