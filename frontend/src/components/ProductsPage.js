@@ -416,7 +416,7 @@ const ProductCard = ({ product, isAuthenticated }) => {
       
       {/* Product Image */}
       <div className="relative z-10">
-        <div className="w-full h-48 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
+        <div className="w-full h-40 sm:h-48 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
           {product.images && product.images.length > 0 ? (
             <img
               src={product.images[0].startsWith('data:') ? product.images[0] : `data:image/jpeg;base64,${product.images[0]}`}
@@ -425,12 +425,12 @@ const ProductCard = ({ product, isAuthenticated }) => {
             />
           ) : (
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto mb-2 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">
+              <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 bg-blue-600 rounded-lg flex items-center justify-center">
+                <span className="text-lg sm:text-2xl font-bold text-white">
                   {product.name.charAt(0)}
                 </span>
               </div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">No Image</p>
+              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">No Image</p>
             </div>
           )}
         </div>
@@ -456,8 +456,8 @@ const ProductCard = ({ product, isAuthenticated }) => {
       </div>
 
       {/* Product Info */}
-      <div className="p-4 relative z-10">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-1">
+      <div className="p-3 sm:p-4 relative z-10">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-1">
           {product.name}
         </h3>
         
@@ -467,7 +467,7 @@ const ProductCard = ({ product, isAuthenticated }) => {
 
         {/* Features */}
         {product.features && Array.isArray(product.features) && product.features.length > 0 && (
-          <p className="text-xs text-blue-600 dark:text-blue-400 mb-3">
+          <p className="text-xs text-blue-600 dark:text-blue-400 mb-3 line-clamp-1">
             {product.features.join(', ')}
           </p>
         )}
@@ -477,7 +477,7 @@ const ProductCard = ({ product, isAuthenticated }) => {
           <div className="flex flex-col">
             {product.discount_price ? (
               <>
-                <span className="text-2xl font-bold text-red-600 dark:text-red-400">
+                <span className="text-lg sm:text-2xl font-bold text-red-600 dark:text-red-400">
                   {formatPrice(product.discount_price)}
                 </span>
                 <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
@@ -485,13 +485,13 @@ const ProductCard = ({ product, isAuthenticated }) => {
                 </span>
               </>
             ) : (
-              <span className="text-2xl font-bold text-gray-900 dark:text-white">
+              <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
                 {formatPrice(product.price)}
               </span>
             )}
           </div>
           {product.stock_quantity && (
-            <span className="text-sm text-gray-500 dark:text-gray-400">
+            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
               {product.stock_quantity} left
             </span>
           )}
@@ -501,15 +501,15 @@ const ProductCard = ({ product, isAuthenticated }) => {
         <div className="flex space-x-2">
           <Link
             to={`/products/${product.id}`}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2.5 sm:py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 font-medium"
           >
             <Eye className="w-4 h-4" />
-            <span>View Details</span>
+            <span className="text-sm sm:text-base">View Details</span>
           </Link>
           
           {isAuthenticated && product.is_in_stock && (
-            <button className="bg-green-600 hover:bg-green-700 text-white p-2 rounded-lg transition-colors duration-200">
-              <ShoppingCart className="w-5 h-5" />
+            <button className="bg-green-600 hover:bg-green-700 text-white p-2.5 sm:p-2 rounded-lg transition-colors duration-200 flex-shrink-0">
+              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
             </button>
           )}
         </div>
