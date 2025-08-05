@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Backend API Testing Script for Vallmark Gift Articles E-commerce System
-SPECIAL FOCUS: Guest Access to Products API Testing
-Testing that guest users can access products without 401 unauthorized errors.
+SPECIAL FOCUS: Cart Merge Functionality Testing
+Testing guest cart functionality and cart merge when guest users login.
 """
 
 import requests
