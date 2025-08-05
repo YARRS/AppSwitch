@@ -1,13 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import Optional, List
 from datetime import datetime
+import uuid
 
 from models import (
     CartItem, CartResponse, CartInDB, ProductInDB,
-    APIResponse, UserInDB
+    APIResponse, UserInDB, GuestCart, GuestCartItem, CartMergeRequest
 )
-from auth import get_current_active_user
+from auth import get_current_active_user, get_optional_current_user
 
 router = APIRouter(prefix="/api/cart", tags=["Shopping Cart"])
 
