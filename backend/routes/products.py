@@ -294,18 +294,24 @@ async def get_products(
     is_active: Optional[bool] = None,
     assigned_to: Optional[str] = None,
     uploaded_by: Optional[str] = None,
-    current_user: UserInDB = Depends(get_current_active_user),
+    current_user: Optional[UserInDB] = Depends(get_optional_current_user),
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """Get products with filtering and pagination"""
+    """Get products with filtering and pagination - accessible to guests and authenticated users"""
     try:
         product_service = ProductService(db)
         
-        # Filter products for salesperson (only their assigned/uploaded products)
-        if current_user.role == "salesperson":
-            if not assigned_to and not uploaded_by:
-                # Default to showing their products
-                assigned_to = current_user.id
+        # For guests (non-authenticated users), only show active products
+        if current_user is None:
+            is_active = True  # Force active products only for guests
+            assigned_to = None  # Clear user-specific filters
+            uploaded_by = None  # Clear user-specific filters
+        else:
+            # Filter products for salesperson (only their assigned/uploaded products)
+            if current_user.role == "salesperson":
+                if not assigned_to and not uploaded_by:
+                    # Default to showing their products
+                    assigned_to = current_user.id
         
         result = await product_service.get_products(
             page=page,
