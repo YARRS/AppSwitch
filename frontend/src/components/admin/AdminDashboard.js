@@ -114,11 +114,11 @@ const AdminDashboard = () => {
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow mb-6">
           <div className="border-b border-gray-200 dark:border-gray-700">
             {/* Mobile Navigation - Dropdown */}
-            <div className="block sm:hidden px-4 py-2">
+            <div className="block sm:hidden px-4 py-3">
               <select
                 value={activeTab}
                 onChange={(e) => setActiveTab(e.target.value)}
-                className="w-full p-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-base"
               >
                 {navigationTabs.map((tab) => (
                   <option key={tab.id} value={tab.id}>
@@ -137,7 +137,7 @@ const AdminDashboard = () => {
                     <button
                       key={tab.id}
                       onClick={() => setActiveTab(tab.id)}
-                      className={`py-4 px-2 lg:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 whitespace-nowrap ${
+                      className={`py-4 px-2 lg:px-1 border-b-2 font-medium text-sm flex items-center space-x-2 whitespace-nowrap transition-colors ${
                         activeTab === tab.id
                           ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                           : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
