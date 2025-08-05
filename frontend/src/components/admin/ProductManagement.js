@@ -133,8 +133,8 @@ const ProductManagement = () => {
         </div>
       </div>
 
-      {/* Product Table */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
+      {/* Product Table - Desktop */}
+      <div className="hidden md:block bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-700">
@@ -194,6 +194,41 @@ const ProductManagement = () => {
                 Next
               </button>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Product Cards - Mobile */}
+      <div className="md:hidden space-y-4">
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            onEdit={handleEditProduct}
+            onDelete={handleDeleteProduct}
+          />
+        ))}
+        
+        {/* Mobile Pagination */}
+        <div className="flex items-center justify-between pt-4">
+          <div className="text-sm text-gray-700 dark:text-gray-300">
+            Page {currentPage} of {totalPages}
+          </div>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="btn-secondary disabled:opacity-50 text-sm px-3 py-2"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="btn-secondary disabled:opacity-50 text-sm px-3 py-2"
+            >
+              Next
+            </button>
           </div>
         </div>
       </div>
