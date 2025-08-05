@@ -334,3 +334,24 @@ async def get_inventory_user(current_user: UserInDB = Depends(get_current_active
             detail="Inventory access required"
         )
     return current_user
+
+# Optional authentication dependency for public endpoints
+async def get_optional_current_user(token: Optional[str] = Depends(oauth2_scheme)) -> Optional[UserInDB]:
+    """Get current user if authenticated, None if not"""
+    if not token:
+        return None
+    
+    try:
+        from server import db  # Import here to avoid circular import
+        
+        token_data = AuthService.verify_token(token)
+        user_service = UserService(db)
+        user = await user_service.get_user_by_id(token_data.user_id)
+        
+        if user and user.is_active:
+            return user
+        return None
+        
+    except HTTPException:
+        # If token is invalid, just return None (don't raise error)
+        return None
