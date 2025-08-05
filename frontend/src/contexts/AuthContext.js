@@ -77,6 +77,10 @@ export const AuthProvider = ({ children }) => {
       setUser(userData);
       setLoading(false);
       
+      // Trigger cart merge (will be handled by CartProvider)
+      // We dispatch a custom event that CartProvider can listen to
+      window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: userData }));
+      
       return { success: true, user: userData };
     } catch (error) {
       console.error('Login failed:', error);
