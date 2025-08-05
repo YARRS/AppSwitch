@@ -5,7 +5,7 @@ import axios from 'axios';
 
 // Components
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { CartProvider } from './contexts/CartContext';
+import { CartProvider, useCart } from './contexts/CartContext';
 import { ProtectedRoute, AdminRoute, OptionalAuth } from './components/ProtectedRoute';
 import Login from './components/Login';
 import Register from './components/Register';
