@@ -233,13 +233,18 @@ function Header({ darkMode, toggleDarkMode }) {
             {/* Hamburger Menu Button */}
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              className="group relative p-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-lg active:scale-95 transform focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              {showMobileMenu ? (
-                <X className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-              ) : (
-                <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300" />
-              )}
+              <div className="relative w-6 h-6">
+                {showMobileMenu ? (
+                  <X className="w-6 h-6 text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200 transform rotate-0 group-hover:rotate-90" />
+                ) : (
+                  <Menu className="w-6 h-6 text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-all duration-200 transform group-hover:scale-110" />
+                )}
+              </div>
+              
+              {/* Pulse effect on hover */}
+              <div className="absolute inset-0 rounded-xl bg-blue-600 opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
             </button>
           </div>
         </div>
