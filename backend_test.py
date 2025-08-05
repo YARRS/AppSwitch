@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """
 Backend API Testing Script for Vallmark Gift Articles E-commerce System
-SPECIAL FOCUS: Product Management System Testing
-Testing why products added by salesman or shop owner through admin dashboard 
-are not appearing on the products homepage.
+SPECIAL FOCUS: Guest Access to Products API Testing
+Testing that guest users can access products without 401 unauthorized errors.
 """
 
 import requests
