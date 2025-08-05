@@ -10,7 +10,7 @@ from models import (
 )
 from auth import (
     get_current_active_user, get_admin_user, get_admin_or_manager_user, 
-    get_inventory_user, get_salesperson_user
+    get_inventory_user, get_salesperson_user, get_optional_current_user
 )
 
 router = APIRouter(prefix="/api/products", tags=["Products"])
