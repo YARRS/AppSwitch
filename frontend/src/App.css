@@ -1,0 +1,175 @@
+/* App.css - Additional styling for mobile responsiveness */
+
+/* Mobile-first responsive utilities */
+@media (max-width: 640px) {
+  /* Ensure touch targets are at least 44px */
+  button,
+  .btn-primary,
+  .btn-secondary,
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+  }
+
+  /* Improve form inputs on mobile */
+  input,
+  select,
+  textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 44px;
+  }
+
+  /* Make cards more touch-friendly */
+  .card {
+    padding: 1rem;
+  }
+
+  /* Improve mobile navigation */
+  .mobile-menu-overlay {
+    backdrop-filter: blur(4px);
+  }
+
+  /* Better spacing for mobile */
+  .mobile-spacing {
+    padding: 0.75rem;
+  }
+
+  /* Mobile-optimized grid */
+  .mobile-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* Tablet optimizations */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .tablet-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .tablet-admin-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop optimizations */
+@media (min-width: 1025px) {
+  .desktop-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Improved accessibility and mobile interaction */
+@media (hover: none) and (pointer: coarse) {
+  /* Touch device specific styles */
+  button:hover,
+  .btn-primary:hover,
+  .btn-secondary:hover {
+    transform: none; /* Remove hover transforms on touch devices */
+  }
+
+  /* Larger touch targets */
+  .touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
+
+/* Loading states for mobile */
+.mobile-loading {
+  padding: 2rem;
+  text-align: center;
+}
+
+/* Mobile-friendly modals */
+@media (max-width: 640px) {
+  .modal-content {
+    margin: 0;
+    border-radius: 0;
+    height: 100vh;
+    max-height: 100vh;
+  }
+
+  .modal-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .modal-footer {
+    position: sticky;
+    bottom: 0;
+    z-index: 10;
+  }
+}
+
+/* Enhanced product cards for mobile */
+.product-card-mobile {
+  transition: transform 0.2s ease-in-out;
+}
+
+.product-card-mobile:active {
+  transform: scale(0.98);
+}
+
+/* Mobile navigation enhancements */
+.mobile-nav-item {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.mobile-nav-item:last-child {
+  border-bottom: none;
+}
+
+/* Admin dashboard mobile enhancements */
+.admin-stats-mobile {
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-quick-action-mobile {
+  min-height: 80px;
+  padding: 1rem;
+  text-align: center;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s ease-in-out;
+}
+
+/* Responsive typography */
+@media (max-width: 640px) {
+  h1 {
+    font-size: 1.875rem; /* 30px */
+    line-height: 2.25rem; /* 36px */
+  }
+
+  h2 {
+    font-size: 1.5rem; /* 24px */
+    line-height: 2rem; /* 32px */
+  }
+
+  h3 {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.75rem; /* 28px */
+  }
+}
+
+/* Improved focus states for keyboard navigation */
+button:focus,
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Dark mode enhancements for mobile */
+@media (prefers-color-scheme: dark) {
+  .mobile-nav-item {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+  }
+}
