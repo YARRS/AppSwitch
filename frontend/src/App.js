@@ -576,42 +576,110 @@ function ContactPage() {
 // Footer Component
 function Footer() {
   return (
-    <footer className="bg-gray-900 text-white py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid md:grid-cols-4 gap-8">
-          <div>
-            <Logo size="small" className="mb-4" />
-            <p className="text-gray-400">
-              Your premier destination for exquisite gift articles that create lasting memories.
-            </p>
+    <footer className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white overflow-hidden">
+      {/* Decorative Background Elements */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-0 left-0 w-72 h-72 bg-gradient-to-r from-red-500 to-yellow-500 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-l from-blue-500 to-purple-500 rounded-full blur-3xl transform translate-x-1/2 translate-y-1/2"></div>
+        <div className="absolute top-1/2 left-1/2 w-64 h-64 bg-gradient-to-br from-green-500 to-cyan-500 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2 opacity-50"></div>
+      </div>
+      
+      {/* Main Footer Content */}
+      <div className="relative z-10 py-12 lg:py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Top Section with Logo and Description */}
+          <div className="text-center mb-12 lg:mb-16">
+            <div className="flex flex-col items-center space-y-6">
+              <Logo size="large" className="transform hover:scale-105 transition-transform duration-300" />
+              <p className="max-w-2xl text-gray-300 text-lg leading-relaxed">
+                Your premier destination for exquisite gift articles that create lasting memories and bring joy to every special occasion.
+              </p>
+              {/* Decorative Divider */}
+              <div className="w-24 h-1 bg-gradient-to-r from-red-500 via-yellow-500 to-red-500 rounded-full"></div>
+            </div>
           </div>
-          <div>
-            <h4 className="font-semibold mb-4">Categories</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="/" className="hover:text-white">Home Decor</a></li>
-              <li><a href="/" className="hover:text-white">Personalized Gifts</a></li>
-              <li><a href="/" className="hover:text-white">Special Occasions</a></li>
-            </ul>
+
+          {/* Links Grid - Mobile & Desktop Friendly */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 text-center lg:text-left">
+            {/* Categories */}
+            <div className="space-y-4">
+              <h4 className="text-xl font-bold text-white mb-6 relative">
+                Categories
+                <div className="absolute bottom-0 left-1/2 lg:left-0 transform -translate-x-1/2 lg:translate-x-0 w-8 h-0.5 bg-gradient-to-r from-red-500 to-yellow-500 rounded-full mt-2"></div>
+              </h4>
+              <ul className="space-y-3">
+                <li><a href="/" className="text-gray-400 hover:text-white transition-colors duration-200 hover:pl-2 lg:hover:pl-2 inline-block">🏠 Home Decor</a></li>
+                <li><a href="/" className="text-gray-400 hover:text-white transition-colors duration-200 hover:pl-2 lg:hover:pl-2 inline-block">🎁 Personalized Gifts</a></li>
+                <li><a href="/" className="text-gray-400 hover:text-white transition-colors duration-200 hover:pl-2 lg:hover:pl-2 inline-block">💍 Jewelry</a></li>
+                <li><a href="/" className="text-gray-400 hover:text-white transition-colors duration-200 hover:pl-2 lg:hover:pl-2 inline-block">🎉 Special Occasions</a></li>
+              </ul>
+            </div>
+
+            {/* Customer Support */}
+            <div className="space-y-4">
+              <h4 className="text-xl font-bold text-white mb-6 relative">
+                Support
+                <div className="absolute bottom-0 left-1/2 lg:left-0 transform -translate-x-1/2 lg:translate-x-0 w-8 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mt-2"></div>
+              </h4>
+              <ul className="space-y-3">
+                <li><a href="/about" className="text-gray-400 hover:text-white transition-colors duration-200 hover:pl-2 lg:hover:pl-2 inline-block">📖 Gift Guide</a></li>
+                <li><a href="/contact" className="text-gray-400 hover:text-white transition-colors duration-200 hover:pl-2 lg:hover:pl-2 inline-block">❓ FAQ</a></li>
+                <li><a href="/contact" className="text-gray-400 hover:text-white transition-colors duration-200 hover:pl-2 lg:hover:pl-2 inline-block">📞 Contact</a></li>
+                <li><a href="/contact" className="text-gray-400 hover:text-white transition-colors duration-200 hover:pl-2 lg:hover:pl-2 inline-block">📧 Support</a></li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div className="space-y-4">
+              <h4 className="text-xl font-bold text-white mb-6 relative">
+                Company
+                <div className="absolute bottom-0 left-1/2 lg:left-0 transform -translate-x-1/2 lg:translate-x-0 w-8 h-0.5 bg-gradient-to-r from-green-500 to-cyan-500 rounded-full mt-2"></div>
+              </h4>
+              <ul className="space-y-3">
+                <li><a href="/about" className="text-gray-400 hover:text-white transition-colors duration-200 hover:pl-2 lg:hover:pl-2 inline-block">🏢 About Us</a></li>
+                <li><a href="/contact" className="text-gray-400 hover:text-white transition-colors duration-200 hover:pl-2 lg:hover:pl-2 inline-block">💼 Careers</a></li>
+                <li><a href="/contact" className="text-gray-400 hover:text-white transition-colors duration-200 hover:pl-2 lg:hover:pl-2 inline-block">🔐 Privacy Policy</a></li>
+                <li><a href="/contact" className="text-gray-400 hover:text-white transition-colors duration-200 hover:pl-2 lg:hover:pl-2 inline-block">📋 Terms</a></li>
+              </ul>
+            </div>
+
+            {/* Social & Contact */}
+            <div className="space-y-4">
+              <h4 className="text-xl font-bold text-white mb-6 relative">
+                Connect
+                <div className="absolute bottom-0 left-1/2 lg:left-0 transform -translate-x-1/2 lg:translate-x-0 w-8 h-0.5 bg-gradient-to-r from-pink-500 to-orange-500 rounded-full mt-2"></div>
+              </h4>
+              <div className="space-y-4">
+                <p className="text-gray-400 text-sm">Follow us for latest updates</p>
+                {/* Social Media Icons */}
+                <div className="flex justify-center lg:justify-start space-x-4">
+                  <a href="#" className="w-10 h-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-200">
+                    <span className="text-white font-bold">f</span>
+                  </a>
+                  <a href="#" className="w-10 h-10 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-200">
+                    <span className="text-white font-bold">ig</span>
+                  </a>
+                  <a href="#" className="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-500 rounded-full flex items-center justify-center hover:scale-110 transition-transform duration-200">
+                    <span className="text-white font-bold">tw</span>
+                  </a>
+                </div>
+                <p className="text-gray-400 text-sm">📧 hello@vallmark.com</p>
+                <p className="text-gray-400 text-sm">📱 +1 (555) 123-4567</p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h4 className="font-semibold mb-4">Support</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="/about" className="hover:text-white">Gift Guide</a></li>
-              <li><a href="/contact" className="hover:text-white">FAQ</a></li>
-              <li><a href="/contact" className="hover:text-white">Contact</a></li>
-            </ul>
+
+          {/* Bottom Section */}
+          <div className="mt-12 lg:mt-16 pt-8 border-t border-gray-700">
+            <div className="text-center space-y-4">
+              <div className="flex justify-center items-center space-x-2 text-gray-400">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                <p>&copy; 2024 Vallmark Gift Articles. All rights reserved.</p>
+                <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+              </div>
+              <p className="text-gray-500 text-sm">Made with ❤️ for creating beautiful memories</p>
+            </div>
           </div>
-          <div>
-            <h4 className="font-semibold mb-4">Company</h4>
-            <ul className="space-y-2 text-gray-400">
-              <li><a href="/about" className="hover:text-white">About</a></li>
-              <li><a href="/contact" className="hover:text-white">Careers</a></li>
-              <li><a href="/contact" className="hover:text-white">Privacy</a></li>
-            </ul>
-          </div>
-        </div>
-        <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2024 Vallmark Gift Articles. All rights reserved.</p>
         </div>
       </div>
     </footer>
