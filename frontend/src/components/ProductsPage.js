@@ -528,4 +528,180 @@ const ProductCard = ({ product, isAuthenticated }) => {
   );
 };
 
+// Featured Categories Carousel Component
+const FeaturedCategoriesCarousel = ({ categories, products, onCategorySelect, selectedCategory }) => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Group products by category
+  const productsByCategory = categories.reduce((acc, category) => {
+    const categoryProducts = products.filter(product => product.category === category.value);
+    if (categoryProducts.length > 0) {
+      acc[category.value] = {
+        ...category,
+        products: categoryProducts.slice(0, 4) // Show max 4 products per category
+      };
+    }
+    return acc;
+  }, {});
+
+  const categorySlides = Object.values(productsByCategory);
+
+  useEffect(() => {
+    if (categorySlides.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentSlide((prev) => (prev + 1) % categorySlides.length);
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [categorySlides.length]);
+
+  if (categorySlides.length === 0) return null;
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(price);
+  };
+
+  const handleCategoryClick = (categoryValue) => {
+    onCategorySelect(categoryValue);
+    // Scroll to products section
+    document.getElementById('products-grid')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  return (
+    <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 rounded-xl shadow-lg p-4 lg:p-8 mb-8 overflow-hidden">
+      <div className="text-center mb-6">
+        <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+          Featured Collections
+        </h2>
+        <p className="text-gray-600 dark:text-gray-300">
+          Discover our handpicked selections across different categories
+        </p>
+        <div className="w-20 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mx-auto mt-3"></div>
+      </div>
+
+      {/* Carousel Container */}
+      <div className="relative">
+        <div 
+          className="flex transition-transform duration-500 ease-in-out"
+          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        >
+          {categorySlides.map((categoryData, slideIndex) => (
+            <div key={categoryData.value} className="w-full flex-shrink-0">
+              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 lg:p-6 shadow-md">
+                {/* Category Header */}
+                <div className="text-center mb-6">
+                  <h3 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    {categoryData.label}
+                  </h3>
+                  <button
+                    onClick={() => handleCategoryClick(categoryData.value)}
+                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+                  >
+                    <span className="text-sm font-medium">View All</span>
+                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Products Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {categoryData.products.map((product) => (
+                    <div
+                      key={product.id}
+                      className="group bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                    >
+                      {/* Product Image */}
+                      <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 relative">
+                        {product.images && product.images.length > 0 ? (
+                          <img
+                            src={product.images[0].startsWith('data:') ? product.images[0] : `data:image/jpeg;base64,${product.images[0]}`}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="flex items-center justify-center h-full">
+                            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                              <span className="text-white font-bold text-lg">
+                                {product.name.charAt(0)}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="p-3">
+                        <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                          {product.name}
+                        </h4>
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-1">
+                          {product.description}
+                        </p>
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-blue-600 dark:text-blue-400 text-sm">
+                            {formatPrice(product.discount_price || product.price)}
+                          </span>
+                          {product.discount_price && (
+                            <span className="text-xs text-gray-500 line-through">
+                              {formatPrice(product.price)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Navigation Dots */}
+        {categorySlides.length > 1 && (
+          <div className="flex justify-center mt-6 space-x-2">
+            {categorySlides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                  index === currentSlide
+                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 w-8'
+                    : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                }`}
+              />
+            ))}
+          </div>
+        )}
+
+        {/* Navigation Arrows */}
+        {categorySlides.length > 1 && (
+          <>
+            <button
+              onClick={() => setCurrentSlide((prev) => (prev - 1 + categorySlides.length) % categorySlides.length)}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white dark:bg-gray-700 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors group"
+            >
+              <svg className="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={() => setCurrentSlide((prev) => (prev + 1) % categorySlides.length)}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white dark:bg-gray-700 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors group"
+            >
+              <svg className="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export default ProductsPage;
