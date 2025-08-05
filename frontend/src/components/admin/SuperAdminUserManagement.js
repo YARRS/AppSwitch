@@ -50,8 +50,8 @@ const SuperAdminUserManagement = () => {
       });
       
       if (response.data.success) {
-        setUsers(response.data.data.users || []);
-        setTotalPages(response.data.data.total_pages || 1);
+        setUsers(response.data.data || []);
+        setTotalPages(Math.ceil((response.data.data || []).length / 20) || 1);
       }
     } catch (error) {
       console.error('Failed to fetch users:', error);
