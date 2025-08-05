@@ -20,6 +20,7 @@ const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isAuthenticated, getAuthenticatedAxios } = useAuth();
+  const { addToCart, isInCart, getItemQuantity, loading: cartLoading } = useCart();
   
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
