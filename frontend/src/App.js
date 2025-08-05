@@ -102,6 +102,7 @@ function App() {
 // Header Component
 function Header({ darkMode, toggleDarkMode }) {
   const { user, logout, isAuthenticated } = useAuth();
+  const { getCartItemCount } = useCart();
   const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleLogout = async () => {
@@ -125,6 +126,16 @@ function Header({ darkMode, toggleDarkMode }) {
           </nav>
           
           <div className="flex items-center space-x-4">
+            {/* Shopping Cart Icon */}
+            <button className="relative p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+              <ShoppingCart className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+              {getCartItemCount() > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {getCartItemCount()}
+                </span>
+              )}
+            </button>
+
             <button
               onClick={toggleDarkMode}
               className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
