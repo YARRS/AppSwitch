@@ -669,7 +669,7 @@ async def reassign_product(
 
 @router.get("/categories/available", response_model=APIResponse)
 async def get_available_categories(db: AsyncIOMotorDatabase = Depends(get_db)):
-    """Get available product categories"""
+    """Get available product categories - publicly accessible"""
     try:
         categories = [
             {
