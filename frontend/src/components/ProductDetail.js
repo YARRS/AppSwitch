@@ -290,9 +290,25 @@ const ProductDetail = () => {
           {/* Price and Stock */}
           <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
             <div className="flex items-center justify-between mb-4">
-              <span className="text-4xl font-bold text-gray-900 dark:text-white">
-                {formatPrice(product?.price || 0)}
-              </span>
+              <div className="flex flex-col">
+                {product?.discount_price ? (
+                  <>
+                    <span className="text-4xl font-bold text-red-600 dark:text-red-400">
+                      {formatPrice(product.discount_price)}
+                    </span>
+                    <span className="text-lg text-gray-500 dark:text-gray-400 line-through">
+                      {formatPrice(product.price)}
+                    </span>
+                    <span className="text-sm text-green-600 dark:text-green-400 mt-1">
+                      Save {formatPrice(product.price - product.discount_price)}
+                    </span>
+                  </>
+                ) : (
+                  <span className="text-4xl font-bold text-gray-900 dark:text-white">
+                    {formatPrice(product?.price || 0)}
+                  </span>
+                )}
+              </div>
               <div className="text-right">
                 <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
                   product?.is_in_stock
