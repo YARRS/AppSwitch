@@ -435,9 +435,22 @@ const ProductCard = ({ product, isAuthenticated }) => {
 
         {/* Price */}
         <div className="flex items-center justify-between mb-4">
-          <span className="text-2xl font-bold text-gray-900 dark:text-white">
-            {formatPrice(product.price)}
-          </span>
+          <div className="flex flex-col">
+            {product.discount_price ? (
+              <>
+                <span className="text-2xl font-bold text-red-600 dark:text-red-400">
+                  {formatPrice(product.discount_price)}
+                </span>
+                <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
+                  {formatPrice(product.price)}
+                </span>
+              </>
+            ) : (
+              <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                {formatPrice(product.price)}
+              </span>
+            )}
+          </div>
           {product.stock_quantity && (
             <span className="text-sm text-gray-500 dark:text-gray-400">
               {product.stock_quantity} left
