@@ -26,6 +26,7 @@ const CategoryManagement = () => {
       const params = {
         page: currentPage,
         per_page: 20,
+        include_hidden: true, // Include seasonal hidden categories for admin users
         ...(searchTerm && { search: searchTerm })
       };
       
