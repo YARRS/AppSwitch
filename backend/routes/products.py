@@ -287,7 +287,8 @@ async def create_product(
 async def get_products(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
-    category: Optional[str] = None,
+    category: Optional[str] = None,  # Keep for backward compatibility
+    categories: Optional[List[str]] = Query(None),  # New multiple categories parameter
     search: Optional[str] = None,
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
@@ -300,6 +301,15 @@ async def get_products(
     """Get products with filtering and pagination - accessible to guests and authenticated users"""
     try:
         product_service = ProductService(db)
+        
+        # Handle category/categories parameter - merge single category with categories list
+        final_categories = []
+        if category:
+            final_categories.append(category)
+        if categories:
+            final_categories.extend(categories)
+        # Remove duplicates while preserving order
+        final_categories = list(dict.fromkeys(final_categories)) if final_categories else None
         
         # For guests (non-authenticated users), only show active products
         if current_user is None:
@@ -316,7 +326,7 @@ async def get_products(
         result = await product_service.get_products(
             page=page,
             per_page=per_page,
-            category=category,
+            categories=final_categories,
             search=search,
             min_price=min_price,
             max_price=max_price,
