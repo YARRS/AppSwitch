@@ -668,24 +668,43 @@ async def reassign_product(
         )
 
 @router.get("/categories/available", response_model=APIResponse)
-async def get_available_categories(db: AsyncIOMotorDatabase = Depends(get_db)):
-    """Get available product categories - publicly accessible"""
+async def get_available_categories(
+    include_hidden: bool = Query(False),
+    current_user: Optional[UserInDB] = Depends(get_optional_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Get available product categories for dropdown selection"""
     try:
-        categories = [
-            {
-                "value": category.value,
-                "label": category.value.replace("_", " ").title(),
-                "description": {
-                    "home_decor": "Beautiful decorative items for home styling",
-                    "personalized_gifts": "Customized gifts for special occasions",
-                    "jewelry": "Elegant jewelry pieces and accessories",
-                    "keepsakes": "Memorable items to treasure forever", 
-                    "special_occasions": "Perfect gifts for celebrations",
-                    "accessories": "Stylish accessories and add-ons"
-                }.get(category.value, "")
-            }
-            for category in ProductCategory
-        ]
+        # Import CategoryService to avoid circular imports
+        from routes.categories import CategoryService
+        
+        category_service = CategoryService(db)
+        
+        # Build query for active categories
+        query = {"is_active": True}
+        
+        # Handle hidden categories based on user role
+        if not include_hidden or not current_user:
+            query["is_hidden"] = {"$ne": True}
+        else:
+            admin_roles = ["admin", "super_admin", "store_owner"]
+            if current_user.role not in admin_roles:
+                query["is_hidden"] = {"$ne": True}
+        
+        # Get categories from database
+        cursor = category_service.categories_collection.find(query).sort("sort_order", 1)
+        categories_from_db = await cursor.to_list(length=None)
+        
+        # Format for dropdown
+        categories = []
+        for category_doc in categories_from_db:
+            categories.append({
+                "value": category_doc["slug"],
+                "label": category_doc["name"],
+                "description": category_doc["description"],
+                "is_seasonal": category_doc.get("is_seasonal", False),
+                "is_hidden": category_doc.get("is_hidden", False)
+            })
         
         return APIResponse(
             success=True,
