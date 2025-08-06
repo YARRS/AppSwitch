@@ -67,7 +67,9 @@ class CategoryService:
         page: int = 1,
         per_page: int = 20,
         search: Optional[str] = None,
-        is_active: Optional[bool] = None
+        is_active: Optional[bool] = None,
+        include_hidden: bool = False,
+        user_role: Optional[str] = None
     ) -> dict:
         """Get categories with filtering and pagination"""
         # Build query
@@ -81,6 +83,16 @@ class CategoryService:
         
         if is_active is not None:
             query["is_active"] = is_active
+        
+        # Filter hidden categories based on user role
+        if not include_hidden:
+            # Regular users cannot see hidden categories
+            query["is_hidden"] = {"$ne": True}
+        else:
+            # Only admin roles can see hidden categories
+            admin_roles = ["admin", "super_admin", "store_owner"]
+            if user_role not in admin_roles:
+                query["is_hidden"] = {"$ne": True}
         
         # Calculate skip value
         skip = (page - 1) * per_page
