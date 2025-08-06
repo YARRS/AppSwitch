@@ -530,6 +530,9 @@ class CampaignBase(BaseModel):
     end_date: datetime
     status: CampaignStatus = CampaignStatus.SCHEDULED
     product_ids: List[str] = []  # Empty means all products
+    category_ids: List[str] = []  # Specific category IDs to target
+    category_slugs: List[str] = []  # Category slugs for easier targeting
+    target_seasonal_categories: bool = False  # If true, applies to seasonal categories
     user_roles: List[str] = []  # Empty means all users
     usage_limit: Optional[int] = None
     usage_count: int = 0
@@ -549,6 +552,9 @@ class CampaignUpdate(BaseModel):
     end_date: Optional[datetime] = None
     status: Optional[CampaignStatus] = None
     product_ids: Optional[List[str]] = None
+    category_ids: Optional[List[str]] = None
+    category_slugs: Optional[List[str]] = None
+    target_seasonal_categories: Optional[bool] = None
     user_roles: Optional[List[str]] = None
     usage_limit: Optional[int] = None
 
