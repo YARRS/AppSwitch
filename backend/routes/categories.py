@@ -213,7 +213,9 @@ async def get_categories(
         # Convert to response format
         category_responses = []
         for category_doc in result["categories"]:
-            category = CategoryInDB(**category_doc)
+            # Remove the product_count field before creating CategoryInDB instance
+            category_data = {k: v for k, v in category_doc.items() if k != "product_count"}
+            category = CategoryInDB(**category_data)
             category_responses.append(CategoryResponse(
                 **category.dict(),
                 product_count=category_doc.get("product_count", 0)
