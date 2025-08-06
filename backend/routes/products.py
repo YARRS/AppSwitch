@@ -370,7 +370,8 @@ async def get_products(
 async def get_my_products(
     page: int = Query(1, ge=1),
     per_page: int = Query(20, ge=1, le=100),
-    category: Optional[str] = None,
+    category: Optional[str] = None,  # Keep for backward compatibility
+    categories: Optional[List[str]] = Query(None),  # New multiple categories parameter
     search: Optional[str] = None,
     is_active: Optional[bool] = None,
     current_user: UserInDB = Depends(get_current_active_user),
@@ -388,8 +389,17 @@ async def get_my_products(
             ]
         }
         
+        # Handle category/categories parameter - merge single category with categories list
+        final_categories = []
         if category:
-            query["category"] = category
+            final_categories.append(category)
+        if categories:
+            final_categories.extend(categories)
+        # Remove duplicates while preserving order
+        final_categories = list(dict.fromkeys(final_categories)) if final_categories else None
+        
+        if final_categories:
+            query["category"] = {"$in": final_categories}
         
         if search:
             query["$and"] = [{
