@@ -87,7 +87,7 @@ class ProductService:
         self,
         page: int = 1,
         per_page: int = 20,
-        category: Optional[str] = None,
+        categories: Optional[List[str]] = None,  # Multiple categories
         search: Optional[str] = None,
         min_price: Optional[float] = None,
         max_price: Optional[float] = None,
@@ -99,8 +99,8 @@ class ProductService:
         # Build query
         query = {}
         
-        if category:
-            query["category"] = category
+        if categories:
+            query["category"] = {"$in": categories}
         
         if search:
             query["$or"] = [
