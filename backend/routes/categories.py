@@ -193,6 +193,8 @@ async def get_categories(
     per_page: int = Query(20, ge=1, le=100),
     search: Optional[str] = None,
     is_active: Optional[bool] = None,
+    include_hidden: bool = Query(False),
+    current_user: UserInDB = Depends(get_current_active_user),
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Get categories with filtering and pagination"""
@@ -203,7 +205,9 @@ async def get_categories(
             page=page,
             per_page=per_page,
             search=search,
-            is_active=is_active
+            is_active=is_active,
+            include_hidden=include_hidden,
+            user_role=current_user.role
         )
         
         # Convert to response format
