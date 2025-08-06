@@ -146,7 +146,7 @@ class TokenData(BaseModel):
 class ProductBase(BaseModel):
     name: str
     description: str
-    category: str  # Category slug instead of enum
+    categories: List[str] = []  # Multiple category slugs instead of single category
     price: float
     discount_price: Optional[float] = None
     sku: str
