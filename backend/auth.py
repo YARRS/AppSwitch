@@ -115,13 +115,14 @@ class AuthService:
             token_data = TokenData(user_id=user_id, email=email)
             return token_data
             
-        except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        except jwt.ExpiredSignatureError:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Token has expired",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-        except jwt.PyJWTError:
+        except Exception as jwt_error:
+            # Handle different JWT library versions
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token",
