@@ -436,6 +436,9 @@ class CategoryBase(BaseModel):
     slug: str
     image: Optional[str] = None  # Base64 encoded image
     is_active: bool = True
+    is_hidden: bool = False  # Hidden categories only visible to admin users
+    is_seasonal: bool = False  # Seasonal categories for campaign targeting
+    seasonal_months: Optional[List[int]] = None  # Months when seasonal category is relevant [1-12]
     sort_order: int = 0
 
 class CategoryCreate(CategoryBase):
@@ -446,6 +449,9 @@ class CategoryUpdate(BaseModel):
     description: Optional[str] = None
     image: Optional[str] = None
     is_active: Optional[bool] = None
+    is_hidden: Optional[bool] = None
+    is_seasonal: Optional[bool] = None
+    seasonal_months: Optional[List[int]] = None
     sort_order: Optional[int] = None
 
 class CategoryInDB(CategoryBase, BaseDocument):
