@@ -399,7 +399,7 @@ async def get_my_products(
         final_categories = list(dict.fromkeys(final_categories)) if final_categories else None
         
         if final_categories:
-            query["category"] = {"$in": final_categories}
+            query["categories"] = {"$in": final_categories}  # Use the new categories field
         
         if search:
             query["$and"] = [{
