@@ -1,18 +1,176 @@
 #!/usr/bin/env python3
 """
-Category Seeder for Vallmark Gift Articles
-Creates initial categories for the ecommerce system
+Category seeding script for Vallmark ecommerce
+Creates default categories including seasonal hidden categories
 """
 
 import asyncio
 import os
-import uuid
+import sys
 from datetime import datetime
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
 
+# Add the backend directory to Python path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from models import CategoryInDB
+
 # Load environment variables
 load_dotenv()
+
+# MongoDB connection
+MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/vallmark_db")
+
+# Default categories to create
+DEFAULT_CATEGORIES = [
+    # Regular visible categories
+    {
+        "name": "Home Decor",
+        "description": "Beautiful decorative items for your home including vases, frames, and ornaments",
+        "slug": "home_decor",
+        "is_active": True,
+        "is_hidden": False,
+        "is_seasonal": False,
+        "sort_order": 1
+    },
+    {
+        "name": "Personalized Gifts",
+        "description": "Custom and personalized gift items for special occasions",
+        "slug": "personalized_gifts", 
+        "is_active": True,
+        "is_hidden": False,
+        "is_seasonal": False,
+        "sort_order": 2
+    },
+    {
+        "name": "Jewelry & Accessories",
+        "description": "Elegant jewelry pieces and fashion accessories",
+        "slug": "jewelry_accessories",
+        "is_active": True,
+        "is_hidden": False,
+        "is_seasonal": False,
+        "sort_order": 3
+    },
+    {
+        "name": "Keepsakes & Memory Items",
+        "description": "Special items to preserve and cherish memories",
+        "slug": "keepsakes_memory",
+        "is_active": True,
+        "is_hidden": False,
+        "is_seasonal": False,
+        "sort_order": 4
+    },
+    {
+        "name": "Special Occasions",
+        "description": "Gift items perfect for birthdays, anniversaries, and celebrations",
+        "slug": "special_occasions",
+        "is_active": True,
+        "is_hidden": False,
+        "is_seasonal": False,
+        "sort_order": 5
+    },
+    {
+        "name": "Luxury Items",
+        "description": "Premium and luxury gift articles for discerning tastes",
+        "slug": "luxury_items",
+        "is_active": True,
+        "is_hidden": False,
+        "is_seasonal": False,
+        "sort_order": 6
+    },
+    {
+        "name": "Corporate Gifts",
+        "description": "Professional gift items suitable for business and corporate events",
+        "slug": "corporate_gifts",
+        "is_active": True,
+        "is_hidden": False,
+        "is_seasonal": False,
+        "sort_order": 7
+    },
+    
+    # Seasonal hidden categories (only visible to admins)
+    {
+        "name": "Valentine's Day Collection",
+        "description": "Romantic gifts and decorations for Valentine's Day",
+        "slug": "valentines_day",
+        "is_active": True,
+        "is_hidden": True,  # Hidden from regular users
+        "is_seasonal": True,
+        "seasonal_months": [2],  # February
+        "sort_order": 101
+    },
+    {
+        "name": "Christmas & Holiday",
+        "description": "Christmas decorations, holiday gifts, and seasonal items",
+        "slug": "christmas_holiday",
+        "is_active": True,
+        "is_hidden": True,
+        "is_seasonal": True,
+        "seasonal_months": [12, 1],  # December, January
+        "sort_order": 102
+    },
+    {
+        "name": "Summer Collection",
+        "description": "Light, bright items perfect for summer celebrations",
+        "slug": "summer_collection",
+        "is_active": True,
+        "is_hidden": True,
+        "is_seasonal": True,
+        "seasonal_months": [6, 7, 8],  # June, July, August
+        "sort_order": 103
+    },
+    {
+        "name": "Mother's Day Specials",
+        "description": "Special gifts curated for Mother's Day celebrations",
+        "slug": "mothers_day",
+        "is_active": True,
+        "is_hidden": True,
+        "is_seasonal": True,
+        "seasonal_months": [5],  # May
+        "sort_order": 104
+    },
+    {
+        "name": "Father's Day Collection",
+        "description": "Thoughtful gifts for Father's Day celebrations", 
+        "slug": "fathers_day",
+        "is_active": True,
+        "is_hidden": True,
+        "is_seasonal": True,
+        "seasonal_months": [6],  # June
+        "sort_order": 105
+    },
+    {
+        "name": "Wedding Season",
+        "description": "Beautiful items perfect for wedding gifts and celebrations",
+        "slug": "wedding_season",
+        "is_active": True,
+        "is_hidden": True,
+        "is_seasonal": True,
+        "seasonal_months": [4, 5, 6, 9, 10],  # April, May, June, September, October
+        "sort_order": 106
+    },
+    {
+        "name": "Back to School",
+        "description": "Items suitable for back to school season and student gifts",
+        "slug": "back_to_school",
+        "is_active": True,
+        "is_hidden": True,
+        "is_seasonal": True,
+        "seasonal_months": [8, 9],  # August, September
+        "sort_order": 107
+    },
+    {
+        "name": "Diwali & Festivals",
+        "description": "Traditional and modern items for Diwali and festival celebrations",
+        "slug": "diwali_festivals",
+        "is_active": True,
+        "is_hidden": True,
+        "is_seasonal": True,
+        "seasonal_months": [10, 11],  # October, November
+        "sort_order": 108
+    }
+]
 
 class CategorySeeder:
     def __init__(self):
@@ -21,226 +179,171 @@ class CategorySeeder:
     
     async def connect(self):
         """Connect to MongoDB"""
-        mongo_url = os.getenv("MONGO_URL", "mongodb://localhost:27017/vallmark_db")
-        print(f"🔗 Connecting to MongoDB: {mongo_url}")
-        
-        self.client = AsyncIOMotorClient(mongo_url)
-        self.db = self.client.get_default_database()
-        
-        # Test connection
-        await self.db.list_collection_names()
-        print("✅ Connected to database successfully")
+        try:
+            self.client = AsyncIOMotorClient(MONGO_URL)
+            self.db = self.client.get_default_database()
+            
+            # Test connection
+            await self.db.list_collection_names()
+            print("✅ Connected to MongoDB successfully")
+            return True
+        except Exception as e:
+            print(f"❌ Failed to connect to MongoDB: {e}")
+            return False
     
-    async def seed_categories(self):
-        """Seed initial categories"""
-        print("🌱 Starting category seeding...")
-        
-        # Regular categories (visible to all)
-        regular_categories = [
-            {
-                "name": "Home Decor",
-                "description": "Beautiful decorative items for home styling and interior design",
-                "slug": "home_decor",
-                "is_active": True,
-                "is_hidden": False,
-                "is_seasonal": False,
-                "sort_order": 1,
-                "image": None
-            },
-            {
-                "name": "Personalized Gifts",
-                "description": "Customized gifts for special occasions and memorable moments",
-                "slug": "personalized_gifts", 
-                "is_active": True,
-                "is_hidden": False,
-                "is_seasonal": False,
-                "sort_order": 2,
-                "image": None
-            },
-            {
-                "name": "Jewelry",
-                "description": "Elegant jewelry pieces and accessories for every occasion",
-                "slug": "jewelry",
-                "is_active": True,
-                "is_hidden": False,
-                "is_seasonal": False,
-                "sort_order": 3,
-                "image": None
-            },
-            {
-                "name": "Keepsakes",
-                "description": "Memorable items to treasure forever and pass down through generations",
-                "slug": "keepsakes",
-                "is_active": True,
-                "is_hidden": False,
-                "is_seasonal": False,
-                "sort_order": 4,
-                "image": None
-            },
-            {
-                "name": "Special Occasions",
-                "description": "Perfect gifts for celebrations, anniversaries, and milestone events",
-                "slug": "special_occasions",
-                "is_active": True,
-                "is_hidden": False,
-                "is_seasonal": False,
-                "sort_order": 5,
-                "image": None
-            },
-            {
-                "name": "Accessories",
-                "description": "Stylish accessories and add-ons to complement your gifts",
-                "slug": "accessories",
-                "is_active": True,
-                "is_hidden": False,
-                "is_seasonal": False,
-                "sort_order": 6,
-                "image": None
-            }
-        ]
-        
-        # Hidden seasonal categories (only visible to admins)
-        seasonal_categories = [
-            {
-                "name": "Winter Collection",
-                "description": "Special winter themed items for holiday seasons and cold weather celebrations",
-                "slug": "winter_collection",
-                "is_active": True,
-                "is_hidden": True,
-                "is_seasonal": True,
-                "seasonal_months": [11, 12, 1, 2],  # Nov, Dec, Jan, Feb
-                "sort_order": 101,
-                "image": None
-            },
-            {
-                "name": "Summer Collection",
-                "description": "Bright and vibrant items perfect for summer celebrations and outdoor events",
-                "slug": "summer_collection",
-                "is_active": True,
-                "is_hidden": True,
-                "is_seasonal": True,
-                "seasonal_months": [4, 5, 6, 7],  # Apr, May, Jun, Jul
-                "sort_order": 102,
-                "image": None
-            },
-            {
-                "name": "Spring Collection",
-                "description": "Fresh and colorful items celebrating new beginnings and renewal",
-                "slug": "spring_collection",
-                "is_active": True,
-                "is_hidden": True,
-                "is_seasonal": True,
-                "seasonal_months": [3, 4, 5],  # Mar, Apr, May
-                "sort_order": 103,
-                "image": None
-            },
-            {
-                "name": "Autumn Collection",
-                "description": "Warm and cozy items perfect for fall celebrations and harvest themes",
-                "slug": "autumn_collection",
-                "is_active": True,
-                "is_hidden": True,
-                "is_seasonal": True,
-                "seasonal_months": [9, 10, 11],  # Sep, Oct, Nov
-                "sort_order": 104,
-                "image": None
-            },
-            {
-                "name": "Festival Collection",
-                "description": "Special items for major festivals like Diwali, Christmas, Eid, and more",
-                "slug": "festival_collection",
-                "is_active": True,
-                "is_hidden": True,
-                "is_seasonal": True,
-                "seasonal_months": [10, 11, 12],  # Oct, Nov, Dec (main festival months)
-                "sort_order": 105,
-                "image": None
-            },
-            {
-                "name": "Valentine Collection",
-                "description": "Romantic gifts and love-themed items for Valentine's Day and anniversaries",
-                "slug": "valentine_collection",
-                "is_active": True,
-                "is_hidden": True,
-                "is_seasonal": True,
-                "seasonal_months": [2],  # February
-                "sort_order": 106,
-                "image": None
-            }
-        ]
-        
-        # Combine all categories
-        all_categories = regular_categories + seasonal_categories
-        
-        # Add UUID and timestamps
-        for category in all_categories:
-            category["id"] = str(uuid.uuid4())
-            category["created_at"] = datetime.utcnow()
-            category["updated_at"] = datetime.utcnow()
-            category["product_count"] = 0
-        
-        # Check existing categories
-        existing_count = await self.db.categories.count_documents({})
-        if existing_count > 0:
-            print(f"⚠️  Found {existing_count} existing categories.")
-            response = input("Do you want to clear existing categories and reseed? (y/N): ")
-            if response.lower() == 'y':
-                await self.db.categories.delete_many({})
-                print("🗑️  Cleared existing categories")
-            else:
-                print("ℹ️  Keeping existing categories and adding new ones")
-                # Only add categories that don't exist
-                existing_slugs = set()
-                async for cat in self.db.categories.find({}, {"slug": 1}):
-                    existing_slugs.add(cat["slug"])
-                
-                all_categories = [cat for cat in all_categories if cat["slug"] not in existing_slugs]
-                print(f"ℹ️  Will add {len(all_categories)} new categories")
-        
-        if all_categories:
-            # Insert categories
-            result = await self.db.categories.insert_many(all_categories)
-            print(f"✅ Created {len(result.inserted_ids)} categories")
-        else:
-            print("ℹ️  No new categories to add")
-        
-        # Show summary
-        total_categories = await self.db.categories.count_documents({})
-        regular_count = await self.db.categories.count_documents({"is_hidden": False})
-        seasonal_count = await self.db.categories.count_documents({"is_seasonal": True})
-        active_count = await self.db.categories.count_documents({"is_active": True})
-        
-        print(f"📊 Database Summary:")
-        print(f"   Total categories: {total_categories}")
-        print(f"   Regular categories: {regular_count}")
-        print(f"   Seasonal categories: {seasonal_count}")
-        print(f"   Active categories: {active_count}")
-        
-        return len(all_categories)
-    
-    async def close(self):
-        """Close database connection"""
+    async def disconnect(self):
+        """Disconnect from MongoDB"""
         if self.client:
             self.client.close()
-            print("🔌 Database connection closed")
+            print("✅ Disconnected from MongoDB")
+    
+    async def category_exists(self, slug: str) -> bool:
+        """Check if category already exists"""
+        existing_category = await self.db.categories.find_one({"slug": slug})
+        return existing_category is not None
+    
+    async def create_category(self, category_data: dict) -> bool:
+        """Create a single category"""
+        try:
+            # Check if category already exists
+            if await self.category_exists(category_data["slug"]):
+                print(f"⚠️  Category '{category_data['name']}' already exists, skipping...")
+                return False
+            
+            # Create category document
+            category = CategoryInDB(**category_data)
+            category_dict = category.dict()
+            
+            # Insert into database
+            await self.db.categories.insert_one(category_dict)
+            
+            category_type = "Seasonal Hidden" if category_data.get("is_seasonal") and category_data.get("is_hidden") else "Regular"
+            print(f"✅ Created {category_type} category: {category.name} ({category.slug})")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Failed to create category {category_data.get('name', 'unknown')}: {e}")
+            return False
+    
+    async def seed_categories(self):
+        """Seed all default categories"""
+        print("\n🌱 Starting category seeding process...")
+        print("=" * 60)
+        
+        created_count = 0
+        skipped_count = 0
+        
+        # Separate regular and seasonal categories for better display
+        regular_categories = [cat for cat in DEFAULT_CATEGORIES if not cat.get("is_seasonal", False)]
+        seasonal_categories = [cat for cat in DEFAULT_CATEGORIES if cat.get("is_seasonal", False)]
+        
+        print("📦 Creating Regular Categories:")
+        for category_data in regular_categories:
+            success = await self.create_category(category_data.copy())
+            if success:
+                created_count += 1
+            else:
+                skipped_count += 1
+        
+        print(f"\n🎭 Creating Seasonal Hidden Categories:")
+        for category_data in seasonal_categories:
+            success = await self.create_category(category_data.copy())
+            if success:
+                created_count += 1
+            else:
+                skipped_count += 1
+        
+        print("=" * 60)
+        print(f"🎉 Category seeding completed!")
+        print(f"   Created: {created_count} categories")
+        print(f"   Skipped: {skipped_count} categories (already existed)")
+        print(f"   Total: {len(DEFAULT_CATEGORIES)} categories processed")
+        print(f"   Regular Categories: {len(regular_categories)}")
+        print(f"   Seasonal Categories: {len(seasonal_categories)}")
+        
+        return created_count, skipped_count
+    
+    async def create_indexes(self):
+        """Create database indexes for better performance"""
+        try:
+            # Create indexes on categories collection
+            await self.db.categories.create_index("slug", unique=True)
+            await self.db.categories.create_index("is_active")
+            await self.db.categories.create_index("is_hidden") 
+            await self.db.categories.create_index("is_seasonal")
+            await self.db.categories.create_index("sort_order")
+            
+            print("✅ Created database indexes for categories")
+        except Exception as e:
+            print(f"⚠️  Warning: Could not create category indexes: {e}")
+    
+    async def display_category_summary(self):
+        """Display summary of created categories"""
+        print("\n📊 CATEGORY SUMMARY")
+        print("=" * 60)
+        print("Regular Categories (Visible to all users):")
+        
+        regular_categories = [cat for cat in DEFAULT_CATEGORIES if not cat.get("is_seasonal", False)]
+        for i, cat in enumerate(regular_categories, 1):
+            print(f"   {i}. {cat['name']} ({cat['slug']})")
+        
+        print(f"\nSeasonal Hidden Categories (Admin only):")
+        seasonal_categories = [cat for cat in DEFAULT_CATEGORIES if cat.get("is_seasonal", False)]
+        for i, cat in enumerate(seasonal_categories, 1):
+            months = cat.get('seasonal_months', [])
+            month_names = []
+            month_mapping = {1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun',
+                           7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec'}
+            for month in months:
+                month_names.append(month_mapping.get(month, str(month)))
+            
+            print(f"   {i}. {cat['name']} ({cat['slug']}) - Active in: {', '.join(month_names)}")
+        
+        print("=" * 60)
+        print("💡 USAGE NOTES:")
+        print("   • Regular categories are visible to all users")
+        print("   • Seasonal categories are hidden from regular users") 
+        print("   • Admins can create campaigns targeting seasonal categories")
+        print("   • Products can be assigned to multiple categories")
+        print("   • Seasonal categories help with targeted promotions")
+        print()
+    
+    async def run(self):
+        """Run the complete category seeding process"""
+        print("🚀 Vallmark Category Seeding Script")
+        print("=" * 50)
+        
+        # Connect to database
+        if not await self.connect():
+            return False
+        
+        try:
+            # Create indexes
+            await self.create_indexes()
+            
+            # Seed categories
+            await self.seed_categories()
+            
+            # Display summary
+            await self.display_category_summary()
+            
+            return True
+            
+        finally:
+            await self.disconnect()
 
 async def main():
-    """Main seeding function"""
+    """Main function"""
     seeder = CategorySeeder()
+    success = await seeder.run()
     
-    try:
-        await seeder.connect()
-        
-        # Seed categories
-        created_count = await seeder.seed_categories()
-        
-        print(f"🎉 Category seeding completed! Created {created_count} categories")
-        
-    except Exception as e:
-        print(f"❌ Seeding failed: {e}")
-        raise
-    finally:
-        await seeder.close()
+    if success:
+        print("🎊 Category seeding completed successfully!")
+        print("   Categories are now available in admin dashboard and product creation.")
+    else:
+        print("💥 Category seeding failed!")
+        sys.exit(1)
 
 if __name__ == "__main__":
+    # Run the seeding script
     asyncio.run(main())
