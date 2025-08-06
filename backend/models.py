@@ -167,7 +167,7 @@ class ProductCreate(ProductBase):
 class ProductUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
-    category: Optional[ProductCategory] = None
+    category: Optional[str] = None  # Category slug instead of enum
     price: Optional[float] = None
     discount_price: Optional[float] = None
     specifications: Optional[Dict[str, Any]] = None
