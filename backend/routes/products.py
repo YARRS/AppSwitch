@@ -100,7 +100,7 @@ class ProductService:
         query = {}
         
         if categories:
-            query["category"] = {"$in": categories}
+            query["categories"] = {"$in": categories}  # Use the new categories field
         
         if search:
             query["$or"] = [
