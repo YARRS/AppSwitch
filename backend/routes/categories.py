@@ -106,7 +106,8 @@ class CategoryService:
         
         # Update product counts for each category
         for category in categories:
-            product_count = await self.products_collection.count_documents({"category": category["slug"]})
+            # Use the new categories field for product counting
+            product_count = await self.products_collection.count_documents({"categories": category["slug"]})
             category["product_count"] = product_count
         
         return {
