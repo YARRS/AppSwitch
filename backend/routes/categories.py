@@ -126,7 +126,7 @@ class CategoryService:
                 "$lookup": {
                     "from": "products",
                     "localField": "slug",
-                    "foreignField": "category",
+                    "foreignField": "categories",  # Use new categories field
                     "as": "products"
                 }
             },
