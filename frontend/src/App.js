@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { Moon, Sun, Zap, Shield, Home, Users, Settings, Package, BarChart3, LogIn, UserPlus, User as UserIcon, ShoppingCart, Menu, X } from 'lucide-react';
 import axios from 'axios';
 import './App.css';
