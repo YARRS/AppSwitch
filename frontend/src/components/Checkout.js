@@ -420,6 +420,33 @@ const Checkout = () => {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Cart Warning */}
+          {cartWarning && (
+            <div className="lg:col-span-3 mb-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                <div className="flex items-center space-x-2 text-yellow-800 dark:text-yellow-300">
+                  <AlertCircle className="w-5 h-5" />
+                  <span className="font-medium">Cart Warning</span>
+                </div>
+                <p className="text-yellow-700 dark:text-yellow-400 mt-2">{cartWarning}</p>
+                <div className="mt-4 flex space-x-3">
+                  <Link
+                    to="/"
+                    className="bg-yellow-600 hover:bg-yellow-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+                  >
+                    Continue Shopping
+                  </Link>
+                  <Link
+                    to="/cart"
+                    className="border border-yellow-600 text-yellow-600 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 px-4 py-2 rounded-lg font-medium transition-colors duration-200"
+                  >
+                    View Cart
+                  </Link>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Checkout Form */}
           <div className="lg:col-span-2">
             {/* Step 1: Shipping Information */}
