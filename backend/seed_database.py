@@ -10,11 +10,13 @@ import sys
 from datetime import datetime
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
+import uuid
+import json
 
 # Add the backend directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from models import UserInDB, UserRole
+from models import UserInDB, UserRole, ProductInDB, CategoryInDB
 from auth import AuthService
 
 # Load environment variables
@@ -114,6 +116,214 @@ DEFAULT_USERS = [
         "role": UserRole.CUSTOMER,
         "is_active": True,
         "email_verified": True
+    }
+]
+
+# Default categories to create
+DEFAULT_CATEGORIES = [
+    {
+        "name": "Home Decor",
+        "description": "Beautiful decorative items to enhance your living space",
+        "slug": "home_decor",
+        "is_active": True,
+        "is_hidden": False,
+        "sort_order": 1
+    },
+    {
+        "name": "Personalized Gifts", 
+        "description": "Unique gifts customized with personal touches",
+        "slug": "personalized_gifts",
+        "is_active": True,
+        "is_hidden": False,
+        "sort_order": 2
+    },
+    {
+        "name": "Jewelry",
+        "description": "Elegant jewelry pieces for special occasions",
+        "slug": "jewelry",
+        "is_active": True,
+        "is_hidden": False,
+        "sort_order": 3
+    },
+    {
+        "name": "Keepsakes",
+        "description": "Memorial items to preserve precious memories",
+        "slug": "keepsakes",
+        "is_active": True,
+        "is_hidden": False,
+        "sort_order": 4
+    },
+    {
+        "name": "Special Occasions",
+        "description": "Perfect gifts for birthdays, anniversaries, and celebrations",
+        "slug": "special_occasions",
+        "is_active": True,
+        "is_hidden": False,
+        "sort_order": 5
+    },
+    {
+        "name": "Accessories",
+        "description": "Stylish accessories to complete your look",
+        "slug": "accessories", 
+        "is_active": True,
+        "is_hidden": False,
+        "sort_order": 6
+    }
+]
+
+# Default products to create
+DEFAULT_PRODUCTS = [
+    {
+        "name": "Elegant Crystal Vase",
+        "description": "A beautiful handcrafted crystal vase perfect for displaying flowers or as a decorative piece.",
+        "categories": ["home_decor"],
+        "price": 89.99,
+        "discount_price": 74.99,
+        "sku": "VL-CV001",
+        "brand": "Vallmark",
+        "specifications": {
+            "material": "Crystal Glass",
+            "height": "12 inches",
+            "diameter": "6 inches",
+            "weight": "2.5 lbs"
+        },
+        "features": ["Handcrafted", "Lead Crystal", "Gift Box Included", "Care Instructions Provided"],
+        "is_active": True,
+        "stock_quantity": 25,
+        "min_stock_level": 5
+    },
+    {
+        "name": "Personalized Photo Frame",
+        "description": "Custom engraved wooden photo frame with your personal message or name.",
+        "categories": ["personalized_gifts", "keepsakes"],
+        "price": 34.99,
+        "discount_price": 27.99,
+        "sku": "VL-PF002",
+        "brand": "Vallmark",
+        "specifications": {
+            "material": "Premium Oak Wood",
+            "size": "8x10 inches",
+            "frame_width": "2 inches",
+            "backing": "MDF with easel stand"
+        },
+        "features": ["Laser Engraving", "Custom Text", "Multiple Font Options", "Protective Glass"],
+        "is_active": True,
+        "stock_quantity": 50,
+        "min_stock_level": 10
+    },
+    {
+        "name": "Sterling Silver Necklace",
+        "description": "Delicate sterling silver necklace with a beautiful pendant, perfect for everyday wear.",
+        "categories": ["jewelry", "accessories"],
+        "price": 125.00,
+        "discount_price": 99.99,
+        "sku": "VL-SN003",
+        "brand": "Vallmark",
+        "specifications": {
+            "material": "925 Sterling Silver",
+            "chain_length": "18 inches",
+            "pendant_size": "1 inch",
+            "clasp_type": "Spring Ring"
+        },
+        "features": ["Hypoallergenic", "Tarnish Resistant", "Gift Box Included", "Certificate of Authenticity"],
+        "is_active": True,
+        "stock_quantity": 15,
+        "min_stock_level": 3
+    },
+    {
+        "name": "Luxury Scented Candle Set",
+        "description": "Set of 3 premium soy wax candles with exotic fragrances in elegant glass holders.",
+        "categories": ["home_decor", "special_occasions"],
+        "price": 55.00,
+        "discount_price": 45.00,
+        "sku": "VL-CS004",
+        "brand": "Vallmark",
+        "specifications": {
+            "material": "100% Soy Wax",
+            "burn_time": "45 hours each",
+            "fragrances": "Vanilla, Lavender, Sandalwood",
+            "container": "Glass with wooden lid"
+        },
+        "features": ["Natural Soy Wax", "Lead-Free Wicks", "Reusable Containers", "Gift Ready"],
+        "is_active": True,
+        "stock_quantity": 30,
+        "min_stock_level": 8
+    },
+    {
+        "name": "Handcrafted Wooden Music Box",
+        "description": "Beautiful handcrafted wooden music box that plays a soothing melody.",
+        "categories": ["keepsakes", "personalized_gifts"],
+        "price": 78.99,
+        "discount_price": 65.99,
+        "sku": "VL-MB005",
+        "brand": "Vallmark",
+        "specifications": {
+            "material": "Mahogany Wood",
+            "dimensions": "6x4x3 inches",
+            "melody": "Für Elise",
+            "mechanism": "Swiss Movement"
+        },
+        "features": ["Hand Carved", "Swiss Music Movement", "Velvet Interior", "Custom Engraving Available"],
+        "is_active": True,
+        "stock_quantity": 20,
+        "min_stock_level": 5
+    },
+    {
+        "name": "Designer Silk Scarf",
+        "description": "Luxurious silk scarf with an exclusive pattern design, perfect accessory for any outfit.",
+        "categories": ["accessories", "special_occasions"],
+        "price": 95.00,
+        "discount_price": 76.00,
+        "sku": "VL-SS006",
+        "brand": "Vallmark",
+        "specifications": {
+            "material": "100% Mulberry Silk",
+            "size": "35x35 inches",
+            "pattern": "Abstract Floral",
+            "edge_finish": "Hand-rolled hem"
+        },
+        "features": ["Pure Silk", "Exclusive Design", "Hand-rolled Edges", "Premium Gift Box"],
+        "is_active": True,
+        "stock_quantity": 12,
+        "min_stock_level": 3
+    },
+    {
+        "name": "Ceramic Coffee Mug Set",
+        "description": "Set of 2 premium ceramic coffee mugs with matching saucers, perfect for morning coffee.",
+        "categories": ["home_decor"],
+        "price": 42.99,
+        "discount_price": 34.99,
+        "sku": "VL-CM007",
+        "brand": "Vallmark",
+        "specifications": {
+            "material": "Fine Bone China",
+            "capacity": "12 oz each",
+            "microwave_safe": "Yes",
+            "dishwasher_safe": "Yes"
+        },
+        "features": ["Lead-Free Ceramic", "Heat Resistant", "Elegant Design", "Matching Saucers"],
+        "is_active": True,
+        "stock_quantity": 40,
+        "min_stock_level": 10
+    },
+    {
+        "name": "Memory Album",
+        "description": "Beautiful leather-bound photo album perfect for preserving precious memories.",
+        "categories": ["keepsakes", "personalized_gifts"],
+        "price": 67.50,
+        "discount_price": 54.00,
+        "sku": "VL-MA008",
+        "brand": "Vallmark",
+        "specifications": {
+            "material": "Genuine Leather Cover",
+            "pages": "50 pages (100 photos)",
+            "photo_size": "4x6 inches",
+            "binding": "Ring binding"
+        },
+        "features": ["Acid-Free Pages", "Photo Corners Included", "Personalization Available", "Protective Sleeve"],
+        "is_active": True,
+        "stock_quantity": 28,
+        "min_stock_level": 7
     }
 ]
 
