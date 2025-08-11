@@ -588,6 +588,13 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate that at least one category is selected
+    if (formData.categories.length === 0) {
+      alert('Please select at least one category');
+      return;
+    }
+    
     setLoading(true);
 
     try {
