@@ -333,7 +333,7 @@ async def create_order(
 async def create_guest_order(
     order_data: GuestOrderCreate,
     session_id: Optional[str] = Header(None, alias="X-Session-Id"),
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Create order for guest user with auto-user creation"""
     try:
