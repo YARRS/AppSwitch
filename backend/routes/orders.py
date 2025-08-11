@@ -292,11 +292,15 @@ class OrderService:
         
         return True
 
+async def get_db():
+    from server import db
+    return db
+
 @router.post("/", response_model=APIResponse)
 async def create_order(
     order_data: OrderCreate,
     current_user: UserInDB = Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Create new order"""
     try:
