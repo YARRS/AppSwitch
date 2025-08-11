@@ -15,7 +15,7 @@ import uuid
 import time
 
 # Backend URL from frontend .env
-BACKEND_URL = "https://ba087eb2-767c-4f3d-9368-73cc0a54e60b.preview.emergentagent.com"
+BACKEND_URL = "https://a2f72f21-4de0-4044-ac4a-9a517f5ea99f.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Auto-seeded user credentials for testing (Vallmark Gift Articles)
