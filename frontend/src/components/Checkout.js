@@ -309,8 +309,13 @@ const Checkout = () => {
           localStorage.setItem('access_token', result.data.access_token);
           localStorage.setItem('user', JSON.stringify(result.data.user));
           
-          // Trigger auth context update
-          window.dispatchEvent(new Event('storage'));
+          // Trigger auth context update through custom event
+          window.dispatchEvent(new CustomEvent('userAutoLoggedIn', { 
+            detail: {
+              access_token: result.data.access_token,
+              user: result.data.user
+            }
+          }));
           
           // Show success with order tracking
           setOrderData(result.data.order);
