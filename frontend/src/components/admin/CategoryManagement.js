@@ -303,7 +303,7 @@ const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
         is_active: category.is_active ?? true,
         is_hidden: category.is_hidden ?? false,
         is_seasonal: category.is_seasonal ?? false,
-        seasonal_months: category.seasonal_months || null,
+        seasonal_months: category.seasonal_months ? category.seasonal_months.join(',') : null,
         sort_order: category.sort_order?.toString() || '0'
       });
     }
