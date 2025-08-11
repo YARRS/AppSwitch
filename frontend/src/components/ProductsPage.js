@@ -542,7 +542,7 @@ const ProductCard = ({ product, isAuthenticated }) => {
             <span className="text-sm sm:text-base">View Details</span>
           </Link>
           
-          {isAuthenticated && product.is_in_stock && (
+          {product.is_in_stock && (
             <button 
               onClick={handleAddToCart}
               disabled={isAddingToCart}
