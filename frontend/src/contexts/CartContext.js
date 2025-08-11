@@ -222,7 +222,13 @@ export const CartProvider = ({ children }) => {
     } catch (error) {
       console.error('Failed to merge carts:', error);
       // Even if merge fails, load the user's existing cart
-      await loadCart();
+      try {
+        await loadCart();
+        // Clear guest session even if merge fails to avoid future conflicts
+        localStorage.removeItem('guest_session_id');
+      } catch (loadError) {
+        console.error('Failed to load user cart after merge failure:', loadError);
+      }
       return { success: false, error: 'Failed to merge carts, but user cart loaded' };
     }
   };
