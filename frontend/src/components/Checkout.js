@@ -135,8 +135,8 @@ const Checkout = () => {
     }
     if (!shipping_address.zip_code || !shipping_address.zip_code.trim()) {
       newErrors.shipping_address_zip_code = 'ZIP code is required';
-    } else if (!/^\d{6}$/.test(shipping_address.zip_code.replace(/\D/g, ''))) {
-      newErrors.shipping_address_zip_code = 'Valid 6-digit ZIP code is required';
+    } else if (!/^\d{5}(-\d{4})?$/.test(shipping_address.zip_code.trim())) {
+      newErrors.shipping_address_zip_code = 'Valid 5-digit ZIP code is required (e.g., 12345 or 12345-6789)';
     }
 
     // Guest user validation
