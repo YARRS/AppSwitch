@@ -513,7 +513,7 @@ async def update_order(
     order_id: str,
     update_data: OrderUpdate,
     admin_user: UserInDB = Depends(get_admin_user),
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Update order (admin only)"""
     try:
