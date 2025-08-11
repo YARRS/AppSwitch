@@ -271,6 +271,9 @@ const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
     slug: '',
     image: '',
     is_active: true,
+    is_hidden: false,
+    is_seasonal: false,
+    seasonal_months: null,
     sort_order: '0'
   });
   const [loading, setLoading] = useState(false);
