@@ -90,7 +90,7 @@ const validateForm = () => {
 
 ### **Backend API Test** ✅
 ```bash
-curl -X POST "https://f21e67b2-b8b3-4d01-a11e-e54cffc7db22.preview.emergentagent.com/api/orders/guest" \
+curl -X POST "https://02ee6ebf-832a-438b-830c-4fcc5a409047.preview.emergentagent.com/api/orders/guest" \
   -H "Content-Type: application/json" \
   -d '{...order data...}'
 
@@ -115,7 +115,7 @@ Auto Login: True
 ## 📋 **Testing Instructions**
 
 ### **For Guest Users:**
-1. Go to: https://f21e67b2-b8b3-4d01-a11e-e54cffc7db22.preview.emergentagent.com
+1. Go to: https://02ee6ebf-832a-438b-830c-4fcc5a409047.preview.emergentagent.com
 2. Add products to cart
 3. Go to checkout
 4. Fill out shipping form (all fields)
