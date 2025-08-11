@@ -543,8 +543,20 @@ const ProductCard = ({ product, isAuthenticated }) => {
           </Link>
           
           {isAuthenticated && product.is_in_stock && (
-            <button className="bg-green-600 hover:bg-green-700 text-white p-2.5 sm:p-2 rounded-lg transition-colors duration-200 flex-shrink-0">
-              <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+            <button 
+              onClick={handleAddToCart}
+              disabled={isAddingToCart}
+              className={`${isAddingToCart 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-green-600 hover:bg-green-700'} 
+              text-white p-2.5 sm:p-2 rounded-lg transition-colors duration-200 flex-shrink-0 flex items-center justify-center`}
+              title="Add to Cart"
+            >
+              {isAddingToCart ? (
+                <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+              )}
             </button>
           )}
         </div>
