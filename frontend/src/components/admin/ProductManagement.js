@@ -390,10 +390,25 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
       {/* Product Info Grid */}
       <div className="grid grid-cols-2 gap-4 text-sm">
         <div>
-          <p className="text-gray-500 dark:text-gray-400 text-xs">Category</p>
-          <p className="text-gray-900 dark:text-white font-medium capitalize">
-            {product.category ? product.category.replace('_', ' ') : 'Uncategorized'}
-          </p>
+          <p className="text-gray-500 dark:text-gray-400 text-xs">Categories</p>
+          <div className="flex flex-wrap gap-1">
+            {product.categories && product.categories.length > 0 ? (
+              product.categories.map((category, index) => (
+                <span
+                  key={index}
+                  className="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 px-2 py-1 rounded-full text-xs font-medium"
+                >
+                  {category.replace('_', ' ')}
+                </span>
+              ))
+            ) : product.category ? (
+              <span className="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 px-2 py-1 rounded-full text-xs font-medium">
+                {product.category.replace('_', ' ')}
+              </span>
+            ) : (
+              <span className="text-gray-500 dark:text-gray-400 text-xs">Uncategorized</span>
+            )}
+          </div>
         </div>
         
         <div>
