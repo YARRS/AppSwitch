@@ -695,7 +695,7 @@ const ShippingForm = ({
             <p className="text-yellow-700 dark:text-yellow-400 text-sm mb-4">
               We've sent a 6-digit OTP to your phone number. Please enter it below to verify your number.
               <br />
-              <strong>For testing: Use OTP 123456</strong>
+              <strong>For testing: Use OTP 079254</strong>
             </p>
             
             <div className="flex space-x-2">
