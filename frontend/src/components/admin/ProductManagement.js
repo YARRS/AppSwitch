@@ -462,7 +462,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
       setFormData({
         name: product.name || '',
         description: product.description || '',
-        category: product.category || '',
+        categories: product.categories || [product.category].filter(Boolean) || [], // Handle both old single category and new multiple categories
         price: product.price?.toString() || '',
         discount_price: product.discount_price?.toString() || '',
         sku: product.sku || '',
