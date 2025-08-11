@@ -288,7 +288,7 @@ const ProductRow = ({ product, onEdit, onDelete }) => {
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
         <span className="capitalize">
-          {product.category.replace('_', ' ')}
+          {product.category ? product.category.replace('_', ' ') : 'Uncategorized'}
         </span>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
