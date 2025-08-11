@@ -473,7 +473,7 @@ async def get_all_orders(
     status: Optional[str] = None,
     user_id: Optional[str] = None,
     admin_user: UserInDB = Depends(get_admin_user),
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Get all orders (admin only)"""
     try:
