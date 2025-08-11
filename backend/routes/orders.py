@@ -80,7 +80,7 @@ class OrderService:
                 "email_verified": False,
                 "created_at": datetime.utcnow(),
                 "updated_at": datetime.utcnow(),
-                "hashed_password": None,  # No password initially
+                "password_hash": "",  # Empty password hash - user needs to set up password
                 "needs_password_setup": True  # Flag to indicate password setup needed
             }
             
