@@ -192,8 +192,8 @@ const CategoryCard = ({ category, onEdit, onDelete }) => {
           )}
         </div>
         
-        {/* Status Badge */}
-        <div className="absolute top-2 right-2">
+        {/* Status Badges */}
+        <div className="absolute top-2 right-2 flex flex-col gap-1">
           <span className={`px-2 py-1 text-xs font-medium rounded-full ${
             category.is_active
               ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
@@ -201,6 +201,16 @@ const CategoryCard = ({ category, onEdit, onDelete }) => {
           }`}>
             {category.is_active ? 'Active' : 'Inactive'}
           </span>
+          {category.is_hidden && (
+            <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400">
+              Hidden
+            </span>
+          )}
+          {category.is_seasonal && (
+            <span className="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400">
+              Seasonal
+            </span>
+          )}
         </div>
       </div>
 
