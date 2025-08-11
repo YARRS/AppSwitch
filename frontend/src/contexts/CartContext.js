@@ -56,9 +56,15 @@ export const CartProvider = ({ children }) => {
 
   // Listen for user login events to trigger cart merge
   useEffect(() => {
-    const handleUserLoggedIn = async () => {
+    const handleUserLoggedIn = async (event) => {
       if (isAuthenticated) {
-        await mergeGuestCart();
+        try {
+          await mergeGuestCart();
+          // Reload cart after successful merge
+          await loadCart();
+        } catch (error) {
+          console.error('Failed to merge cart after login:', error);
+        }
       }
     };
 
