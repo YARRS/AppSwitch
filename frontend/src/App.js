@@ -17,7 +17,7 @@ import ProductDetail from './components/ProductDetail';
 import AdminDashboard from './components/admin/AdminDashboard';
 import Cart from './components/Cart';
 import Checkout from './components/Checkout';
-import Logo from './components/Logo';
+import OrderTracking from './components/OrderTracking';
 
 // Theme context
 export const ThemeContext = React.createContext();
