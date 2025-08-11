@@ -34,6 +34,13 @@ const SuperAdminUserManagement = () => {
 
   useEffect(() => {
     fetchUsers();
+    
+    // Set up interval to refresh user data periodically
+    const interval = setInterval(() => {
+      fetchUsers();
+    }, 30000); // Refresh every 30 seconds
+    
+    return () => clearInterval(interval);
   }, [currentPage, searchTerm, roleFilter, statusFilter]);
 
   const fetchUsers = async () => {
