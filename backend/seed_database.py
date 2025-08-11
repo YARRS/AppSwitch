@@ -616,6 +616,7 @@ async def main():
     if success:
         print("🎊 Database seeding completed successfully!")
         print("   You can now login with the credentials shown above.")
+        print("   Cart and checkout flow is ready for testing!")
     else:
         print("💥 Database seeding failed!")
         sys.exit(1)
