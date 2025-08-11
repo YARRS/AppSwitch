@@ -302,22 +302,19 @@ const Checkout = () => {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        // Handle guest order with auto-login
+        // For guest orders, if user was logged in automatically, update auth context
         if (!isAuthenticated && result.data.user_logged_in) {
-          // Store token and user data
           localStorage.setItem('access_token', result.data.access_token);
+          localStorage.setItem('user', JSON.stringify(result.data.user));
           
-          // Trigger a custom event to notify AuthProvider about the login
-          window.dispatchEvent(new CustomEvent('userAutoLoggedIn', { 
-            detail: {
-              access_token: result.data.access_token,
-              user: result.data.user
-            }
-          }));
+          // Trigger auth context update
+          window.dispatchEvent(new Event('storage'));
           
+          // Show success with order tracking
           setOrderData(result.data.order);
         } else {
-          setOrderData(result.data);
+          // Regular order success
+          setOrderData(result.data.order || result.data);
         }
         
         setOrderPlaced(true);
