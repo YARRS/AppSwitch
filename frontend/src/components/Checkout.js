@@ -415,6 +415,10 @@ const Checkout = () => {
                 handleInputChange={handleInputChange}
                 errors={errors}
                 isAuthenticated={isAuthenticated}
+                otpState={otpState}
+                setOtpState={setOtpState}
+                sendOtp={sendOtp}
+                verifyOtp={verifyOtp}
                 onNext={() => setCurrentStep(2)}
               />
             )}
