@@ -391,11 +391,35 @@ const ProductsPage = () => {
 
 // Product Card Component
 const ProductCard = ({ product, isAuthenticated }) => {
+  const { addToCart } = useCart();
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD'
     }).format(price);
+  };
+
+  const handleAddToCart = async () => {
+    if (isAddingToCart) return;
+    
+    setIsAddingToCart(true);
+    try {
+      const result = await addToCart(product.id, 1);
+      if (result.success) {
+        // Show success feedback - you could add a toast notification here
+        console.log('Product added to cart successfully');
+      } else {
+        console.error('Failed to add to cart:', result.error);
+        alert('Failed to add product to cart. Please try again.');
+      }
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add product to cart. Please try again.');
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
 
   // Check if product is new (within last 7 days)
