@@ -430,7 +430,7 @@ async def get_user_orders(
 async def get_order(
     order_id: str,
     current_user: UserInDB = Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Get order by ID"""
     try:
