@@ -4,7 +4,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   Package, ArrowLeft, Truck, CheckCircle2, Clock, 
   MapPin, Phone, Mail, Calendar, Copy, ExternalLink,
-  User, CreditCard, AlertCircle
+  User, CreditCard, AlertCircle, ShoppingCart, RotateCcw, Eye
 } from 'lucide-react';
 
 const OrderTracking = () => {
