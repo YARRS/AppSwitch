@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Backend API Testing Script for Vallmark Gift Articles E-commerce System
-SPECIAL FOCUS: Cart Merge Functionality Testing
-Testing guest cart functionality and cart merge when guest users login.
+SPECIAL FOCUS: Order Placement Functionality Testing
+Testing complete order placement functionality for both guest and authenticated users.
 """
 
 import requests
@@ -30,6 +30,10 @@ AUTO_SEEDED_USERS = [
     {"email": "marketing@vallmark.com", "password": "Marketing123!", "role": "marketing_manager"},
     {"email": "customer@vallmark.com", "password": "Customer123!", "role": "customer"}
 ]
+
+# Test product data
+TEST_PRODUCT_ID = "ee3d34ec-43c1-4521-9df1-e82e75e60be4"  # Elegant Crystal Vase Set
+TEST_PRODUCT_PRICE = 149.99
 
 class ProductManagementTester:
     def __init__(self):
