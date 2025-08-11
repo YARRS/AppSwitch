@@ -358,6 +358,16 @@ class DatabaseSeeder:
         existing_username = await self.db.users.find_one({"username": username})
         return existing_email is not None or existing_username is not None
     
+    async def category_exists(self, slug: str) -> bool:
+        """Check if category already exists"""
+        existing_category = await self.db.categories.find_one({"slug": slug})
+        return existing_category is not None
+    
+    async def product_exists(self, sku: str) -> bool:
+        """Check if product already exists"""
+        existing_product = await self.db.products.find_one({"sku": sku})
+        return existing_product is not None
+    
     async def create_user(self, user_data: dict) -> bool:
         """Create a single user"""
         try:
@@ -386,6 +396,48 @@ class DatabaseSeeder:
             print(f"❌ Failed to create user {user_data.get('username', 'unknown')}: {e}")
             return False
     
+    async def create_category(self, category_data: dict) -> bool:
+        """Create a single category"""
+        try:
+            # Check if category already exists
+            if await self.category_exists(category_data["slug"]):
+                print(f"⚠️  Category {category_data['name']} ({category_data['slug']}) already exists, skipping...")
+                return False
+            
+            # Create category document
+            category = CategoryInDB(**category_data)
+            category_dict = category.dict()
+            
+            # Insert into database
+            await self.db.categories.insert_one(category_dict)
+            print(f"✅ Created category: {category.name} ({category.slug})")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Failed to create category {category_data.get('name', 'unknown')}: {e}")
+            return False
+    
+    async def create_product(self, product_data: dict) -> bool:
+        """Create a single product"""
+        try:
+            # Check if product already exists
+            if await self.product_exists(product_data["sku"]):
+                print(f"⚠️  Product {product_data['name']} ({product_data['sku']}) already exists, skipping...")
+                return False
+            
+            # Create product document
+            product = ProductInDB(**product_data)
+            product_dict = product.dict()
+            
+            # Insert into database
+            await self.db.products.insert_one(product_dict)
+            print(f"✅ Created product: {product.name} ({product.sku}) - ${product.price}")
+            return True
+            
+        except Exception as e:
+            print(f"❌ Failed to create product {product_data.get('name', 'unknown')}: {e}")
+            return False
+    
     async def seed_users(self):
         """Seed all default users"""
         print("\n🌱 Starting user seeding process...")
@@ -402,12 +454,57 @@ class DatabaseSeeder:
                 skipped_count += 1
         
         print("=" * 50)
-        print(f"🎉 Seeding completed!")
+        print(f"🎉 User seeding completed!")
         print(f"   Created: {created_count} users")
         print(f"   Skipped: {skipped_count} users (already existed)")
         print(f"   Total: {len(DEFAULT_USERS)} users processed")
         
-        # Return counts for logging
+        return created_count, skipped_count
+    
+    async def seed_categories(self):
+        """Seed all default categories"""
+        print("\n🏷️  Starting category seeding process...")
+        print("=" * 50)
+        
+        created_count = 0
+        skipped_count = 0
+        
+        for category_data in DEFAULT_CATEGORIES:
+            success = await self.create_category(category_data.copy())
+            if success:
+                created_count += 1
+            else:
+                skipped_count += 1
+        
+        print("=" * 50)
+        print(f"🎉 Category seeding completed!")
+        print(f"   Created: {created_count} categories")
+        print(f"   Skipped: {skipped_count} categories (already existed)")
+        print(f"   Total: {len(DEFAULT_CATEGORIES)} categories processed")
+        
+        return created_count, skipped_count
+    
+    async def seed_products(self):
+        """Seed all default products"""
+        print("\n📦 Starting product seeding process...")
+        print("=" * 50)
+        
+        created_count = 0
+        skipped_count = 0
+        
+        for product_data in DEFAULT_PRODUCTS:
+            success = await self.create_product(product_data.copy())
+            if success:
+                created_count += 1
+            else:
+                skipped_count += 1
+        
+        print("=" * 50)
+        print(f"🎉 Product seeding completed!")
+        print(f"   Created: {created_count} products")
+        print(f"   Skipped: {skipped_count} products (already existed)")
+        print(f"   Total: {len(DEFAULT_PRODUCTS)} products processed")
+        
         return created_count, skipped_count
     
     async def display_login_credentials(self):
