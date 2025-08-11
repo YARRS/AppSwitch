@@ -4,11 +4,13 @@ from typing import Optional, List
 from datetime import datetime
 import uuid
 from pydantic import BaseModel
+import re
 
 from models import (
     OrderCreate, OrderUpdate, OrderResponse, OrderInDB,
     OrderItem, OrderStatus, APIResponse, PaginatedResponse,
-    UserInDB, ProductInDB, CartInDB, GuestCart, ShippingAddress
+    UserInDB, ProductInDB, CartInDB, GuestCart, ShippingAddress,
+    UserRole
 )
 from auth import get_current_active_user, get_admin_user
 
