@@ -30,7 +30,7 @@ app.add_middleware(
 # MongoDB connection
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/vallmark_db")
 client = AsyncIOMotorClient(MONGO_URL)
-db = client.get_default_database()
+db = client.vallmark_db  # Explicitly use vallmark_db database
 
 # OAuth2 setup
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
