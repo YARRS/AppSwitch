@@ -364,7 +364,7 @@ async def delete_category(
             )
         
         # Check if category has products
-        product_count = await category_service.products_collection.count_documents({"category": category.slug})
+        product_count = await category_service.products_collection.count_documents({"categories": category.slug})
         if product_count > 0:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
