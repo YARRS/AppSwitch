@@ -40,7 +40,23 @@ const SuperAdminUserManagement = () => {
       fetchUsers();
     }, 30000); // Refresh every 30 seconds
     
-    return () => clearInterval(interval);
+    // Listen for new user creation events
+    const handleUserCreated = () => {
+      setTimeout(() => fetchUsers(), 1000); // Small delay to ensure data is synced
+    };
+    
+    const handleUserLoggedIn = () => {
+      setTimeout(() => fetchUsers(), 1000); // Refresh when users login
+    };
+    
+    window.addEventListener('userAutoLoggedIn', handleUserCreated);
+    window.addEventListener('userLoggedIn', handleUserLoggedIn);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('userAutoLoggedIn', handleUserCreated);
+      window.removeEventListener('userLoggedIn', handleUserLoggedIn);
+    };
   }, [currentPage, searchTerm, roleFilter, statusFilter]);
 
   const fetchUsers = async () => {
