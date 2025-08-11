@@ -61,7 +61,9 @@ const Checkout = () => {
   useEffect(() => {
     if (!cartLoading && (!cart.items || cart.items.length === 0)) {
       // Instead of forcing redirect, show a warning and allow user to choose
-      setError('Your cart appears to be empty. Please add items to your cart before checkout.');
+      setCartWarning('Your cart appears to be empty. Please add items to your cart before checkout.');
+    } else {
+      setCartWarning('');
     }
   }, [cart, cartLoading]);
 
