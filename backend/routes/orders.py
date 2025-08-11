@@ -36,6 +36,71 @@ class OrderService:
         self.orders_collection = db.orders
         self.products_collection = db.products
         self.carts_collection = db.carts
+        self.users_collection = db.users
+        self.guest_carts_collection = db.guest_carts
+    
+    async def find_or_create_user_by_phone(self, phone_number: str, customer_email: Optional[str] = None, full_name: Optional[str] = None) -> UserInDB:
+        """Find existing user by phone or create new one"""
+        try:
+            # Clean phone number
+            clean_phone = re.sub(r'\D', '', phone_number)
+            if len(clean_phone) >= 10:
+                clean_phone = clean_phone[-10:]  # Take last 10 digits
+            
+            # Try to find existing user by phone
+            existing_user = await self.users_collection.find_one({"phone": clean_phone})
+            
+            if existing_user:
+                return UserInDB(**existing_user)
+            
+            # Create new user with phone as primary identifier
+            from auth import AuthService
+            
+            # Generate unique username based on phone
+            username = f"user_{clean_phone}"
+            counter = 1
+            while await self.users_collection.find_one({"username": username}):
+                username = f"user_{clean_phone}_{counter}"
+                counter += 1
+            
+            # Check if email already exists
+            if customer_email:
+                existing_email_user = await self.users_collection.find_one({"email": customer_email})
+                if existing_email_user:
+                    customer_email = None  # Don't set email if already exists
+            
+            user_data = {
+                "id": str(uuid.uuid4()),
+                "username": username,
+                "email": customer_email or f"{username}@placeholder.com",  # Placeholder email
+                "phone": clean_phone,
+                "full_name": full_name or f"Customer {clean_phone}",
+                "role": UserRole.CUSTOMER.value,
+                "is_active": True,
+                "email_verified": False,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow(),
+                "hashed_password": None,  # No password initially
+                "needs_password_setup": True  # Flag to indicate password setup needed
+            }
+            
+            await self.users_collection.insert_one(user_data)
+            return UserInDB(**user_data)
+            
+        except Exception as e:
+            # If user creation fails, return a temporary user object
+            return UserInDB(
+                id=f"temp_{clean_phone}",
+                username=f"guest_{clean_phone}",
+                email=customer_email or f"guest_{clean_phone}@temp.com",
+                phone=clean_phone,
+                full_name=full_name or f"Guest {clean_phone}",
+                role=UserRole.CUSTOMER.value,
+                is_active=True,
+                email_verified=False,
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow()
+            )
     
     async def create_order(self, user_id: str, order_data: dict) -> OrderInDB:
         """Create new order"""
