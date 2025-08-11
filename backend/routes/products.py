@@ -456,15 +456,22 @@ async def get_product(
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Get product by ID - accessible to guests and authenticated users"""
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
+        logger.info(f"🔍 Getting product {product_id}")
         product_service = ProductService(db)
         
         product = await product_service.get_product_by_id(product_id)
         if not product:
+            logger.info(f"🔍 Product {product_id} not found")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Product not found"
             )
+        
+        logger.info(f"🔍 Product found: {product.name}")
         
         # Check if user can view this product
         can_view = True
@@ -477,19 +484,23 @@ async def get_product(
                        product.is_active)  # Allow viewing active products for sales
         
         if not can_view:
+            logger.info(f"🔍 User cannot view product {product_id}")
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not authorized to view this product"
             )
         
+        logger.info(f"🔍 User can view product, incrementing views")
         # Increment views (only for active products)
         if product.is_active:
             await product_service.increment_views(product_id)
         
+        logger.info(f"🔍 Enriching product with user details")
         # Enrich with user details
         enriched_products = await product_service.get_products_with_user_details([product.dict()])
         enriched_product = enriched_products[0] if enriched_products else product.dict()
         
+        logger.info(f"🔍 Creating product response")
         # Create response
         product_response = ProductResponse(
             **enriched_product,
@@ -497,6 +508,7 @@ async def get_product(
             assigned_by_name=enriched_product.get("assigned_by_name")
         )
         
+        logger.info(f"🔍 Returning product response")
         return APIResponse(
             success=True,
             message="Product retrieved successfully",
@@ -506,6 +518,10 @@ async def get_product(
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"🔍 Error getting product {product_id}: {str(e)}")
+        logger.error(f"🔍 Error type: {type(e)}")
+        import traceback
+        logger.error(f"🔍 Traceback: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve product"
