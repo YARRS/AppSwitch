@@ -45,8 +45,42 @@ class OrderService:
             )
         
         # Clear user's cart
+        if user_id:
+            await self.carts_collection.update_one(
+                {"user_id": user_id},
+                {"$set": {"items": [], "total_amount": 0.0, "total_items": 0}}
+            )
+        
+        return order
+    
+    async def create_guest_order(self, session_id: str, order_data: dict) -> OrderInDB:
+        """Create new order for guest user"""
+        # Generate order number
+        order_number = f"SW{datetime.now().strftime('%Y%m%d')}{str(uuid.uuid4())[:8].upper()}"
+        
+        order_data["order_number"] = order_number
+        order_data["user_id"] = f"guest_{session_id}"  # Use session_id as user_id for guests
+        order = OrderInDB(**order_data)
+        order_dict = order.dict()
+        
+        # Insert order
+        await self.orders_collection.insert_one(order_dict)
+        
+        # Update product stock and sales count
+        for item in order.items:
+            await self.products_collection.update_one(
+                {"id": item.product_id},
+                {
+                    "$inc": {
+                        "stock_quantity": -item.quantity,
+                        "sales_count": item.quantity
+                    }
+                }
+            )
+        
+        # Clear guest cart
         await self.carts_collection.update_one(
-            {"user_id": user_id},
+            {"session_id": session_id},
             {"$set": {"items": [], "total_amount": 0.0, "total_items": 0}}
         )
         
