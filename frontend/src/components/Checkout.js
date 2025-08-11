@@ -151,6 +151,95 @@ const Checkout = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // OTP Functions
+  const sendOtp = async () => {
+    const phoneNumber = formData.shipping_address.phone;
+    if (!phoneNumber) {
+      setErrors(prev => ({ ...prev, shipping_address_phone: 'Phone number is required' }));
+      return;
+    }
+
+    setOtpState(prev => ({ ...prev, sendingOtp: true, otpError: '' }));
+
+    try {
+      const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${API_BASE_URL}/api/otp/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone_number: phoneNumber })
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setOtpState(prev => ({
+          ...prev,
+          otpSent: true,
+          sendingOtp: false,
+          resendTimer: 60 // 60 seconds countdown
+        }));
+        
+        // Start countdown timer
+        const timer = setInterval(() => {
+          setOtpState(prev => {
+            if (prev.resendTimer <= 1) {
+              clearInterval(timer);
+              return { ...prev, resendTimer: 0 };
+            }
+            return { ...prev, resendTimer: prev.resendTimer - 1 };
+          });
+        }, 1000);
+      } else {
+        throw new Error(result.message || 'Failed to send OTP');
+      }
+    } catch (error) {
+      setOtpState(prev => ({
+        ...prev,
+        sendingOtp: false,
+        otpError: error.message || 'Failed to send OTP'
+      }));
+    }
+  };
+
+  const verifyOtp = async () => {
+    const phoneNumber = formData.shipping_address.phone;
+    const otp = otpState.otp;
+
+    if (!otp || otp.length !== 6) {
+      setOtpState(prev => ({ ...prev, otpError: 'Please enter a valid 6-digit OTP' }));
+      return;
+    }
+
+    setOtpState(prev => ({ ...prev, verifyingOtp: true, otpError: '' }));
+
+    try {
+      const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const response = await fetch(`${API_BASE_URL}/api/otp/verify`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone_number: phoneNumber, otp })
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setOtpState(prev => ({
+          ...prev,
+          otpVerified: true,
+          verifyingOtp: false
+        }));
+      } else {
+        throw new Error(result.message || 'Invalid OTP');
+      }
+    } catch (error) {
+      setOtpState(prev => ({
+        ...prev,
+        verifyingOtp: false,
+        otpError: error.message || 'Failed to verify OTP'
+      }));
+    }
+  };
+
   // Handle order placement
   const handlePlaceOrder = async () => {
     if (!validateForm()) {
