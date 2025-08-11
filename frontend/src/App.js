@@ -216,7 +216,7 @@ function Header({ darkMode, toggleDarkMode }) {
           {/* Mobile Right Side - Compact */}
           <div className="flex md:hidden items-center space-x-2">
             {/* Shopping Cart Icon - Mobile */}
-            <button className="group relative p-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-lg active:scale-95 transform focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+            <Link to="/cart" className="group relative p-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-lg active:scale-95 transform focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
               <ShoppingCart className="w-5 h-5 text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200" />
               {getCartItemCount() > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center text-xs font-medium animate-pulse">
@@ -225,7 +225,7 @@ function Header({ darkMode, toggleDarkMode }) {
               )}
               {/* Pulse effect on hover */}
               <div className="absolute inset-0 rounded-xl bg-blue-600 opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
-            </button>
+            </Link>
 
             {/* Dark Mode Toggle - Mobile */}
             <button
