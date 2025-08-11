@@ -51,6 +51,7 @@ from routes.commissions import router as commissions_router
 from routes.dashboard import router as dashboard_router
 from routes.inquiries import router as inquiries_router
 from routes.uploads import router as uploads_router
+from routes.otp import router as otp_router
 
 # Make db available globally for imports
 import sys
