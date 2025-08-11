@@ -37,6 +37,17 @@ const Checkout = () => {
   const [errors, setErrors] = useState({});
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderData, setOrderData] = useState(null);
+  
+  // OTP State
+  const [otpState, setOtpState] = useState({
+    otpSent: false,
+    otpVerified: false,
+    otp: '',
+    sendingOtp: false,
+    verifyingOtp: false,
+    otpError: '',
+    resendTimer: 0
+  });
 
   // Calculate totals
   const subtotal = cart?.total_amount || 0;
