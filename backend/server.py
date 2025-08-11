@@ -69,6 +69,7 @@ app.include_router(commissions_router)
 app.include_router(dashboard_router)
 app.include_router(inquiries_router)
 app.include_router(uploads_router)
+app.include_router(otp_router)
 
 # Startup event handler
 @app.on_event("startup")
