@@ -275,7 +275,7 @@ async def get_category(
             )
         
         # Get product count
-        product_count = await category_service.products_collection.count_documents({"category": category.slug})
+        product_count = await category_service.products_collection.count_documents({"categories": category.slug})
         
         # Create response
         category_response = CategoryResponse(
