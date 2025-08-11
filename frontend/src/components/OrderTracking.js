@@ -9,31 +9,65 @@ import {
 
 const OrderTracking = () => {
   const { orderId } = useParams();
-  const { user, getAuthenticatedAxios } = useAuth();
+  const { user, getAuthenticatedAxios, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     if (orderId) {
       fetchOrderDetails();
     }
-  }, [orderId]);
+  }, [orderId, isAuthenticated, user]); // Add dependencies for auth state changes
 
   const fetchOrderDetails = async () => {
     try {
-      const axios = getAuthenticatedAxios();
-      const response = await axios.get(`/api/orders/${orderId}`);
-      setOrder(response.data.data);
+      setLoading(true);
+      setError(null);
+      
+      // Get the API base URL
+      const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      
+      // Try to get authenticated axios first, but fallback to regular axios with token
+      let axiosInstance;
+      try {
+        axiosInstance = getAuthenticatedAxios();
+      } catch (authError) {
+        // Fallback: try to get token from localStorage manually
+        const token = localStorage.getItem('access_token');
+        if (token) {
+          const axios = require('axios');
+          axiosInstance = axios.create({
+            baseURL: API_BASE_URL,
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+        } else {
+          throw new Error('No authentication token available');
+        }
+      }
+      
+      const response = await axiosInstance.get(`/api/orders/${orderId}`);
+      
+      if (response.data.success) {
+        setOrder(response.data.data);
+      } else {
+        throw new Error(response.data.message || 'Failed to load order');
+      }
     } catch (error) {
       console.error('Failed to fetch order details:', error);
+      
       if (error.response?.status === 404) {
         setError('Order not found');
       } else if (error.response?.status === 403) {
         setError('You are not authorized to view this order');
+      } else if (error.response?.status === 401) {
+        setError('Please log in to view your order details');
       } else {
-        setError('Failed to load order details');
+        setError('Failed to load order details. Please try again.');
       }
     } finally {
       setLoading(false);
