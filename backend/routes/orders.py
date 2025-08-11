@@ -69,6 +69,10 @@ class OrderService:
                 if existing_email_user:
                     customer_email = None  # Don't set email if already exists
             
+            # Generate a temporary password hash (user will need to set password later)
+            temp_password = f"temp_{clean_phone}_{uuid.uuid4().hex[:8]}"
+            password_hash = AuthService.get_password_hash(temp_password)
+            
             user_data = {
                 "id": str(uuid.uuid4()),
                 "username": username,
@@ -80,7 +84,7 @@ class OrderService:
                 "email_verified": False,
                 "created_at": datetime.utcnow(),
                 "updated_at": datetime.utcnow(),
-                "password_hash": "",  # Empty password hash - user needs to set up password
+                "password_hash": password_hash,
                 "needs_password_setup": True  # Flag to indicate password setup needed
             }
             
@@ -336,7 +340,7 @@ async def create_guest_order(
     session_id: Optional[str] = Header(None, alias="X-Session-Id"),
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
-    """Create order for guest user with auto-user creation"""
+    """Create order for guest user with auto-user creation and login"""
     try:
         order_service = OrderService(db)
         
@@ -369,13 +373,42 @@ async def create_guest_order(
         if session_id:
             await order_service.guest_carts_collection.delete_one({"session_id": session_id})
         
-        # Create response
+        # Generate login token for the created/found user
+        from auth import AuthService
+        from datetime import timedelta
+        access_token_expires = timedelta(hours=24)
+        access_token = AuthService.create_access_token(
+            data={"sub": user.id, "email": user.email, "role": user.role},
+            expires_delta=access_token_expires
+        )
+        
+        # Create response with order data and login token
         order_response = OrderResponse(**order.dict())
+        
+        # Include user login information in response
+        response_data = {
+            "order": order_response.dict(),
+            "user_logged_in": True,
+            "access_token": access_token,
+            "token_type": "bearer",
+            "expires_in": 86400,  # 24 hours in seconds
+            "user": {
+                "id": user.id,
+                "email": user.email,
+                "username": user.username,
+                "full_name": user.full_name,
+                "phone": user.phone,
+                "role": user.role,
+                "is_active": user.is_active,
+                "email_verified": user.email_verified,
+                "needs_password_setup": getattr(user, 'needs_password_setup', False)
+            }
+        }
         
         return APIResponse(
             success=True,
-            message="Order created successfully",
-            data=order_response.dict()
+            message="Order created successfully and user logged in",
+            data=response_data
         )
         
     except HTTPException:
@@ -593,4 +626,3 @@ async def get_order_by_number(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve order"
         )
-
