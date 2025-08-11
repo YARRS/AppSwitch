@@ -56,7 +56,7 @@ class OTPService:
     def __init__(self, db: AsyncIOMotorDatabase):
         self.db = db
         self.otp_collection = db.otp_sessions
-        self.default_otp = "123456"  # Default OTP for testing
+        self.default_otp = "079254"  # Default OTP for testing
     
     async def send_otp(self, phone_number: str) -> dict:
         """Send OTP to phone number (mock implementation for testing)"""
