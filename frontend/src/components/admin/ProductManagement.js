@@ -441,7 +441,7 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    category: '',
+    categories: [], // Changed from 'category' to 'categories' array
     price: '',
     discount_price: '',
     sku: '',
