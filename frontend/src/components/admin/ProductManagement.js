@@ -392,7 +392,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
         <div>
           <p className="text-gray-500 dark:text-gray-400 text-xs">Category</p>
           <p className="text-gray-900 dark:text-white font-medium capitalize">
-            {product.category.replace('_', ' ')}
+            {product.category ? product.category.replace('_', ' ') : 'Uncategorized'}
           </p>
         </div>
         
