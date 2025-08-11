@@ -455,7 +455,7 @@ class CategoryUpdate(BaseModel):
     sort_order: Optional[int] = None
 
 class CategoryInDB(CategoryBase, BaseDocument):
-    product_count: int = 0
+    pass  # product_count is computed at runtime, not stored
 
 class CategoryResponse(CategoryBase, BaseDocument):
     product_count: int
