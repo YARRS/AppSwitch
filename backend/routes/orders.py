@@ -14,6 +14,20 @@ from auth import get_current_active_user, get_admin_user
 
 router = APIRouter(prefix="/api/orders", tags=["Orders"])
 
+# Guest checkout models
+class GuestOrderCreate(BaseModel):
+    items: List[OrderItem]
+    shipping_address: ShippingAddress
+    total_amount: float
+    tax_amount: float = 0.0
+    shipping_cost: float = 0.0
+    discount_amount: float = 0.0
+    final_amount: float
+    payment_method: str = "COD"
+    notes: Optional[str] = None
+    customer_email: Optional[str] = None
+    customer_phone: Optional[str] = None
+
 class OrderService:
     def __init__(self, db: AsyncIOMotorDatabase):
         self.db = db
