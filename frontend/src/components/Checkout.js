@@ -654,52 +654,39 @@ const ShippingForm = ({
             )}
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-blue-700 dark:text-blue-300 mb-2">
-              Contact Phone *
-            </label>
-            <div className="flex space-x-2">
-              <input
-                type="tel"
-                value={formData.customer_phone}
-                onChange={(e) => handleInputChange(null, 'customer_phone', e.target.value)}
-                className={`flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                  errors.customer_phone ? 'border-red-500' : 'border-gray-300'
-                }`}
-                placeholder="Contact phone number"
-                disabled={otpState.otpVerified}
-              />
-              {!otpState.otpVerified && (
-                <button
-                  type="button"
-                  onClick={sendOtp}
-                  disabled={otpState.sendingOtp || !formData.customer_phone || otpState.resendTimer > 0}
-                  className="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-                >
-                  {otpState.sendingOtp ? (
-                    <div className="flex items-center space-x-2">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                      <span>Sending...</span>
-                    </div>
-                  ) : otpState.resendTimer > 0 ? (
-                    `Resend (${otpState.resendTimer}s)`
-                  ) : otpState.otpSent ? (
-                    'Resend OTP'
-                  ) : (
-                    'Send OTP'
-                  )}
-                </button>
-              )}
-              {otpState.otpVerified && (
-                <div className="flex items-center px-4 py-3 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 rounded-lg">
-                  <CheckCircle2 className="w-5 h-5" />
-                </div>
-              )}
+          {/* Phone OTP Verification Section - Show only for the main shipping address phone */}
+          {!isAuthenticated && !otpState.otpVerified && (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={sendOtp}
+                disabled={otpState.sendingOtp || !formData.shipping_address.phone || otpState.resendTimer > 0}
+                className="w-full px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {otpState.sendingOtp ? (
+                  <div className="flex items-center justify-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Sending OTP...</span>
+                  </div>
+                ) : otpState.resendTimer > 0 ? (
+                  `Resend OTP in ${otpState.resendTimer}s`
+                ) : otpState.otpSent ? (
+                  'Resend OTP to Verify Phone'
+                ) : (
+                  'Send OTP to Verify Phone Number'
+                )}
+              </button>
             </div>
-            {errors.customer_phone && (
-              <p className="text-red-500 text-sm mt-1">{errors.customer_phone}</p>
-            )}
-          </div>
+          )}
+
+          {otpState.otpVerified && !isAuthenticated && (
+            <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+              <div className="flex items-center space-x-2 text-green-800 dark:text-green-300">
+                <CheckCircle2 className="w-5 h-5" />
+                <span className="font-medium">Phone number verified successfully!</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* OTP Verification */}
