@@ -5,7 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { 
   ShoppingCart, User, MapPin, CreditCard, Check, 
   AlertCircle, ArrowLeft, Package, Shield, Truck,
-  Phone, Mail, Edit3, Loader, CheckCircle2
+  Phone, Mail, Edit3, Loader, CheckCircle2, Clock
 } from 'lucide-react';
 
 const Checkout = () => {
