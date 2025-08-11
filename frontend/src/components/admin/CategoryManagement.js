@@ -287,6 +287,9 @@ const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
         slug: category.slug || '',
         image: category.image || '',
         is_active: category.is_active ?? true,
+        is_hidden: category.is_hidden ?? false,
+        is_seasonal: category.is_seasonal ?? false,
+        seasonal_months: category.seasonal_months || null,
         sort_order: category.sort_order?.toString() || '0'
       });
     }
