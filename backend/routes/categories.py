@@ -214,12 +214,12 @@ async def get_categories(
         # Convert to response format
         category_responses = []
         for category_doc in result["categories"]:
-            # Remove the product_count field before creating CategoryInDB instance
-            product_count = category_doc.get("product_count", 0)
-            category_data = {k: v for k, v in category_doc.items() if k != "product_count"}
-            category = CategoryInDB(**category_data, product_count=product_count)
+            # Get the product count and create CategoryInDB properly
+            product_count = category_doc.pop("product_count", 0)  # Remove and store product_count
+            category = CategoryInDB(**category_doc)  # Create CategoryInDB without product_count
             category_responses.append(CategoryResponse(
-                **category.dict()
+                **category.dict(),
+                product_count=product_count  # Add product_count to response
             ).dict())
         
         return PaginatedResponse(
