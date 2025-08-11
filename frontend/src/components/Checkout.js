@@ -112,24 +112,24 @@ const Checkout = () => {
     const { shipping_address } = formData;
 
     // Shipping address validation
-    if (!shipping_address.full_name.trim()) {
+    if (!shipping_address.full_name || !shipping_address.full_name.trim()) {
       newErrors.shipping_address_full_name = 'Full name is required';
     }
-    if (!shipping_address.phone.trim()) {
+    if (!shipping_address.phone || !shipping_address.phone.trim()) {
       newErrors.shipping_address_phone = 'Phone number is required';
     } else if (!/^\d{10}$/.test(shipping_address.phone.replace(/\D/g, ''))) {
       newErrors.shipping_address_phone = 'Valid 10-digit phone number is required';
     }
-    if (!shipping_address.address_line1.trim()) {
+    if (!shipping_address.address_line1 || !shipping_address.address_line1.trim()) {
       newErrors.shipping_address_address_line1 = 'Address is required';
     }
-    if (!shipping_address.city.trim()) {
+    if (!shipping_address.city || !shipping_address.city.trim()) {
       newErrors.shipping_address_city = 'City is required';
     }
-    if (!shipping_address.state.trim()) {
+    if (!shipping_address.state || !shipping_address.state.trim()) {
       newErrors.shipping_address_state = 'State is required';
     }
-    if (!shipping_address.zip_code.trim()) {
+    if (!shipping_address.zip_code || !shipping_address.zip_code.trim()) {
       newErrors.shipping_address_zip_code = 'ZIP code is required';
     } else if (!/^\d{6}$/.test(shipping_address.zip_code.replace(/\D/g, ''))) {
       newErrors.shipping_address_zip_code = 'Valid 6-digit ZIP code is required';
@@ -137,13 +137,10 @@ const Checkout = () => {
 
     // Guest user validation
     if (!isAuthenticated) {
-      if (!formData.customer_email.trim()) {
+      if (!formData.customer_email || !formData.customer_email.trim()) {
         newErrors.customer_email = 'Email is required for order updates';
       } else if (!/\S+@\S+\.\S+/.test(formData.customer_email)) {
         newErrors.customer_email = 'Valid email is required';
-      }
-      if (!formData.customer_phone.trim()) {
-        newErrors.customer_phone = 'Phone number is required';
       }
       
       // For guest users, check if phone verification is required
