@@ -27,7 +27,8 @@ const Checkout = () => {
     },
     payment_method: 'COD',
     notes: '',
-    customer_email: ''
+    customer_email: '',
+    customer_phone: ''
   });
 
   // UI State
