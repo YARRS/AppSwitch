@@ -217,7 +217,7 @@ const SuperAdminUserManagement = () => {
 
       {/* Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sm:p-6">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
           <div>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -254,6 +254,15 @@ const SuperAdminUserManagement = () => {
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </select>
+          </div>
+          <div>
+            <button
+              onClick={fetchUsers}
+              className="btn-secondary flex items-center space-x-2"
+            >
+              <Search className="w-5 h-5" />
+              <span>Refresh</span>
+            </button>
           </div>
         </div>
       </div>
