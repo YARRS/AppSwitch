@@ -352,7 +352,10 @@ const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
       const axios = getAuthenticatedAxios();
       const cleanedFormData = {
         ...formData,
-        sort_order: parseInt(formData.sort_order)
+        sort_order: parseInt(formData.sort_order),
+        seasonal_months: formData.is_seasonal && formData.seasonal_months 
+          ? formData.seasonal_months.split(',').map(m => parseInt(m.trim())).filter(m => m >= 1 && m <= 12)
+          : null
       };
 
       if (category) {
