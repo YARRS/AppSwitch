@@ -830,6 +830,64 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
               </div>
             </div>
 
+            {/* Specifications */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Specifications
+              </label>
+              <div className="space-y-3">
+                {Object.entries(formData.specifications).map(([key, value], index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={key}
+                      onChange={(e) => {
+                        const newSpecs = { ...formData.specifications };
+                        delete newSpecs[key];
+                        newSpecs[e.target.value] = value;
+                        handleInputChange('specifications', newSpecs);
+                      }}
+                      className="input-field flex-1"
+                      placeholder="Specification name (e.g., Material, Dimensions)"
+                    />
+                    <input
+                      type="text"
+                      value={value}
+                      onChange={(e) => {
+                        const newSpecs = { ...formData.specifications };
+                        newSpecs[key] = e.target.value;
+                        handleInputChange('specifications', newSpecs);
+                      }}
+                      className="input-field flex-1"
+                      placeholder="Specification value"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newSpecs = { ...formData.specifications };
+                        delete newSpecs[key];
+                        handleInputChange('specifications', newSpecs);
+                      }}
+                      className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newSpecs = { ...formData.specifications };
+                    newSpecs[`spec_${Date.now()}`] = '';
+                    handleInputChange('specifications', newSpecs);
+                  }}
+                  className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                >
+                  + Add Specification
+                </button>
+              </div>
+            </div>
+
             {/* Features */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
