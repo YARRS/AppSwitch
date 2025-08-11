@@ -50,7 +50,7 @@ const Checkout = () => {
     resendTimer: 0
   });
 
-  // Calculate totals
+  // Calculate totals safely
   const subtotal = cart?.total_amount || 0;
   const taxRate = 0.08; // 8% tax
   const taxAmount = subtotal * taxRate;
