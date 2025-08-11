@@ -75,8 +75,19 @@ const OrderTracking = () => {
   };
 
   const copyOrderNumber = () => {
-    navigator.clipboard.writeText(order.order_number);
-    // You could add a toast notification here
+    if (navigator.clipboard && order?.order_number) {
+      navigator.clipboard.writeText(order.order_number);
+      // Could add toast notification here
+    }
+  };
+
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+    fetchOrderDetails();
+  };
+
+  const handleViewAllOrders = () => {
+    navigate('/profile'); // Assuming profile page has order history
   };
 
   const getStatusSteps = () => {
