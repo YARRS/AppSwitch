@@ -56,12 +56,13 @@ const Checkout = () => {
   const shippingCost = subtotal >= 50 ? 0 : 5.99; // Free shipping over $50
   const finalAmount = subtotal + taxAmount + shippingCost;
 
-  // Redirect if cart is empty
+  // Enhanced cart validation - allow checkout access but show warning if cart is empty
   useEffect(() => {
     if (!cartLoading && (!cart.items || cart.items.length === 0)) {
-      navigate('/cart');
+      // Instead of forcing redirect, show a warning and allow user to choose
+      setError('Your cart appears to be empty. Please add items to your cart before checkout.');
     }
-  }, [cart, cartLoading, navigate]);
+  }, [cart, cartLoading]);
 
   // Pre-fill user data if authenticated
   useEffect(() => {
