@@ -642,20 +642,101 @@ const ShippingForm = ({
             <label className="block text-sm font-medium text-blue-700 dark:text-blue-300 mb-2">
               Contact Phone *
             </label>
-            <input
-              type="tel"
-              value={formData.customer_phone}
-              onChange={(e) => handleInputChange(null, 'customer_phone', e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                errors.customer_phone ? 'border-red-500' : 'border-gray-300'
-              }`}
-              placeholder="Contact phone number"
-            />
+            <div className="flex space-x-2">
+              <input
+                type="tel"
+                value={formData.customer_phone}
+                onChange={(e) => handleInputChange(null, 'customer_phone', e.target.value)}
+                className={`flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                  errors.customer_phone ? 'border-red-500' : 'border-gray-300'
+                }`}
+                placeholder="Contact phone number"
+                disabled={otpState.otpVerified}
+              />
+              {!otpState.otpVerified && (
+                <button
+                  type="button"
+                  onClick={sendOtp}
+                  disabled={otpState.sendingOtp || !formData.customer_phone || otpState.resendTimer > 0}
+                  className="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                >
+                  {otpState.sendingOtp ? (
+                    <div className="flex items-center space-x-2">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                      <span>Sending...</span>
+                    </div>
+                  ) : otpState.resendTimer > 0 ? (
+                    `Resend (${otpState.resendTimer}s)`
+                  ) : otpState.otpSent ? (
+                    'Resend OTP'
+                  ) : (
+                    'Send OTP'
+                  )}
+                </button>
+              )}
+              {otpState.otpVerified && (
+                <div className="flex items-center px-4 py-3 bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400 rounded-lg">
+                  <CheckCircle2 className="w-5 h-5" />
+                </div>
+              )}
+            </div>
             {errors.customer_phone && (
               <p className="text-red-500 text-sm mt-1">{errors.customer_phone}</p>
             )}
           </div>
         </div>
+
+        {/* OTP Verification */}
+        {otpState.otpSent && !otpState.otpVerified && (
+          <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+            <h4 className="text-yellow-800 dark:text-yellow-300 font-medium mb-3 flex items-center space-x-2">
+              <Phone className="w-5 h-5" />
+              <span>Verify Your Phone Number</span>
+            </h4>
+            <p className="text-yellow-700 dark:text-yellow-400 text-sm mb-4">
+              We've sent a 6-digit OTP to your phone number. Please enter it below to verify your number.
+              <br />
+              <strong>For testing: Use OTP 123456</strong>
+            </p>
+            
+            <div className="flex space-x-2">
+              <input
+                type="text"
+                value={otpState.otp}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                  setOtpState(prev => ({ ...prev, otp: value, otpError: '' }));
+                }}
+                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center text-lg tracking-wider"
+                placeholder="Enter 6-digit OTP"
+                maxLength="6"
+              />
+              <button
+                type="button"
+                onClick={verifyOtp}
+                disabled={otpState.verifyingOtp || otpState.otp.length !== 6}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {otpState.verifyingOtp ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Verifying...</span>
+                  </div>
+                ) : (
+                  'Verify'
+                )}
+              </button>
+            </div>
+            
+            {otpState.otpError && (
+              <p className="text-red-600 dark:text-red-400 text-sm mt-2">{otpState.otpError}</p>
+            )}
+          </div>
+        )}
+
+        {errors.otp_verification && (
+          <p className="text-red-500 text-sm mt-2">{errors.otp_verification}</p>
+        )}
       </div>
     )}
 
