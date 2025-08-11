@@ -515,10 +515,6 @@ class DatabaseSeeder:
         print()
         
         for user_data in DEFAULT_USERS:
-            # Skip showing the password for users that already existed
-            if not await self.user_exists(user_data["email"], user_data["username"]):
-                continue
-                
             print(f"👤 {user_data['role'].upper()} ACCESS:")
             print(f"   Email/Username: {user_data['email']} or {user_data['username']}")
             print(f"   Password: {user_data['password']}")
@@ -534,6 +530,26 @@ class DatabaseSeeder:
         print("   5. Admin can manage most users except Super Admin")
         print()
     
+    async def display_test_data_summary(self):
+        """Display summary of test data available"""
+        print("\n📊 TEST DATA SUMMARY")
+        print("=" * 60)
+        print(f"🏷️  Categories: {len(DEFAULT_CATEGORIES)} categories seeded")
+        for cat in DEFAULT_CATEGORIES:
+            print(f"   - {cat['name']} ({cat['slug']})")
+        
+        print(f"\n📦 Products: {len(DEFAULT_PRODUCTS)} products seeded")
+        for prod in DEFAULT_PRODUCTS:
+            price_str = f"${prod['discount_price']:.2f}" if prod.get('discount_price') else f"${prod['price']:.2f}"
+            print(f"   - {prod['name']} ({prod['sku']}) - {price_str}")
+        
+        print(f"\n💰 CART TESTING:")
+        print(f"   - All products have stock available for testing")
+        print(f"   - Products range from $27.99 to $125.00")
+        print(f"   - Multiple categories available for filtering")
+        print(f"   - OTP for testing: 079254")
+        print()
+    
     async def create_indexes(self):
         """Create database indexes for better performance"""
         try:
@@ -541,7 +557,19 @@ class DatabaseSeeder:
             await self.db.users.create_index("email", unique=True)
             await self.db.users.create_index("username", unique=True)
             await self.db.users.create_index("role")
-            await self.db.users.create_index("is_active") 
+            await self.db.users.create_index("is_active")
+            
+            # Create indexes on categories collection
+            await self.db.categories.create_index("slug", unique=True)
+            await self.db.categories.create_index("is_active")
+            await self.db.categories.create_index("sort_order")
+            
+            # Create indexes on products collection
+            await self.db.products.create_index("sku", unique=True)
+            await self.db.products.create_index("is_active")
+            await self.db.products.create_index("categories")
+            await self.db.products.create_index("price")
+            await self.db.products.create_index([("name", "text"), ("description", "text")])
             
             print("✅ Created database indexes")
         except Exception as e:
@@ -549,7 +577,7 @@ class DatabaseSeeder:
     
     async def run(self):
         """Run the complete seeding process"""
-        print("🚀 SmartSwitch Database Seeding Script")
+        print("🚀 Vallmark Gift Articles Database Seeding Script")
         print("=" * 50)
         
         # Connect to database
@@ -563,8 +591,17 @@ class DatabaseSeeder:
             # Seed users
             await self.seed_users()
             
+            # Seed categories
+            await self.seed_categories()
+            
+            # Seed products
+            await self.seed_products()
+            
             # Display credentials
             await self.display_login_credentials()
+            
+            # Display test data summary
+            await self.display_test_data_summary()
             
             return True
             
