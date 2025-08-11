@@ -3,6 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from datetime import timedelta
 from typing import Optional
+from pydantic import BaseModel
 
 from models import (
     UserCreate, UserResponse, UserUpdate, Token, APIResponse,
