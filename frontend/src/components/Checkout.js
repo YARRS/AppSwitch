@@ -1053,6 +1053,15 @@ const OrderSummary = ({ cart, subtotal, taxAmount, shippingCost, finalAmount, fo
 const OrderSuccess = ({ orderData }) => {
   const navigate = useNavigate();
 
+  const handleTrackOrder = () => {
+    // Navigate to order tracking page with order ID
+    navigate(`/orders/${orderData.id}`);
+  };
+
+  const handleContinueShopping = () => {
+    navigate('/');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -1094,18 +1103,18 @@ const OrderSuccess = ({ orderData }) => {
           
           <div className="space-y-4">
             <button
-              onClick={() => navigate('/')}
+              onClick={handleTrackOrder}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors duration-200"
+            >
+              Track Your Order
+            </button>
+            
+            <button
+              onClick={handleContinueShopping}
+              className="w-full border border-gray-300 text-gray-700 dark:text-gray-300 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
             >
               Continue Shopping
             </button>
-            
-            <Link
-              to={`/orders/${orderData.id}`}
-              className="block w-full border border-gray-300 text-gray-700 dark:text-gray-300 py-3 px-6 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
-            >
-              View Order Details
-            </Link>
           </div>
         </div>
       </div>
