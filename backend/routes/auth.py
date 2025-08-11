@@ -295,3 +295,175 @@ async def update_user_role(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to update user role"
         )
+
+# New models for profile management
+class EmailUpdateRequest(BaseModel):
+    email: str
+    password: Optional[str] = None  # Current password for verification
+
+class PasswordSetupRequest(BaseModel):
+    password: str
+    confirm_password: str
+
+@router.put("/profile/email", response_model=APIResponse)
+async def update_user_email(
+    request: EmailUpdateRequest,
+    current_user: UserInDB = Depends(get_current_active_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Update user email address"""
+    try:
+        user_service = UserService(db)
+        
+        # Check if email is already in use
+        existing_user = await user_service.get_user_by_email(request.email)
+        if existing_user and existing_user.id != current_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already in use by another account"
+            )
+        
+        # If user has a password, verify it
+        if current_user.hashed_password and request.password:
+            is_valid = await user_service.verify_password(request.password, current_user.hashed_password)
+            if not is_valid:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid password"
+                )
+        
+        # Update email
+        updated_user = await user_service.update_user(
+            current_user.id,
+            {
+                "email": request.email,
+                "email_verified": False  # Reset email verification
+            }
+        )
+        
+        return APIResponse(
+            success=True,
+            message="Email updated successfully",
+            data={"email": request.email}
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update email"
+        )
+
+@router.post("/profile/setup-password", response_model=APIResponse)
+async def setup_user_password(
+    request: PasswordSetupRequest,
+    current_user: UserInDB = Depends(get_current_active_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Set up password for users who don't have one (e.g., created via phone)"""
+    try:
+        # Validate password match
+        if request.password != request.confirm_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Passwords do not match"
+            )
+        
+        # Validate password strength
+        if len(request.password) < 6:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Password must be at least 6 characters long"
+            )
+        
+        user_service = UserService(db)
+        
+        # Hash the new password
+        from auth import AuthService
+        hashed_password = AuthService.get_password_hash(request.password)
+        
+        # Update user with new password
+        await user_service.update_user(
+            current_user.id,
+            {
+                "hashed_password": hashed_password,
+                "needs_password_setup": False
+            }
+        )
+        
+        return APIResponse(
+            success=True,
+            message="Password set successfully"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to set password"
+        )
+
+@router.put("/profile/password", response_model=APIResponse)
+async def change_user_password(
+    current_password: str,
+    new_password: str,
+    confirm_password: str,
+    current_user: UserInDB = Depends(get_current_active_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Change user password"""
+    try:
+        # Validate new password match
+        if new_password != confirm_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="New passwords do not match"
+            )
+        
+        # Validate password strength
+        if len(new_password) < 6:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Password must be at least 6 characters long"
+            )
+        
+        user_service = UserService(db)
+        
+        # Verify current password
+        if not current_user.hashed_password:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No password set. Use setup-password endpoint first."
+            )
+        
+        is_valid = await user_service.verify_password(current_password, current_user.hashed_password)
+        if not is_valid:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid current password"
+            )
+        
+        # Hash the new password
+        from auth import AuthService
+        hashed_password = AuthService.get_password_hash(new_password)
+        
+        # Update user with new password
+        await user_service.update_user(
+            current_user.id,
+            {"hashed_password": hashed_password}
+        )
+        
+        return APIResponse(
+            success=True,
+            message="Password changed successfully"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to change password"
+        )
