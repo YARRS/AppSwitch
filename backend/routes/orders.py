@@ -461,3 +461,46 @@ async def get_order_by_number(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to retrieve order"
         )
+
+@router.post("/guest", response_model=APIResponse)
+async def create_guest_order(
+    order_data: GuestOrderCreate,
+    session_id: Optional[str] = Header(None, alias="X-Session-Id"),
+    db: AsyncIOMotorDatabase = Depends()
+):
+    """Create new order for guest user"""
+    try:
+        if not session_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Session ID is required for guest checkout"
+            )
+        
+        order_service = OrderService(db)
+        
+        # Validate order items
+        await order_service.validate_order_items(order_data.items)
+        
+        # Create order data dict
+        order_dict = order_data.dict()
+        
+        # Create order
+        order = await order_service.create_guest_order(session_id, order_dict)
+        
+        # Create response
+        order_response = OrderResponse(**order.dict())
+        
+        return APIResponse(
+            success=True,
+            message="Order created successfully",
+            data=order_response.dict()
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Guest order creation error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create order"
+        )
