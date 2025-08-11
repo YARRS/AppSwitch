@@ -72,6 +72,12 @@ class StartupTasks:
                 # Seed users
                 await seeder.seed_users()
                 
+                # Seed categories
+                await seeder.seed_categories()
+                
+                # Seed products
+                await seeder.seed_products()
+                
                 logger.info("🎉 Database seeding completed via startup task")
                 
             finally:
