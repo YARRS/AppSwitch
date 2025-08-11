@@ -308,10 +308,13 @@ const CartSummary = ({ cart, formatPrice, isAuthenticated }) => (
         </div>
       )}
       
-      <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-lg font-semibold text-lg transition-colors duration-200 flex items-center justify-center space-x-2">
+      <Link
+        to="/checkout"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-lg font-semibold text-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+      >
         <CreditCard className="w-6 h-6" />
         <span>Proceed to Checkout</span>
-      </button>
+      </Link>
       
       <Link
         to="/"
