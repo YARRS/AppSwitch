@@ -311,12 +311,12 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, orderStatuses }) =>
   const [trackingNumber, setTrackingNumber] = useState(order.tracking_number || '');
   const [notes, setNotes] = useState(order.notes || '');
   const [loading, setLoading] = useState(false);
+  const { getAuthenticatedAxios } = useAuth(); // Move useAuth to component level
 
   const handleUpdate = async () => {
     setLoading(true);
     try {
-      const { getAuthenticatedAxios } = useAuth();
-      const axios = getAuthenticatedAxios();
+      const axios = getAuthenticatedAxios(); // Use the hook result here
       await axios.put(`/api/orders/${order.id}`, {
         tracking_number: trackingNumber,
         notes: notes
