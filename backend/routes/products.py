@@ -52,27 +52,10 @@ class ProductService:
     
     async def get_product_by_id(self, product_id: str) -> Optional[ProductInDB]:
         """Get product by ID"""
-        import logging
-        logger = logging.getLogger(__name__)
-        logger.info(f"🔍 Looking for product with ID: {product_id}")
-        
-        try:
-            product_doc = await self.products_collection.find_one({"id": product_id})
-            logger.info(f"🔍 Product query result: {product_doc is not None}")
-            if product_doc:
-                logger.info(f"🔍 Found product: {product_doc.get('name', 'Unknown')}")
-                return ProductInDB(**product_doc)
-            else:
-                # Try to find any product to debug
-                first_product = await self.products_collection.find_one({})
-                if first_product:
-                    logger.info(f"🔍 First product in DB has ID: {first_product.get('id')} and name: {first_product.get('name')}")
-                else:
-                    logger.info("🔍 No products found in database at all")
-            return None
-        except Exception as e:
-            logger.error(f"🔍 Error in get_product_by_id: {str(e)}")
-            raise
+        product_doc = await self.products_collection.find_one({"id": product_id})
+        if product_doc:
+            return ProductInDB(**product_doc)
+        return None
     
     async def get_product_by_sku(self, sku: str) -> Optional[ProductInDB]:
         """Get product by SKU"""
