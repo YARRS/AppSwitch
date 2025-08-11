@@ -275,8 +275,7 @@ const Checkout = () => {
         final_amount: finalAmount,
         payment_method: formData.payment_method,
         notes: formData.notes,
-        customer_email: formData.customer_email,
-        customer_phone: formData.customer_phone || formData.shipping_address.phone
+        customer_email: formData.customer_email
       };
 
       // Choose endpoint based on authentication
