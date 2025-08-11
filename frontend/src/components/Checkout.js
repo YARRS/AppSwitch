@@ -248,6 +248,12 @@ const Checkout = () => {
 
   // Handle order placement
   const handlePlaceOrder = async () => {
+    // Check if cart is empty before proceeding
+    if (!cart.items || cart.items.length === 0) {
+      setErrors({ general: 'Cannot place order with an empty cart. Please add items to your cart first.' });
+      return;
+    }
+
     if (!validateForm()) {
       setCurrentStep(1); // Go back to address step if validation fails
       return;
