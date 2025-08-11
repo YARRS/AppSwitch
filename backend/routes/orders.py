@@ -325,6 +325,62 @@ async def create_order(
             detail="Failed to create order"
         )
 
+@router.post("/guest", response_model=APIResponse)
+async def create_guest_order(
+    order_data: GuestOrderCreate,
+    session_id: Optional[str] = Header(None, alias="X-Session-Id"),
+    db: AsyncIOMotorDatabase = Depends()
+):
+    """Create order for guest user with auto-user creation"""
+    try:
+        order_service = OrderService(db)
+        
+        # Validate order items
+        await order_service.validate_order_items(order_data.items)
+        
+        # Extract phone number from shipping address
+        phone_number = order_data.shipping_address.phone
+        if not phone_number:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Phone number is required for guest orders"
+            )
+        
+        # Find or create user based on phone number
+        user = await order_service.find_or_create_user_by_phone(
+            phone_number=phone_number,
+            customer_email=order_data.customer_email,
+            full_name=order_data.shipping_address.full_name
+        )
+        
+        # Create order data
+        order_dict = order_data.dict()
+        order_dict["user_id"] = user.id
+        
+        # Create order
+        order = await order_service.create_order(user.id, order_dict)
+        
+        # Clear guest cart if session ID provided
+        if session_id:
+            await order_service.guest_carts_collection.delete_one({"session_id": session_id})
+        
+        # Create response
+        order_response = OrderResponse(**order.dict())
+        
+        return APIResponse(
+            success=True,
+            message="Order created successfully",
+            data=order_response.dict()
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create guest order"
+        )
+
 @router.get("/", response_model=PaginatedResponse)
 async def get_user_orders(
     page: int = Query(1, ge=1),
