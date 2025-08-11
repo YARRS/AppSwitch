@@ -492,6 +492,23 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
     setFormData(prev => ({ ...prev, features: [...prev.features, ''] }));
   };
 
+  const handleCategoryChange = (categoryValue) => {
+    setFormData(prev => {
+      const categories = [...prev.categories];
+      const index = categories.indexOf(categoryValue);
+      
+      if (index > -1) {
+        // Remove category if already selected
+        categories.splice(index, 1);
+      } else {
+        // Add category if not selected
+        categories.push(categoryValue);
+      }
+      
+      return { ...prev, categories };
+    });
+  };
+
   const removeFeature = (index) => {
     const newFeatures = formData.features.filter((_, i) => i !== index);
     setFormData(prev => ({ ...prev, features: newFeatures }));
