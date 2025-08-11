@@ -235,6 +235,13 @@ const CustomerManagement = () => {
               <option value="inactive">Inactive</option>
             </select>
           </div>
+          <button
+            onClick={fetchCustomers}
+            className="btn-secondary flex items-center space-x-2"
+          >
+            <Search className="w-5 h-5" />
+            <span>Refresh</span>
+          </button>
         </div>
       </div>
 
