@@ -139,37 +139,84 @@ const OrderTracking = () => {
       <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-red-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="text-center">
-            <div className="w-20 h-20 mx-auto mb-6 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center">
-              <AlertCircle className="w-12 h-12 text-red-600 dark:text-red-400" />
+            {/* Error Icon with Animation */}
+            <div className="relative mb-8">
+              <div className="w-20 h-20 mx-auto bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center animate-bounce">
+                <AlertCircle className="w-12 h-12 text-red-600 dark:text-red-400" />
+              </div>
+              {/* Pulse Effect */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="w-20 h-20 border-4 border-red-300 rounded-full animate-ping opacity-30"></div>
+              </div>
             </div>
             
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white mb-4">
               {error}
             </h1>
             
-            <p className="text-gray-600 dark:text-gray-400 mb-8">
+            <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto leading-relaxed">
               {error === 'Order not found' 
-                ? 'The order you\'re looking for doesn\'t exist or may have been removed.'
+                ? 'The order you\'re looking for doesn\'t exist or may have been removed. Please check your order number or contact support.'
                 : error === 'You are not authorized to view this order'
-                ? 'This order belongs to another customer. Please check your order history.'
-                : 'There was a problem loading the order details. Please try again.'}
+                ? 'This order belongs to another customer. Please check your order history or log in with the correct account.'
+                : error === 'Please log in to view your order details'
+                ? 'Your session may have expired. Please log in again to view your order details.'
+                : 'There was a problem loading the order details. This might be due to a temporary connection issue.'}
             </p>
             
-            <div className="space-y-4">
-              <Link
-                to="/profile"
-                className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+            {/* Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 max-w-4xl mx-auto">
+              <button
+                onClick={handleRetry}
+                className="group bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2"
               >
-                <User className="w-5 h-5" />
-                <span>View My Orders</span>
+                <RotateCcw className="w-5 h-5 group-hover:rotate-180 transition-transform duration-500" />
+                <span>Retry</span>
+              </button>
+              
+              {isAuthenticated && (
+                <button
+                  onClick={handleViewAllOrders}
+                  className="group bg-green-600 hover:bg-green-700 text-white px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2"
+                >
+                  <Eye className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                  <span>My Orders</span>
+                </button>
+              )}
+              
+              <Link
+                to="/login"
+                className="group bg-purple-600 hover:bg-purple-700 text-white px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2"
+              >
+                <User className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                <span>Sign In</span>
               </Link>
               
               <Link
                 to="/"
-                className="block text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 font-medium"
+                className="group border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 px-6 py-4 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center justify-center space-x-2"
               >
-                ← Back to Shopping
+                <ShoppingCart className="w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
+                <span>Shop Now</span>
               </Link>
+            </div>
+            
+            {/* Helpful Information */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6 max-w-2xl mx-auto">
+              <h3 className="text-lg font-semibold text-blue-800 dark:text-blue-300 mb-3 flex items-center justify-center space-x-2">
+                <Package className="w-5 h-5" />
+                <span>Need Help?</span>
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div className="text-blue-700 dark:text-blue-400">
+                  <p className="font-medium mb-1">Order Issues:</p>
+                  <p>Contact our support team with your order number for immediate assistance.</p>
+                </div>
+                <div className="text-blue-700 dark:text-blue-400">
+                  <p className="font-medium mb-1">Account Access:</p>
+                  <p>Make sure you're logged in with the account used to place the order.</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
