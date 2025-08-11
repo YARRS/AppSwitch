@@ -501,18 +501,64 @@ const CategoryModal = ({ isOpen, onClose, onSave, category = null }) => {
               )}
             </div>
 
-            {/* Status */}
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="is_active"
-                checked={formData.is_active}
-                onChange={(e) => handleInputChange('is_active', e.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-white">
-                Active Category
-              </label>
+            {/* Status Controls */}
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="is_active"
+                  checked={formData.is_active}
+                  onChange={(e) => handleInputChange('is_active', e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-white">
+                  Active Category
+                </label>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="is_hidden"
+                  checked={formData.is_hidden}
+                  onChange={(e) => handleInputChange('is_hidden', e.target.checked)}
+                  className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded"
+                />
+                <label htmlFor="is_hidden" className="ml-2 block text-sm text-gray-900 dark:text-white">
+                  Hidden Category (not shown in main navigation)
+                </label>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="is_seasonal"
+                  checked={formData.is_seasonal}
+                  onChange={(e) => handleInputChange('is_seasonal', e.target.checked)}
+                  className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
+                />
+                <label htmlFor="is_seasonal" className="ml-2 block text-sm text-gray-900 dark:text-white">
+                  Seasonal Category (show only during certain months)
+                </label>
+              </div>
+
+              {formData.is_seasonal && (
+                <div className="ml-6 mt-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Seasonal Months (e.g., 11,12,1 for winter months)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.seasonal_months || ''}
+                    onChange={(e) => handleInputChange('seasonal_months', e.target.value)}
+                    className="input-field"
+                    placeholder="Enter months as comma-separated numbers (1-12)"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Example: "11,12,1,2" for November through February
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Submit Buttons */}
