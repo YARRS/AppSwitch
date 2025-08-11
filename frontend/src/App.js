@@ -138,14 +138,14 @@ function Header({ darkMode, toggleDarkMode }) {
           {/* Desktop Right Side */}
           <div className="hidden md:flex items-center space-x-4">
             {/* Shopping Cart Icon */}
-            <button className="group relative p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-md active:scale-95 transform">
+            <Link to="/cart" className="group relative p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-md active:scale-95 transform">
               <ShoppingCart className="w-5 h-5 text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200" />
               {getCartItemCount() > 0 && (
                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium animate-gentle-pulse">
                   {getCartItemCount()}
                 </span>
               )}
-            </button>
+            </Link>
 
             <button
               onClick={toggleDarkMode}
