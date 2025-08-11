@@ -304,7 +304,24 @@ const Checkout = () => {
       const result = await response.json();
 
       if (response.ok && result.success) {
-        setOrderData(result.data);
+        // Handle guest order with auto-login
+        if (!isAuthenticated && result.data.user_logged_in) {
+          // Store token and user data
+          localStorage.setItem('access_token', result.data.access_token);
+          
+          // Trigger a custom event to notify AuthProvider about the login
+          window.dispatchEvent(new CustomEvent('userAutoLoggedIn', { 
+            detail: {
+              access_token: result.data.access_token,
+              user: result.data.user
+            }
+          }));
+          
+          setOrderData(result.data.order);
+        } else {
+          setOrderData(result.data);
+        }
+        
         setOrderPlaced(true);
         
         // Clear cart after successful order
