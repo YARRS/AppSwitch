@@ -51,16 +51,33 @@ class OrderService:
             existing_user = await self.users_collection.find_one({"phone": clean_phone})
             
             if existing_user:
+                # Update the full_name if provided and different
+                if full_name and full_name != existing_user.get("full_name"):
+                    await self.users_collection.update_one(
+                        {"id": existing_user["id"]},
+                        {"$set": {"full_name": full_name, "updated_at": datetime.utcnow()}}
+                    )
+                    existing_user["full_name"] = full_name
+                
                 return UserInDB(**existing_user)
             
             # Create new user with phone as primary identifier
             from auth import AuthService
             
-            # Generate unique username based on phone
-            username = f"user_{clean_phone}"
+            # Generate username based on full_name or phone
+            if full_name:
+                # Create username from full_name, removing spaces and special chars
+                base_username = re.sub(r'[^a-zA-Z0-9]', '', full_name.lower())
+                if len(base_username) < 3:
+                    base_username = f"user_{clean_phone}"
+            else:
+                base_username = f"user_{clean_phone}"
+            
+            # Ensure username is unique
+            username = base_username
             counter = 1
             while await self.users_collection.find_one({"username": username}):
-                username = f"user_{clean_phone}_{counter}"
+                username = f"{base_username}_{counter}"
                 counter += 1
             
             # Check if email already exists
@@ -93,6 +110,7 @@ class OrderService:
             
         except Exception as e:
             # If user creation fails, return a temporary user object
+            clean_phone = re.sub(r'\D', '', phone_number)[-10:]
             return UserInDB(
                 id=f"temp_{clean_phone}",
                 username=f"guest_{clean_phone}",
@@ -110,7 +128,7 @@ class OrderService:
     async def create_order(self, user_id: str, order_data: dict) -> OrderInDB:
         """Create new order"""
         # Generate order number
-        order_number = f"SW{datetime.now().strftime('%Y%m%d')}{str(uuid.uuid4())[:8].upper()}"
+        order_number = f"VL{datetime.now().strftime('%Y%m%d')}{str(uuid.uuid4())[:8].upper()}"
         
         order_data["order_number"] = order_number
         order = OrderInDB(**order_data)
@@ -143,7 +161,7 @@ class OrderService:
     async def create_guest_order(self, session_id: str, order_data: dict) -> OrderInDB:
         """Create new order for guest user"""
         # Generate order number
-        order_number = f"SW{datetime.now().strftime('%Y%m%d')}{str(uuid.uuid4())[:8].upper()}"
+        order_number = f"VL{datetime.now().strftime('%Y%m%d')}{str(uuid.uuid4())[:8].upper()}"
         
         order_data["order_number"] = order_number
         order_data["user_id"] = f"guest_{session_id}"  # Use session_id as user_id for guests
@@ -347,7 +365,7 @@ async def create_guest_order(
         # Validate order items
         await order_service.validate_order_items(order_data.items)
         
-        # Extract phone number from shipping address
+        # Extract phone number from shipping address (use single verified phone)
         phone_number = order_data.shipping_address.phone
         if not phone_number:
             raise HTTPException(
@@ -355,11 +373,11 @@ async def create_guest_order(
                 detail="Phone number is required for guest orders"
             )
         
-        # Find or create user based on phone number
+        # Find or create user based on phone number with proper name handling
         user = await order_service.find_or_create_user_by_phone(
             phone_number=phone_number,
             customer_email=order_data.customer_email,
-            full_name=order_data.shipping_address.full_name
+            full_name=order_data.shipping_address.full_name  # Use the name from shipping address
         )
         
         # Create order data
