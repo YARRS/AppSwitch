@@ -3,6 +3,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import Optional, List
 from datetime import datetime
 import uuid
+from pydantic import BaseModel
 
 from models import (
     OrderCreate, OrderUpdate, OrderResponse, OrderInDB,
