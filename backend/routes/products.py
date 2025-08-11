@@ -423,12 +423,10 @@ async def get_my_products(
         product_responses = []
         for product_doc in enriched_products:
             product = ProductInDB(**product_doc)
+            # Create response using enriched data (already contains user details)
             product_responses.append(ProductResponse(
-                **product.dict(),
-                is_in_stock=product.stock_quantity > 0,
-                assigned_salesman_name=product_doc.get("assigned_salesman_name"),
-                uploader_name=product_doc.get("uploader_name"),
-                assigned_by_name=product_doc.get("assigned_by_name")
+                **product_doc,  # Use enriched data directly
+                is_in_stock=product.stock_quantity > 0
             ).dict())
         
         return PaginatedResponse(
