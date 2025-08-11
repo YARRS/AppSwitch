@@ -469,7 +469,17 @@ const Checkout = () => {
 };
 
 // Shipping Form Component
-const ShippingForm = ({ formData, handleInputChange, errors, isAuthenticated, onNext }) => (
+const ShippingForm = ({ 
+  formData, 
+  handleInputChange, 
+  errors, 
+  isAuthenticated, 
+  otpState, 
+  setOtpState, 
+  sendOtp, 
+  verifyOtp, 
+  onNext 
+}) => (
   <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
     <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center space-x-2">
       <MapPin className="w-6 h-6" />
