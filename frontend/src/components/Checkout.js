@@ -145,6 +145,11 @@ const Checkout = () => {
       if (!formData.customer_phone.trim()) {
         newErrors.customer_phone = 'Phone number is required';
       }
+      
+      // Check OTP verification for guest users
+      if (!otpState.otpVerified) {
+        newErrors.otp_verification = 'Phone number must be verified with OTP';
+      }
     }
 
     setErrors(newErrors);
