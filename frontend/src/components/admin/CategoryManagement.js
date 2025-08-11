@@ -227,14 +227,28 @@ const CategoryCard = ({ category, onEdit, onDelete }) => {
           {category.description}
         </p>
 
-        {/* Stats */}
+        {/* Stats and Status */}
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-            <Package className="w-4 h-4 mr-1" />
-            <span>{category.product_count} products</span>
-          </div>
-          <div className="text-xs text-gray-500 dark:text-gray-400">
-            #{category.sort_order}
+          <div className="flex flex-col">
+            <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-1">
+              <Package className="w-4 h-4 mr-1" />
+              <span>{category.product_count} products</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="text-xs text-gray-500 dark:text-gray-400">
+                Order: #{category.sort_order}
+              </div>
+              {category.is_hidden && (
+                <span className="px-1 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400">
+                  Hidden
+                </span>
+              )}
+              {category.is_seasonal && (
+                <span className="px-1 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400">
+                  Seasonal
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
