@@ -31,6 +31,23 @@ export const AuthProvider = ({ children }) => {
     } else {
       setLoading(false);
     }
+    
+    // Listen for auto-login events (e.g., after guest order placement)
+    const handleAutoLogin = (event) => {
+      const { access_token, user: userData } = event.detail;
+      localStorage.setItem('access_token', access_token);
+      setUser(userData);
+      setLoading(false);
+      
+      // Trigger cart merge
+      window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: userData }));
+    };
+    
+    window.addEventListener('userAutoLoggedIn', handleAutoLogin);
+    
+    return () => {
+      window.removeEventListener('userAutoLoggedIn', handleAutoLogin);
+    };
   }, []);
 
   // Get current user information
