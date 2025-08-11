@@ -82,13 +82,14 @@ const ProductDetail = () => {
 
   const fetchRelatedProducts = async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/api/products?limit=4`);
+      const response = await axios.get(`${API_BASE_URL}/api/products/?per_page=4`);
       if (response.data.success) {
         setRelatedProducts(response.data.data.filter(p => p.id !== id).slice(0, 4));
       }
     } catch (err) {
-      // Use sample related products
-      setRelatedProducts(getSampleRelatedProducts());
+      console.error('Error fetching related products:', err);
+      // Set empty array instead of sample products
+      setRelatedProducts([]);
     }
   };
 
