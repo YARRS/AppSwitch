@@ -37,6 +37,7 @@ const Checkout = () => {
   const [errors, setErrors] = useState({});
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderData, setOrderData] = useState(null);
+  const [cartWarning, setCartWarning] = useState('');
   
   // OTP State
   const [otpState, setOtpState] = useState({
