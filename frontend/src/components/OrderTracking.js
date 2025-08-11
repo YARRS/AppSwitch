@@ -449,22 +449,70 @@ const OrderTracking = () => {
             </div>
 
             {/* Action Buttons */}
-            <div className="space-y-3">
-              <Link
-                to="/profile"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
-              >
-                <User className="w-5 h-5" />
-                <span>View All Orders</span>
-              </Link>
+            <div className="space-y-4">
+              {/* Primary Actions Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <button
+                  onClick={handleViewAllOrders}
+                  className="group bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <Eye className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
+                  <span>View All Orders</span>
+                </button>
+                
+                <Link
+                  to="/"
+                  className="group border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 py-4 px-6 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center space-x-2"
+                >
+                  <ShoppingCart className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
+                  <span>Continue Shopping</span>
+                </Link>
+              </div>
               
-              <Link
-                to="/"
-                className="w-full border border-gray-300 text-gray-700 dark:text-gray-300 py-3 px-4 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 flex items-center justify-center space-x-2"
-              >
-                <ExternalLink className="w-5 h-5" />
-                <span>Continue Shopping</span>
-              </Link>
+              {/* Secondary Actions Row */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <button
+                  onClick={handleRetry}
+                  className="group bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <RotateCcw className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
+                  <span>Refresh Order</span>
+                </button>
+                
+                <button
+                  onClick={copyOrderNumber}
+                  className="group bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <Copy className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                  <span>Copy Order #</span>
+                </button>
+                
+                <Link
+                  to="/contact"
+                  className="group bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 py-3 px-4 rounded-lg font-medium transition-all duration-200 flex items-center justify-center space-x-2"
+                >
+                  <Mail className="w-4 h-4 group-hover:scale-110 transition-transform duration-300" />
+                  <span>Contact Support</span>
+                </Link>
+              </div>
+              
+              {/* Help Information */}
+              <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <div className="flex items-center space-x-2 text-blue-800 dark:text-blue-300 mb-2">
+                  <Package className="w-5 h-5" />
+                  <span className="font-semibold">Order Management</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-blue-700 dark:text-blue-400">
+                  <div>
+                    <p className="font-medium mb-1">Track Updates:</p>
+                    <p>Your order status updates automatically. Check back anytime for the latest information.</p>
+                  </div>
+                  <div>
+                    <p className="font-medium mb-1">Need Help?:</p>
+                    <p>Contact our support team if you have questions about your order or delivery.</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
