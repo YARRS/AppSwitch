@@ -682,21 +682,61 @@ const ProductModal = ({ isOpen, onClose, onSave, product = null, categories }) =
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Category *
+                  Categories *
                 </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => handleInputChange('category', e.target.value)}
-                  className="input-field"
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {categories.map((category) => (
-                    <option key={category.value} value={category.value}>
-                      {category.label}
-                    </option>
-                  ))}
-                </select>
+                <div className="space-y-2">
+                  {/* Selected Categories Display */}
+                  {formData.categories.length > 0 && (
+                    <div className="flex flex-wrap gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      {formData.categories.map((categoryValue) => {
+                        const category = categories.find(cat => cat.value === categoryValue);
+                        return (
+                          <span
+                            key={categoryValue}
+                            className="inline-flex items-center space-x-1 bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 px-2 py-1 rounded-full text-sm"
+                          >
+                            <span>{category?.label || categoryValue}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleCategoryChange(categoryValue)}
+                              className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
+                  
+                  {/* Category Selection Dropdown */}
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        handleCategoryChange(e.target.value);
+                        e.target.value = ''; // Reset dropdown
+                      }
+                    }}
+                    className="input-field"
+                    defaultValue=""
+                  >
+                    <option value="">Select Category to Add</option>
+                    {categories
+                      .filter(category => !formData.categories.includes(category.value))
+                      .map((category) => (
+                        <option key={category.value} value={category.value}>
+                          {category.label}
+                        </option>
+                      ))}
+                  </select>
+                  
+                  {/* Validation message */}
+                  {formData.categories.length === 0 && (
+                    <p className="text-sm text-red-600 dark:text-red-400">
+                      Please select at least one category
+                    </p>
+                  )}
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
