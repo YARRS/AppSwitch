@@ -553,7 +553,7 @@ async def update_order(
 async def get_order_by_number(
     order_number: str,
     current_user: UserInDB = Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Get order by order number"""
     try:
