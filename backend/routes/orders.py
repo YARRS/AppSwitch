@@ -391,7 +391,7 @@ async def get_user_orders(
     per_page: int = Query(20, ge=1, le=100),
     status: Optional[str] = None,
     current_user: UserInDB = Depends(get_current_active_user),
-    db: AsyncIOMotorDatabase = Depends()
+    db: AsyncIOMotorDatabase = Depends(get_db)
 ):
     """Get user's orders"""
     try:
