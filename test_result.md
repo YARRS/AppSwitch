@@ -146,6 +146,31 @@ When testing frontend:
 5. ✅ ~~Add role-based access control~~ (COMPLETED)
 6. Continue building e-commerce features and role-specific functionalities
 
+## Current Issues Identified (January 11, 2025)
+
+### 🚨 **CRITICAL CHECKOUT FLOW ISSUE**
+
+**Problem**: Direct navigation to `/checkout` redirects back to cart/homepage when cart becomes empty due to:
+- Session refresh/reload
+- Cart session timeout  
+- Guest cart clearing issues
+
+**Root Cause**: Checkout component has aggressive redirect logic (lines 60-64 in Checkout.js) that redirects users to cart if cart is empty, blocking access to checkout page entirely.
+
+**Impact**: 
+- ❌ Guest users cannot complete purchases if cart session is lost
+- ❌ Blocks the entire checkout flow for edge cases
+- ❌ No recovery mechanism for users with checkout intent
+
+### 🎯 **REQUIRED IMPROVEMENTS**
+
+Based on user requirements, implement:
+1. **Fix checkout access** - Allow checkout page access even if cart temporarily becomes empty
+2. **Beautiful success notification** - Professional UI/UX with order confirmation
+3. **Auto-redirect after 10 seconds** - Automatic navigation to order tracking page  
+4. **Guest auto-login** - Seamless login after successful guest order placement
+5. **Unified flow** - Same experience for both guest and authenticated users
+
 ## Files Created
 ### Backend
 - `/app/backend/requirements.txt` - Python dependencies
