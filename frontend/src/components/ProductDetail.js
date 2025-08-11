@@ -51,10 +51,16 @@ const ProductDetail = () => {
   const fetchProduct = async () => {
     try {
       setLoading(true);
+      setError(null);
+      console.log(`Fetching product with ID: ${id}`);
+      
       const response = await axios.get(`${API_BASE_URL}/api/products/${id}`);
+      
+      console.log('Product API response:', response.data);
       
       if (response.data.success) {
         setProduct(response.data.data);
+        console.log('Product loaded successfully:', response.data.data);
       } else {
         throw new Error(response.data.message || 'Product not found');
       }
@@ -62,11 +68,13 @@ const ProductDetail = () => {
       console.error('Error fetching product:', err);
       if (err.response && err.response.status === 404) {
         setError('Product not found');
+      } else if (err.response && err.response.status === 500) {
+        setError('Server error while loading product. Please try again.');
       } else {
-        setError('Failed to load product details');
-        // Fallback to sample product for demo
-        setProduct(getSampleProduct(id));
+        setError('Failed to load product details. Please check your connection.');
       }
+      // Don't fallback to sample data - show actual error
+      setProduct(null);
     } finally {
       setLoading(false);
     }
