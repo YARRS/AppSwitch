@@ -12,7 +12,7 @@ import random
 import string
 
 # Backend URL from frontend .env
-BACKEND_URL = "https://1eafc60d-ffd9-4666-8a13-7a67de9d3fa7.preview.emergentagent.com"
+BACKEND_URL = "https://21c6fd07-04cc-4552-9eb4-bb9285be6a80.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 class AuthenticationTester:
