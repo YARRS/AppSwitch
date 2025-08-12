@@ -297,7 +297,7 @@ const Checkout = () => {
         headers['X-Session-Id'] = sessionId;
       } else {
         // Add authentication token for logged-in users
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('access_token');
         headers['Authorization'] = `Bearer ${token}`;
       }
 
