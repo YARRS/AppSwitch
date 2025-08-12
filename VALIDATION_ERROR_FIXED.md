@@ -58,7 +58,7 @@ TypeError: Cannot read properties of undefined (reading 'trim')
 ## 📝 **Manual Testing Instructions:**
 
 ### **Test Guest Checkout:**
-1. Visit: https://order-auth-fix.preview.emergentagent.com
+1. Visit: https://order-auth-portal.preview.emergentagent.com
 2. Add products to cart
 3. Go to checkout
 4. Fill shipping info + email

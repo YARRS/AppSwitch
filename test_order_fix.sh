@@ -3,7 +3,7 @@
 echo "🔧 Testing Order Placement Fix"
 echo "============================="
 
-BASE_URL="https://order-auth-fix.preview.emergentagent.com"
+BASE_URL="https://order-auth-portal.preview.emergentagent.com"
 SESSION_ID="fix-test-$(date +%s)"
 
 echo "Session ID: $SESSION_ID"

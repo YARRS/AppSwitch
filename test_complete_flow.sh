@@ -3,7 +3,7 @@
 echo "🛒 Testing Complete Cart to Order Flow"
 echo "======================================"
 
-BASE_URL="https://order-auth-fix.preview.emergentagent.com"
+BASE_URL="https://order-auth-portal.preview.emergentagent.com"
 SESSION_ID="test-session-$(date +%s)"
 
 echo "Session ID: $SESSION_ID"
@@ -111,7 +111,7 @@ echo "✅ Auto login: WORKING"
 echo "✅ Order confirmation: WORKING"
 echo ""
 echo "💡 Manual Testing Instructions:"
-echo "1. Go to: https://order-auth-fix.preview.emergentagent.com"
+echo "1. Go to: https://order-auth-portal.preview.emergentagent.com"
 echo "2. Add products to cart"
 echo "3. Go to checkout"
 echo "4. Fill shipping info"
