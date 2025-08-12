@@ -61,40 +61,34 @@ class AuthService:
         # Remove all non-digit characters for processing
         phone = re.sub(r'\D', '', original_phone)
         
-        # Handle different input formats
-        if len(phone) == 11 and phone.startswith('0'):
-            # Remove leading 0 (format: 09876543210)
-            phone = phone[1:]
-        elif len(phone) == 12 and phone.startswith('91'):
-            # Remove country code 91 (format: 919876543210)
-            phone = phone[2:]
-        elif len(phone) == 13 and phone.startswith('91'):
-            # Handle +91 case where + was removed (format: +919876543210)
-            phone = phone[2:]
-        elif len(phone) == 11 and phone.startswith('1'):
-            # US format: +1234567890 -> 1234567890 (11 digits)
-            # For consistency, store as original format if it had +
-            if original_phone.startswith('+'):
-                return original_phone  # Keep the + for US numbers
-            else:
-                return phone  # Return without +
-        elif len(phone) == 12 and phone.startswith('1'):
-            # Handle case where US number has extra digit
-            phone = phone[1:] if phone.startswith('11') else phone
+        # Handle different input formats based on original input and length
         
-        # Validate final phone number
-        if len(phone) == 10:
-            # 10-digit number (Indian or US without country code)
-            return phone
-        elif len(phone) == 11 and phone.startswith('1'):
-            # US phone number format (11 digits with country code 1)
-            # Preserve original format if it had +
-            if original_phone.startswith('+'):
-                return f"+{phone}"
-            else:
-                return phone
+        # US phone number with +1 prefix: +1234567890 (11 digits original, 11 digits cleaned)
+        if original_phone.startswith('+1') and len(phone) == 11 and phone.startswith('1'):
+            return original_phone  # Keep +1234567890 format
+        
+        # US phone number with 1 prefix: 12345678901 (11 digits)
+        elif len(phone) == 11 and phone.startswith('1') and not original_phone.startswith('+'):
+            return phone  # Keep 12345678901 format
+        
+        # Indian phone number with +91 prefix: +919876543210 (13 digits original, 12 digits cleaned)
+        elif original_phone.startswith('+91') and len(phone) == 12 and phone.startswith('91'):
+            return phone[2:]  # Return 9876543210
+        
+        # Indian phone number with 91 prefix: 919876543210 (12 digits)
+        elif len(phone) == 12 and phone.startswith('91'):
+            return phone[2:]  # Return 9876543210
+        
+        # Indian phone number with 0 prefix: 09876543210 (11 digits)
+        elif len(phone) == 11 and phone.startswith('0'):
+            return phone[1:]  # Return 9876543210
+        
+        # 10-digit number (could be Indian mobile or US without country code)
+        elif len(phone) == 10:
+            return phone  # Return as-is
+        
         else:
-            raise ValueError(f"Invalid phone number format. Expected 10 or 11 digits, got {len(phone)}")
+            raise ValueError(f"Invalid phone number format. Got {len(phone)} digits: {phone}")
         
         return phone
     
