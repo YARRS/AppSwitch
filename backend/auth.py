@@ -196,6 +196,10 @@ class UserService:
             {"$set": {"last_login": datetime.utcnow()}}
         )
     
+    async def verify_password(self, plain_password: str, hashed_password: str) -> bool:
+        """Verify password against hash"""
+        return AuthService.verify_password(plain_password, hashed_password)
+    
     async def authenticate_user(self, username_or_email: str, password: str) -> Optional[UserInDB]:
         """Authenticate user with username/email and password"""
         # Try to find user by email first
