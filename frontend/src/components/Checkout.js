@@ -110,8 +110,8 @@ const Checkout = () => {
     }
   };
 
-  // Validate form
-  const validateForm = () => {
+  // Validate form step by step
+  const validateStep1 = () => {
     const newErrors = {};
     const { shipping_address } = formData;
 
@@ -148,13 +148,18 @@ const Checkout = () => {
       }
       
       // For guest users, check if phone verification is required
-      if (!isAuthenticated && !otpState.otpVerified) {
+      if (!otpState.otpVerified) {
         newErrors.otp_verification = 'Please verify your phone number';
       }
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  // Validate entire form for final order placement
+  const validateForm = () => {
+    return validateStep1(); // For now, all validation is in step 1
   };
 
   // OTP Functions
