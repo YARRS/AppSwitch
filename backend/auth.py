@@ -196,13 +196,19 @@ class UserService:
             {"$set": {"last_login": datetime.utcnow()}}
         )
     
-    async def authenticate_user(self, email: str, password: str) -> Optional[UserInDB]:
-        """Authenticate user with email and password"""
-        user = await self.get_user_by_email(email)
+    async def authenticate_user(self, username_or_email: str, password: str) -> Optional[UserInDB]:
+        """Authenticate user with username/email and password"""
+        # Try to find user by email first
+        user = await self.get_user_by_email(username_or_email)
+        
+        # If not found by email, try by username
+        if not user:
+            user = await self.get_user_by_username(username_or_email)
+        
         if not user:
             return None
         
-        if not AuthService.verify_password(password, user.password_hash):
+        if not AuthService.verify_password(password, user.hashed_password):
             return None
         
         if not user.is_active:
