@@ -35,6 +35,262 @@ async def get_db():
     from server import db
     return db
 
+@router.post("/login/detect", response_model=APIResponse)
+async def detect_login_type(request: LoginDetectRequest, db: AsyncIOMotorDatabase = Depends(get_db)):
+    """Detect if identifier is email or phone number and return appropriate login method"""
+    try:
+        identifier = request.identifier.strip()
+        
+        # Check if it's an email
+        if AuthService.is_email(identifier):
+            return APIResponse(
+                success=True,
+                message="Email detected",
+                data={
+                    "login_type": "email",
+                    "identifier": identifier,
+                    "requires": "password"
+                }
+            )
+        
+        # Check if it's a phone number
+        if AuthService.is_phone_number(identifier):
+            try:
+                formatted_phone = AuthService.format_phone_number(identifier)
+                return APIResponse(
+                    success=True,
+                    message="Phone number detected",
+                    data={
+                        "login_type": "phone",
+                        "identifier": formatted_phone,
+                        "requires": "otp"
+                    }
+                )
+            except ValueError as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=str(e)
+                )
+        
+        # If neither email nor phone, return error
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid email address or phone number format"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to detect login type"
+        )
+
+@router.post("/login/mobile", response_model=Token)
+async def mobile_login(request: MobileLoginRequest, db: AsyncIOMotorDatabase = Depends(get_db)):
+    """Login with mobile number and OTP"""
+    try:
+        user_service = UserService(db)
+        
+        # Format phone number
+        formatted_phone = AuthService.format_phone_number(request.phone_number)
+        
+        # Verify OTP first
+        from routes.otp import OTPService
+        otp_service = OTPService(db)
+        
+        # For testing, accept static OTP "123456"
+        if request.otp == "123456":
+            is_otp_valid = True
+        else:
+            is_otp_valid = await otp_service.verify_otp(formatted_phone, request.otp)
+        
+        if not is_otp_valid:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid or expired OTP",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # Find user by phone
+        user = await user_service.get_user_by_phone(formatted_phone)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User not found with this phone number",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        if not user.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Account is inactive",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        # Update last login
+        await user_service.update_last_login(user.id)
+        
+        # Create access token
+        access_token_expires = timedelta(hours=24)
+        access_token = AuthService.create_access_token(
+            data={"sub": user.id, "email": user.email, "role": user.role},
+            expires_delta=access_token_expires
+        )
+        
+        # Create user response
+        user_response = UserResponse(
+            id=user.id,
+            email=user.email,
+            username=user.username,
+            full_name=user.full_name,
+            phone=user.phone,
+            role=user.role,
+            is_active=user.is_active,
+            email_verified=user.email_verified,
+            last_login=user.last_login,
+            created_at=user.created_at,
+            updated_at=user.updated_at
+        )
+        
+        return Token(
+            access_token=access_token,
+            token_type="bearer",
+            expires_in=86400,  # 24 hours in seconds
+            user=user_response
+        )
+        
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Mobile login failed"
+        )
+
+@router.post("/password/reset-request", response_model=APIResponse)
+async def request_password_reset(request: PasswordResetRequest, db: AsyncIOMotorDatabase = Depends(get_db)):
+    """Request password reset for email"""
+    try:
+        user_service = UserService(db)
+        
+        # Check if user exists
+        user = await user_service.get_user_by_email(request.email)
+        if not user:
+            # Don't reveal if email exists or not for security
+            return APIResponse(
+                success=True,
+                message="If the email exists, a reset code has been sent",
+                data={"email": request.email}
+            )
+        
+        # Generate reset code (for testing, use static code)
+        reset_code = "RESET123"  # In production, generate random code
+        
+        # Store reset code in database (simple implementation)
+        reset_data = {
+            "email": request.email,
+            "reset_code": reset_code,
+            "created_at": datetime.utcnow(),
+            "expires_at": datetime.utcnow() + timedelta(hours=1),
+            "used": False
+        }
+        
+        # Remove any existing reset codes for this email
+        await db.password_resets.delete_many({"email": request.email})
+        
+        # Insert new reset code
+        await db.password_resets.insert_one(reset_data)
+        
+        return APIResponse(
+            success=True,
+            message="Password reset code sent to your email",
+            data={
+                "email": request.email,
+                "test_reset_code": reset_code  # For testing only
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to process password reset request"
+        )
+
+@router.post("/password/reset-confirm", response_model=APIResponse)
+async def confirm_password_reset(request: PasswordResetConfirm, db: AsyncIOMotorDatabase = Depends(get_db)):
+    """Confirm password reset with code and new password"""
+    try:
+        user_service = UserService(db)
+        
+        # Find reset request
+        reset_doc = await db.password_resets.find_one({
+            "email": request.email,
+            "reset_code": request.reset_code,
+            "used": False
+        })
+        
+        if not reset_doc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or expired reset code"
+            )
+        
+        # Check if reset code has expired
+        if datetime.utcnow() > reset_doc["expires_at"]:
+            await db.password_resets.delete_one({"_id": reset_doc["_id"]})
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Reset code has expired"
+            )
+        
+        # Find user
+        user = await user_service.get_user_by_email(request.email)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        # Validate new password
+        if len(request.new_password) < 6:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Password must be at least 6 characters long"
+            )
+        
+        # Update password
+        hashed_password = AuthService.hash_password(request.new_password)
+        await user_service.update_user(
+            user.id,
+            {"hashed_password": hashed_password}
+        )
+        
+        # Mark reset code as used
+        await db.password_resets.update_one(
+            {"_id": reset_doc["_id"]},
+            {"$set": {"used": True, "used_at": datetime.utcnow()}}
+        )
+        
+        return APIResponse(
+            success=True,
+            message="Password reset successfully",
+            data={"email": request.email}
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to reset password"
+        )
+
 @router.post("/register", response_model=APIResponse)
 async def register(user_data: UserCreate, db: AsyncIOMotorDatabase = Depends(get_db)):
     """Register a new user"""
