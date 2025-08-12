@@ -158,28 +158,30 @@ const UserProfile = () => {
           </div>
 
           {/* Tab Navigation */}
-          <nav className="flex space-x-8">
+          <nav className="flex space-x-4 sm:space-x-8 overflow-x-auto">
             <button
               onClick={() => setActiveTab('profile')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
                 activeTab === 'profile'
                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <User className="w-4 h-4 inline mr-2" />
-              Profile Information
+              <span className="hidden sm:inline">Profile Information</span>
+              <span className="sm:hidden">Profile</span>
             </button>
             <button
               onClick={() => setActiveTab('orders')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
+              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
                 activeTab === 'orders'
                   ? 'border-blue-500 text-blue-600 dark:text-blue-400'
                   : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
               }`}
             >
               <Package className="w-4 h-4 inline mr-2" />
-              My Orders ({orders.length})
+              <span className="hidden sm:inline">My Orders ({orders.length})</span>
+              <span className="sm:hidden">Orders ({orders.length})</span>
             </button>
           </nav>
         </div>
