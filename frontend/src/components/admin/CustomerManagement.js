@@ -5,6 +5,7 @@ import {
   Calendar, ShoppingCart, DollarSign, MapPin, User,
   Star, Package, Clock, TrendingUp
 } from 'lucide-react';
+import { decryptPhoneNumber } from '../../utils/phoneDecryption';
 
 const CustomerManagement = () => {
   const { getAuthenticatedAxios } = useAuth();
