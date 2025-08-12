@@ -254,6 +254,15 @@ function Header({ darkMode, toggleDarkMode }) {
               <div className="absolute inset-0 rounded-xl bg-blue-600 opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
             </Link>
 
+            {/* My Orders Icon - Mobile - Only show for authenticated users */}
+            {isAuthenticated && (
+              <Link to="/profile?tab=orders" className="group relative p-3 rounded-xl bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 hover:shadow-lg active:scale-95 transform focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                <Package className="w-5 h-5 text-gray-700 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors duration-200" />
+                {/* Pulse effect on hover */}
+                <div className="absolute inset-0 rounded-xl bg-green-600 opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
+              </Link>
+            )}
+
             {/* Dark Mode Toggle - Mobile */}
             <button
               onClick={toggleDarkMode}
