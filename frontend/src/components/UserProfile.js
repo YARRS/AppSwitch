@@ -329,7 +329,7 @@ const ProfileTab = ({ user, isEditing, formData, handleChange, handleSubmit, han
           ) : (
             <div className="flex items-center">
               <Phone className="h-4 w-4 text-gray-400 mr-2" />
-              {decryptPhoneNumber(user?.phone) || 'Not specified'}
+              {decryptedPhone || 'Not specified'}
             </div>
           )}
         </dd>
