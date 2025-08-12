@@ -884,7 +884,7 @@ const ProductCard = ({ product, isAuthenticated, index }) => {
   );
 };
 
-// Featured Categories Carousel Component
+// Enhanced Featured Categories Carousel Component
 const FeaturedCategoriesCarousel = ({ categories, products, onCategorySelect, selectedCategory }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -927,85 +927,131 @@ const FeaturedCategoriesCarousel = ({ categories, products, onCategorySelect, se
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 rounded-xl shadow-lg p-4 lg:p-8 mb-8 overflow-hidden">
-      <div className="text-center mb-6">
-        <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+    <div className="relative bg-gradient-to-br from-purple-900/10 via-pink-900/10 to-blue-900/10 dark:from-purple-800/20 dark:via-pink-800/20 dark:to-blue-800/20 backdrop-blur-lg rounded-3xl shadow-2xl border border-white/20 dark:border-gray-700/20 p-8 mb-12 overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-purple-400/20 to-pink-400/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-gradient-to-br from-blue-400/20 to-purple-400/20 rounded-full blur-3xl animate-pulse"></div>
+      </div>
+
+      {/* Header */}
+      <div className="relative z-10 text-center mb-8">
+        <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full mb-4 shadow-lg">
+          <Sparkles className="w-8 h-8 text-white animate-pulse" />
+        </div>
+        <h2 className="text-3xl lg:text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-3">
           Featured Collections
         </h2>
-        <p className="text-gray-600 dark:text-gray-300">
+        <p className="text-gray-600 dark:text-gray-300 text-lg max-w-2xl mx-auto">
           Discover our handpicked selections across different categories
         </p>
-        <div className="w-20 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full mx-auto mt-3"></div>
+        <div className="w-24 h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-blue-500 rounded-full mx-auto mt-4"></div>
       </div>
 
       {/* Carousel Container */}
-      <div className="relative">
+      <div className="relative z-10">
         <div 
-          className="flex transition-transform duration-500 ease-in-out"
+          className="flex transition-transform duration-700 ease-in-out"
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
           {categorySlides.map((categoryData, slideIndex) => (
             <div key={categoryData.value} className="w-full flex-shrink-0">
-              <div className="bg-white dark:bg-gray-700 rounded-lg p-4 lg:p-6 shadow-md">
+              <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl p-6 lg:p-8 shadow-xl border border-white/20 dark:border-gray-700/20">
                 {/* Category Header */}
-                <div className="text-center mb-6">
-                  <h3 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4">
                     {categoryData.label}
                   </h3>
                   <button
                     onClick={() => handleCategoryClick(categoryData.value)}
-                    className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full hover:from-blue-700 hover:to-purple-700 transition-all duration-200 transform hover:scale-105 shadow-lg"
+                    className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-full hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-purple-500/30 font-medium"
                   >
-                    <span className="text-sm font-medium">View All</span>
-                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <span>View All {categoryData.label}</span>
+                    <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </button>
                 </div>
 
                 {/* Products Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {categoryData.products.map((product) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {categoryData.products.map((product, index) => (
                     <div
                       key={product.id}
-                      className="group bg-gray-50 dark:bg-gray-800 rounded-lg overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                      className="group bg-white/90 dark:bg-gray-700/90 backdrop-blur-lg rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 border border-white/30 dark:border-gray-600/30"
+                      style={{
+                        animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`
+                      }}
                     >
                       {/* Product Image */}
-                      <div className="aspect-square bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 relative">
+                      <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-600 dark:to-gray-700 relative overflow-hidden">
                         {product.images && product.images.length > 0 ? (
                           <img
-                            src={product.images[0].startsWith('data:') ? product.images[0] : `data:image/jpeg;base64,${product.images[0]}`}
+                            src={product.images[0]}
                             alt={product.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            loading="lazy"
                           />
                         ) : (
                           <div className="flex items-center justify-center h-full">
-                            <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center">
+                            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
                               <span className="text-white font-bold text-lg">
                                 {product.name.charAt(0)}
                               </span>
                             </div>
                           </div>
                         )}
-                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all duration-300"></div>
+                        
+                        {/* Overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        
+                        {/* Quick View Button */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <Link
+                            to={`/products/${product.id}`}
+                            className="w-10 h-10 bg-white/90 backdrop-blur-lg rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 transition-all duration-200"
+                          >
+                            <Eye className="w-5 h-5 text-purple-600" />
+                          </Link>
+                        </div>
                       </div>
 
                       {/* Product Info */}
-                      <div className="p-3">
-                        <h4 className="font-semibold text-gray-900 dark:text-white text-sm mb-1 line-clamp-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                      <div className="p-4">
+                        <h4 className="font-bold text-gray-900 dark:text-white text-sm mb-2 line-clamp-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
                           {product.name}
                         </h4>
-                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-1">
+                        <p className="text-xs text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
                           {product.description}
                         </p>
+                        
+                        {/* Price */}
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-blue-600 dark:text-blue-400 text-sm">
-                            {formatPrice(product.discount_price || product.price)}
-                          </span>
-                          {product.discount_price && (
-                            <span className="text-xs text-gray-500 line-through">
-                              {formatPrice(product.price)}
-                            </span>
+                          <div className="flex flex-col">
+                            {product.discount_price ? (
+                              <>
+                                <span className="font-bold text-purple-600 dark:text-purple-400 text-sm">
+                                  {formatPrice(product.discount_price)}
+                                </span>
+                                <span className="text-xs text-gray-500 line-through">
+                                  {formatPrice(product.price)}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="font-bold text-purple-600 dark:text-purple-400 text-sm">
+                                {formatPrice(product.price)}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Rating */}
+                          {product.rating && (
+                            <div className="flex items-center space-x-1">
+                              <Star className="w-3 h-3 text-yellow-400 fill-current" />
+                              <span className="text-xs text-gray-600 dark:text-gray-400">
+                                {product.rating}
+                              </span>
+                            </div>
                           )}
                         </div>
                       </div>
@@ -1019,15 +1065,15 @@ const FeaturedCategoriesCarousel = ({ categories, products, onCategorySelect, se
 
         {/* Navigation Dots */}
         {categorySlides.length > 1 && (
-          <div className="flex justify-center mt-6 space-x-2">
+          <div className="flex justify-center mt-8 space-x-3">
             {categorySlides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`w-3 h-3 rounded-full transition-all duration-200 ${
+                className={`h-3 rounded-full transition-all duration-300 ${
                   index === currentSlide
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 w-8'
-                    : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500'
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 w-8 shadow-lg'
+                    : 'bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500 w-3'
                 }`}
               />
             ))}
@@ -1039,17 +1085,17 @@ const FeaturedCategoriesCarousel = ({ categories, products, onCategorySelect, se
           <>
             <button
               onClick={() => setCurrentSlide((prev) => (prev - 1 + categorySlides.length) % categorySlides.length)}
-              className="absolute left-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white dark:bg-gray-700 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors group"
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-full shadow-xl flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 group border border-white/30 dark:border-gray-600/30"
             >
-              <svg className="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-gray-600 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             <button
               onClick={() => setCurrentSlide((prev) => (prev + 1) % categorySlides.length)}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 w-10 h-10 bg-white dark:bg-gray-700 rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors group"
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-full shadow-xl flex items-center justify-center hover:bg-white dark:hover:bg-gray-700 transition-all duration-300 group border border-white/30 dark:border-gray-600/30"
             >
-              <svg className="w-5 h-5 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-gray-600 dark:text-gray-300 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
