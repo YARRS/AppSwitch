@@ -3,7 +3,7 @@
 echo "🛒 Testing Complete Cart to Checkout Flow"
 echo "=========================================="
 
-BASE_URL="https://guest-order-login.preview.emergentagent.com"
+BASE_URL="https://order-auth-fix.preview.emergentagent.com"
 SESSION_ID="test-session-$(date +%s)"
 
 echo "Session ID: $SESSION_ID"
