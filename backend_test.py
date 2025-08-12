@@ -45,15 +45,14 @@ TEST_PHONE_FORMATS = [
     "+911234567898"    # With +91 country code
 ]
 
-class AuthOrderTester:
+class MobileLoginTester:
     def __init__(self):
         self.results = []
         self.total_tests = 0
         self.passed_tests = 0
         self.failed_tests = 0
         self.auth_tokens = {}  # Store tokens for different users
-        self.test_products = []  # Store test products for order testing
-        self.created_orders = []  # Track created orders
+        self.otp_sessions = {}  # Store OTP sessions for testing
         
     def log_result(self, test_name, status, message, details=None):
         """Log test result"""
@@ -101,356 +100,614 @@ class AuthOrderTester:
             self.log_result("Health Check", "FAIL", f"Error checking health: {str(e)}")
             return False
     
-    def authenticate_user(self, email, password, role_name):
-        """Authenticate user and store token"""
+    def test_login_type_detection_email(self):
+        """Test login type detection with email addresses"""
         try:
-            login_data = {
-                "username": email,
-                "password": password
-            }
+            test_emails = [
+                "admin@vallmark.com",
+                "customer@vallmark.com", 
+                "test.user@example.com",
+                "user+tag@domain.co.uk"
+            ]
             
-            response = requests.post(f"{API_BASE}/auth/login", data=login_data, timeout=30)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("access_token"):
-                    self.auth_tokens[role_name] = {
-                        "token": data["access_token"],
-                        "user": data.get("user", {}),
-                        "expires_in": data.get("expires_in", 86400)
-                    }
-                    user_info = data.get("user", {})
-                    self.log_result(
-                        f"Authentication ({role_name})", 
-                        "PASS", 
-                        f"Successfully authenticated {role_name} - {user_info.get('full_name', email)}",
-                        {
-                            "user_id": user_info.get("id"),
-                            "email": user_info.get("email"),
-                            "role": user_info.get("role"),
-                            "token_expires_in": data.get("expires_in")
-                        }
-                    )
-                    return True
-                else:
-                    self.log_result(f"Authentication ({role_name})", "FAIL", f"No access token in response for {role_name}")
-                    return False
-            else:
-                self.log_result(f"Authentication ({role_name})", "FAIL", f"Authentication failed for {role_name}: HTTP {response.status_code} - {response.text}")
-                return False
-                
-        except Exception as e:
-            self.log_result(f"Authentication ({role_name})", "FAIL", f"Error authenticating {role_name}: {str(e)}")
-            return False
-    
-    def get_auth_headers(self, role_name):
-        """Get authorization headers for a specific role"""
-        token_data = self.auth_tokens.get(role_name)
-        if token_data:
-            return {"Authorization": f"Bearer {token_data['token']}"}
-        return {}
-    
-    def test_jwt_token_validation(self, role_name):
-        """Test JWT token validation by accessing protected endpoint"""
-        try:
-            headers = self.get_auth_headers(role_name)
-            if not headers:
-                self.log_result(f"JWT Token Validation ({role_name})", "SKIP", f"No auth token for {role_name}")
-                return False
-            
-            # Test /auth/me endpoint which requires valid JWT
-            response = requests.get(f"{API_BASE}/auth/me", headers=headers, timeout=30)
-            
-            if response.status_code == 200:
-                data = response.json()
-                user_info = data
-                self.log_result(
-                    f"JWT Token Validation ({role_name})", 
-                    "PASS", 
-                    f"JWT token valid - retrieved user info for {user_info.get('full_name', 'Unknown')}",
-                    {
-                        "user_id": user_info.get("id"),
-                        "email": user_info.get("email"),
-                        "role": user_info.get("role"),
-                        "is_active": user_info.get("is_active")
-                    }
-                )
-                return True
-            else:
-                self.log_result(f"JWT Token Validation ({role_name})", "FAIL", f"JWT validation failed: HTTP {response.status_code} - {response.text}")
-                return False
-                
-        except Exception as e:
-            self.log_result(f"JWT Token Validation ({role_name})", "FAIL", f"Error validating JWT for {role_name}: {str(e)}")
-            return False
-    
-    def get_test_products(self):
-        """Get available products for order testing"""
-        try:
-            response = requests.get(f"{API_BASE}/products/?is_active=true&per_page=5", timeout=30)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("success"):
-                    products = data.get("data", [])
-                    self.test_products = products[:3]  # Use first 3 products for testing
-                    self.log_result(
-                        "Get Test Products", 
-                        "PASS", 
-                        f"Retrieved {len(self.test_products)} products for order testing",
-                        {
-                            "product_count": len(self.test_products),
-                            "products": [{"id": p.get("id"), "name": p.get("name"), "price": p.get("price")} for p in self.test_products]
-                        }
-                    )
-                    return True
-                else:
-                    self.log_result("Get Test Products", "FAIL", "API returned success=false", data)
-                    return False
-            else:
-                self.log_result("Get Test Products", "FAIL", f"HTTP {response.status_code}: {response.text}")
-                return False
-                
-        except Exception as e:
-            self.log_result("Get Test Products", "FAIL", f"Error retrieving products: {str(e)}")
-            return False
-    
-    def test_order_creation(self, role_name):
-        """Test order creation for authenticated user"""
-        try:
-            headers = self.get_auth_headers(role_name)
-            if not headers:
-                self.log_result(f"Order Creation ({role_name})", "SKIP", f"No auth token for {role_name}")
-                return False
-            
-            if not self.test_products:
-                self.log_result(f"Order Creation ({role_name})", "SKIP", "No test products available")
-                return False
-            
-            # Create order with first available product
-            product = self.test_products[0]
-            
-            # Create realistic order data
-            order_data = {
-                "items": [
-                    {
-                        "product_id": product["id"],
-                        "product_name": product["name"],
-                        "quantity": 2,
-                        "unit_price": product["price"],
-                        "total_price": product["price"] * 2
-                    }
-                ],
-                "shipping_address": {
-                    "full_name": f"Test Customer {role_name.title()}",
-                    "address_line_1": "123 Smart Switch Lane",
-                    "address_line_2": "Suite 456",
-                    "city": "Tech City",
-                    "state": "CA",
-                    "postal_code": "90210",
-                    "country": "USA",
-                    "phone": "555-123-4567"
-                },
-                "total_amount": product["price"] * 2,
-                "tax_amount": product["price"] * 2 * 0.08,  # 8% tax
-                "shipping_cost": 10.00,
-                "discount_amount": 0.0,
-                "final_amount": (product["price"] * 2) + (product["price"] * 2 * 0.08) + 10.00,
-                "payment_method": "COD",
-                "notes": f"Test order created by {role_name} user for authentication testing"
-            }
-            
-            response = requests.post(f"{API_BASE}/orders/", json=order_data, headers=headers, timeout=30)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("success"):
-                    order_info = data.get("data", {})
-                    self.created_orders.append({
-                        "id": order_info.get("id"),
-                        "order_number": order_info.get("order_number"),
-                        "role": role_name,
-                        "total_amount": order_info.get("final_amount")
-                    })
-                    self.log_result(
-                        f"Order Creation ({role_name})", 
-                        "PASS", 
-                        f"Successfully created order {order_info.get('order_number')} for ${order_info.get('final_amount', 0):.2f}",
-                        {
-                            "order_id": order_info.get("id"),
-                            "order_number": order_info.get("order_number"),
-                            "status": order_info.get("status"),
-                            "total_amount": order_info.get("final_amount"),
-                            "items_count": len(order_info.get("items", []))
-                        }
-                    )
-                    return True
-                else:
-                    self.log_result(f"Order Creation ({role_name})", "FAIL", "API returned success=false", data)
-                    return False
-            else:
-                self.log_result(f"Order Creation ({role_name})", "FAIL", f"HTTP {response.status_code}: {response.text}")
-                return False
-                
-        except Exception as e:
-            self.log_result(f"Order Creation ({role_name})", "FAIL", f"Error creating order for {role_name}: {str(e)}")
-            return False
-    
-    def test_order_retrieval(self, role_name):
-        """Test order retrieval for authenticated user"""
-        try:
-            headers = self.get_auth_headers(role_name)
-            if not headers:
-                self.log_result(f"Order Retrieval ({role_name})", "SKIP", f"No auth token for {role_name}")
-                return False
-            
-            # Get user's orders
-            response = requests.get(f"{API_BASE}/orders/", headers=headers, timeout=30)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("success"):
-                    orders = data.get("data", [])
-                    total = data.get("total", 0)
-                    
-                    # Check if our created order is in the list
-                    user_created_orders = [o for o in self.created_orders if o["role"] == role_name]
-                    found_orders = 0
-                    
-                    for created_order in user_created_orders:
-                        for order in orders:
-                            if order.get("id") == created_order["id"]:
-                                found_orders += 1
-                                break
-                    
-                    self.log_result(
-                        f"Order Retrieval ({role_name})", 
-                        "PASS", 
-                        f"Retrieved {len(orders)} orders (total: {total}), found {found_orders}/{len(user_created_orders)} created orders",
-                        {
-                            "retrieved_orders": len(orders),
-                            "total_orders": total,
-                            "found_created_orders": found_orders,
-                            "expected_created_orders": len(user_created_orders)
-                        }
-                    )
-                    return True
-                else:
-                    self.log_result(f"Order Retrieval ({role_name})", "FAIL", "API returned success=false", data)
-                    return False
-            else:
-                self.log_result(f"Order Retrieval ({role_name})", "FAIL", f"HTTP {response.status_code}: {response.text}")
-                return False
-                
-        except Exception as e:
-            self.log_result(f"Order Retrieval ({role_name})", "FAIL", f"Error retrieving orders for {role_name}: {str(e)}")
-            return False
-    
-    def test_order_details(self, role_name):
-        """Test individual order details retrieval"""
-        try:
-            headers = self.get_auth_headers(role_name)
-            if not headers:
-                self.log_result(f"Order Details ({role_name})", "SKIP", f"No auth token for {role_name}")
-                return False
-            
-            # Find an order created by this user
-            user_orders = [o for o in self.created_orders if o["role"] == role_name]
-            if not user_orders:
-                self.log_result(f"Order Details ({role_name})", "SKIP", f"No orders created by {role_name} to test")
-                return False
-            
-            order = user_orders[0]
-            order_id = order["id"]
-            
-            response = requests.get(f"{API_BASE}/orders/{order_id}", headers=headers, timeout=30)
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("success"):
-                    order_details = data.get("data", {})
-                    self.log_result(
-                        f"Order Details ({role_name})", 
-                        "PASS", 
-                        f"Retrieved order details for {order_details.get('order_number')}",
-                        {
-                            "order_id": order_details.get("id"),
-                            "order_number": order_details.get("order_number"),
-                            "status": order_details.get("status"),
-                            "items_count": len(order_details.get("items", [])),
-                            "total_amount": order_details.get("final_amount")
-                        }
-                    )
-                    return True
-                else:
-                    self.log_result(f"Order Details ({role_name})", "FAIL", "API returned success=false", data)
-                    return False
-            else:
-                self.log_result(f"Order Details ({role_name})", "FAIL", f"HTTP {response.status_code}: {response.text}")
-                return False
-                
-        except Exception as e:
-            self.log_result(f"Order Details ({role_name})", "FAIL", f"Error retrieving order details for {role_name}: {str(e)}")
-            return False
-    
-    def test_database_seeding_verification(self):
-        """Test that auto-seeded users exist in database"""
-        try:
-            # Try to authenticate each seeded user to verify they exist
-            seeded_users_found = 0
-            seeded_users_total = len(AUTO_SEEDED_USERS)
-            
-            for user_data in AUTO_SEEDED_USERS:
-                email = user_data["email"]
-                password = user_data["password"]
-                role = user_data["role"]
-                
-                login_data = {
-                    "username": email,
-                    "password": password
-                }
-                
+            passed_count = 0
+            for email in test_emails:
                 try:
-                    response = requests.post(f"{API_BASE}/auth/login", data=login_data, timeout=30)
+                    response = requests.post(
+                        f"{API_BASE}/auth/login/detect",
+                        json={"identifier": email},
+                        timeout=30
+                    )
+                    
                     if response.status_code == 200:
                         data = response.json()
-                        if data.get("access_token"):
-                            seeded_users_found += 1
-                except:
-                    pass  # Count failed authentications
+                        if (data.get("success") and 
+                            data.get("data", {}).get("login_type") == "email" and
+                            data.get("data", {}).get("requires") == "password"):
+                            passed_count += 1
+                        else:
+                            self.log_result(
+                                f"Login Detection Email ({email})", 
+                                "FAIL", 
+                                f"Incorrect detection result", 
+                                data
+                            )
+                    else:
+                        self.log_result(
+                            f"Login Detection Email ({email})", 
+                            "FAIL", 
+                            f"HTTP {response.status_code}: {response.text}"
+                        )
+                except Exception as e:
+                    self.log_result(
+                        f"Login Detection Email ({email})", 
+                        "FAIL", 
+                        f"Error: {str(e)}"
+                    )
             
-            if seeded_users_found == seeded_users_total:
+            if passed_count == len(test_emails):
                 self.log_result(
-                    "Database Seeding Verification", 
+                    "Login Type Detection - Email", 
                     "PASS", 
-                    f"All {seeded_users_total} auto-seeded users found and can authenticate",
-                    {
-                        "total_seeded_users": seeded_users_total,
-                        "found_users": seeded_users_found,
-                        "success_rate": "100%"
-                    }
+                    f"All {len(test_emails)} email addresses correctly detected as email type"
                 )
                 return True
             else:
                 self.log_result(
-                    "Database Seeding Verification", 
+                    "Login Type Detection - Email", 
                     "FAIL", 
-                    f"Only {seeded_users_found}/{seeded_users_total} auto-seeded users found",
-                    {
-                        "total_seeded_users": seeded_users_total,
-                        "found_users": seeded_users_found,
-                        "missing_users": seeded_users_total - seeded_users_found
-                    }
+                    f"Only {passed_count}/{len(test_emails)} emails correctly detected"
                 )
                 return False
                 
         except Exception as e:
-            self.log_result("Database Seeding Verification", "FAIL", f"Error verifying seeded users: {str(e)}")
+            self.log_result("Login Type Detection - Email", "FAIL", f"Error testing email detection: {str(e)}")
             return False
     
-    def run_comprehensive_auth_order_test(self):
-        """Run comprehensive authentication and order testing"""
-        print("🚀 Starting Authentication and Order Placement Testing")
+    def test_login_type_detection_phone(self):
+        """Test login type detection with phone numbers in different formats"""
+        try:
+            test_phones = [
+                "9876543210",      # 10 digits
+                "+919876543210",   # With +91 country code
+                "09876543210",     # With leading 0
+                "919876543210",    # With 91 country code
+                "1234567898"       # From seeded user
+            ]
+            
+            passed_count = 0
+            for phone in test_phones:
+                try:
+                    response = requests.post(
+                        f"{API_BASE}/auth/login/detect",
+                        json={"identifier": phone},
+                        timeout=30
+                    )
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        if (data.get("success") and 
+                            data.get("data", {}).get("login_type") == "phone" and
+                            data.get("data", {}).get("requires") == "otp"):
+                            passed_count += 1
+                        else:
+                            self.log_result(
+                                f"Login Detection Phone ({phone})", 
+                                "FAIL", 
+                                f"Incorrect detection result", 
+                                data
+                            )
+                    else:
+                        self.log_result(
+                            f"Login Detection Phone ({phone})", 
+                            "FAIL", 
+                            f"HTTP {response.status_code}: {response.text}"
+                        )
+                except Exception as e:
+                    self.log_result(
+                        f"Login Detection Phone ({phone})", 
+                        "FAIL", 
+                        f"Error: {str(e)}"
+                    )
+            
+            if passed_count == len(test_phones):
+                self.log_result(
+                    "Login Type Detection - Phone", 
+                    "PASS", 
+                    f"All {len(test_phones)} phone numbers correctly detected as phone type"
+                )
+                return True
+            else:
+                self.log_result(
+                    "Login Type Detection - Phone", 
+                    "FAIL", 
+                    f"Only {passed_count}/{len(test_phones)} phones correctly detected"
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result("Login Type Detection - Phone", "FAIL", f"Error testing phone detection: {str(e)}")
+            return False
+    
+    def test_login_type_detection_invalid(self):
+        """Test login type detection with invalid formats"""
+        try:
+            invalid_inputs = [
+                "invalid",
+                "123",
+                "abc@",
+                "@domain.com",
+                "12345",  # Too short for phone
+                "123456789012345"  # Too long for phone
+            ]
+            
+            passed_count = 0
+            for invalid_input in invalid_inputs:
+                try:
+                    response = requests.post(
+                        f"{API_BASE}/auth/login/detect",
+                        json={"identifier": invalid_input},
+                        timeout=30
+                    )
+                    
+                    # Should return 400 for invalid formats
+                    if response.status_code == 400:
+                        passed_count += 1
+                    else:
+                        self.log_result(
+                            f"Login Detection Invalid ({invalid_input})", 
+                            "FAIL", 
+                            f"Expected 400, got {response.status_code}"
+                        )
+                except Exception as e:
+                    self.log_result(
+                        f"Login Detection Invalid ({invalid_input})", 
+                        "FAIL", 
+                        f"Error: {str(e)}"
+                    )
+            
+            if passed_count == len(invalid_inputs):
+                self.log_result(
+                    "Login Type Detection - Invalid", 
+                    "PASS", 
+                    f"All {len(invalid_inputs)} invalid inputs correctly rejected"
+                )
+                return True
+            else:
+                self.log_result(
+                    "Login Type Detection - Invalid", 
+                    "FAIL", 
+                    f"Only {passed_count}/{len(invalid_inputs)} invalid inputs correctly rejected"
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result("Login Type Detection - Invalid", "FAIL", f"Error testing invalid detection: {str(e)}")
+            return False
+    
+    def test_otp_sending(self):
+        """Test OTP sending for valid phone numbers"""
+        try:
+            # Test with seeded user phone numbers
+            test_phones = ["1234567898", "1234567891", "9876543210"]
+            
+            passed_count = 0
+            for phone in test_phones:
+                try:
+                    response = requests.post(
+                        f"{API_BASE}/otp/send",
+                        json={"phone_number": phone},
+                        timeout=30
+                    )
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        if data.get("success"):
+                            # Store OTP session info for later verification
+                            self.otp_sessions[phone] = {
+                                "test_otp": data.get("data", {}).get("test_otp", "079254"),
+                                "expires_in": data.get("data", {}).get("expires_in", 600)
+                            }
+                            passed_count += 1
+                        else:
+                            self.log_result(
+                                f"OTP Send ({phone})", 
+                                "FAIL", 
+                                f"API returned success=false", 
+                                data
+                            )
+                    else:
+                        self.log_result(
+                            f"OTP Send ({phone})", 
+                            "FAIL", 
+                            f"HTTP {response.status_code}: {response.text}"
+                        )
+                except Exception as e:
+                    self.log_result(
+                        f"OTP Send ({phone})", 
+                        "FAIL", 
+                        f"Error: {str(e)}"
+                    )
+            
+            if passed_count == len(test_phones):
+                self.log_result(
+                    "OTP Sending", 
+                    "PASS", 
+                    f"OTP sent successfully to all {len(test_phones)} phone numbers"
+                )
+                return True
+            else:
+                self.log_result(
+                    "OTP Sending", 
+                    "FAIL", 
+                    f"OTP sent to only {passed_count}/{len(test_phones)} phone numbers"
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result("OTP Sending", "FAIL", f"Error testing OTP sending: {str(e)}")
+            return False
+    
+    def test_mobile_login_with_otp(self):
+        """Test mobile login flow with OTP verification"""
+        try:
+            # Test with seeded users who have phone numbers
+            test_users = [
+                {"phone": "1234567898", "role": "customer"},
+                {"phone": "1234567891", "role": "admin"}
+            ]
+            
+            test_otps = ["123456", "079254"]  # Both testing OTPs mentioned in review
+            
+            passed_count = 0
+            for user in test_users:
+                for otp in test_otps:
+                    try:
+                        response = requests.post(
+                            f"{API_BASE}/auth/login/mobile",
+                            json={
+                                "phone_number": user["phone"],
+                                "otp": otp
+                            },
+                            timeout=30
+                        )
+                        
+                        if response.status_code == 200:
+                            data = response.json()
+                            if data.get("access_token") and data.get("user"):
+                                # Store token for later use
+                                self.auth_tokens[f"{user['role']}_mobile"] = {
+                                    "token": data["access_token"],
+                                    "user": data["user"],
+                                    "expires_in": data.get("expires_in", 86400)
+                                }
+                                passed_count += 1
+                                self.log_result(
+                                    f"Mobile Login ({user['role']} - OTP {otp})", 
+                                    "PASS", 
+                                    f"Successfully logged in with phone {user['phone']} and OTP {otp}",
+                                    {
+                                        "user_id": data["user"].get("id"),
+                                        "email": data["user"].get("email"),
+                                        "role": data["user"].get("role")
+                                    }
+                                )
+                                break  # Success with this OTP, no need to test other OTP
+                            else:
+                                self.log_result(
+                                    f"Mobile Login ({user['role']} - OTP {otp})", 
+                                    "FAIL", 
+                                    f"Missing access_token or user in response", 
+                                    data
+                                )
+                        else:
+                            self.log_result(
+                                f"Mobile Login ({user['role']} - OTP {otp})", 
+                                "FAIL", 
+                                f"HTTP {response.status_code}: {response.text}"
+                            )
+                    except Exception as e:
+                        self.log_result(
+                            f"Mobile Login ({user['role']} - OTP {otp})", 
+                            "FAIL", 
+                            f"Error: {str(e)}"
+                        )
+            
+            if passed_count >= len(test_users):
+                self.log_result(
+                    "Mobile Login Flow", 
+                    "PASS", 
+                    f"Mobile login successful for {passed_count} test cases"
+                )
+                return True
+            else:
+                self.log_result(
+                    "Mobile Login Flow", 
+                    "FAIL", 
+                    f"Mobile login failed - only {passed_count} successful logins"
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result("Mobile Login Flow", "FAIL", f"Error testing mobile login: {str(e)}")
+            return False
+    
+    def test_password_reset_request(self):
+        """Test password reset request functionality"""
+        try:
+            test_emails = ["admin@vallmark.com", "customer@vallmark.com"]
+            
+            passed_count = 0
+            for email in test_emails:
+                try:
+                    response = requests.post(
+                        f"{API_BASE}/auth/password/reset-request",
+                        json={"email": email},
+                        timeout=30
+                    )
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        if data.get("success"):
+                            # Check if test reset code is provided
+                            reset_code = data.get("data", {}).get("test_reset_code")
+                            if reset_code:
+                                passed_count += 1
+                                self.log_result(
+                                    f"Password Reset Request ({email})", 
+                                    "PASS", 
+                                    f"Reset request successful, test code: {reset_code}"
+                                )
+                            else:
+                                self.log_result(
+                                    f"Password Reset Request ({email})", 
+                                    "FAIL", 
+                                    f"No test reset code in response", 
+                                    data
+                                )
+                        else:
+                            self.log_result(
+                                f"Password Reset Request ({email})", 
+                                "FAIL", 
+                                f"API returned success=false", 
+                                data
+                            )
+                    else:
+                        self.log_result(
+                            f"Password Reset Request ({email})", 
+                            "FAIL", 
+                            f"HTTP {response.status_code}: {response.text}"
+                        )
+                except Exception as e:
+                    self.log_result(
+                        f"Password Reset Request ({email})", 
+                        "FAIL", 
+                        f"Error: {str(e)}"
+                    )
+            
+            if passed_count == len(test_emails):
+                self.log_result(
+                    "Password Reset Request", 
+                    "PASS", 
+                    f"Password reset request successful for all {len(test_emails)} emails"
+                )
+                return True
+            else:
+                self.log_result(
+                    "Password Reset Request", 
+                    "FAIL", 
+                    f"Password reset request failed for some emails ({passed_count}/{len(test_emails)})"
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result("Password Reset Request", "FAIL", f"Error testing password reset request: {str(e)}")
+            return False
+    
+    def test_password_reset_confirm(self):
+        """Test password reset confirmation with reset code"""
+        try:
+            # First, request a password reset to get a valid reset code
+            test_email = "customer@vallmark.com"
+            
+            # Request password reset first
+            reset_request_response = requests.post(
+                f"{API_BASE}/auth/password/reset-request",
+                json={"email": test_email},
+                timeout=30
+            )
+            
+            if reset_request_response.status_code != 200:
+                self.log_result(
+                    "Password Reset Confirm", 
+                    "FAIL", 
+                    f"Could not request password reset: {reset_request_response.text}"
+                )
+                return False
+            
+            # Use the static reset code "RESET123" mentioned in review
+            reset_code = "RESET123"
+            new_password = "NewPassword123!"
+            
+            response = requests.post(
+                f"{API_BASE}/auth/password/reset-confirm",
+                json={
+                    "email": test_email,
+                    "reset_code": reset_code,
+                    "new_password": new_password
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("success"):
+                    self.log_result(
+                        "Password Reset Confirm", 
+                        "PASS", 
+                        f"Password reset confirmed successfully for {test_email}"
+                    )
+                    return True
+                else:
+                    self.log_result(
+                        "Password Reset Confirm", 
+                        "FAIL", 
+                        f"API returned success=false", 
+                        data
+                    )
+                    return False
+            else:
+                self.log_result(
+                    "Password Reset Confirm", 
+                    "FAIL", 
+                    f"HTTP {response.status_code}: {response.text}"
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result("Password Reset Confirm", "FAIL", f"Error testing password reset confirm: {str(e)}")
+            return False
+    
+    def test_traditional_email_login(self):
+        """Test that traditional email/password login still works"""
+        try:
+            # Test with seeded users
+            test_users = [
+                {"email": "admin@vallmark.com", "password": "Admin123!", "role": "admin"},
+                {"email": "customer@vallmark.com", "password": "Customer123!", "role": "customer"}
+            ]
+            
+            passed_count = 0
+            for user in test_users:
+                try:
+                    login_data = {
+                        "username": user["email"],
+                        "password": user["password"]
+                    }
+                    
+                    response = requests.post(f"{API_BASE}/auth/login", data=login_data, timeout=30)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        if data.get("access_token") and data.get("user"):
+                            # Store token for later use
+                            self.auth_tokens[f"{user['role']}_email"] = {
+                                "token": data["access_token"],
+                                "user": data["user"],
+                                "expires_in": data.get("expires_in", 86400)
+                            }
+                            passed_count += 1
+                            self.log_result(
+                                f"Traditional Email Login ({user['role']})", 
+                                "PASS", 
+                                f"Successfully logged in with email {user['email']}",
+                                {
+                                    "user_id": data["user"].get("id"),
+                                    "email": data["user"].get("email"),
+                                    "role": data["user"].get("role")
+                                }
+                            )
+                        else:
+                            self.log_result(
+                                f"Traditional Email Login ({user['role']})", 
+                                "FAIL", 
+                                f"Missing access_token or user in response", 
+                                data
+                            )
+                    else:
+                        self.log_result(
+                            f"Traditional Email Login ({user['role']})", 
+                            "FAIL", 
+                            f"HTTP {response.status_code}: {response.text}"
+                        )
+                except Exception as e:
+                    self.log_result(
+                        f"Traditional Email Login ({user['role']})", 
+                        "FAIL", 
+                        f"Error: {str(e)}"
+                    )
+            
+            if passed_count == len(test_users):
+                self.log_result(
+                    "Traditional Email Login", 
+                    "PASS", 
+                    f"Traditional email login working for all {len(test_users)} test users"
+                )
+                return True
+            else:
+                self.log_result(
+                    "Traditional Email Login", 
+                    "FAIL", 
+                    f"Traditional email login failed for some users ({passed_count}/{len(test_users)})"
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result("Traditional Email Login", "FAIL", f"Error testing traditional email login: {str(e)}")
+            return False
+    
+    def test_jwt_token_validation(self):
+        """Test JWT token validation by accessing protected endpoint"""
+        try:
+            passed_count = 0
+            total_tokens = len(self.auth_tokens)
+            
+            for token_name, token_data in self.auth_tokens.items():
+                try:
+                    headers = {"Authorization": f"Bearer {token_data['token']}"}
+                    
+                    # Test /auth/me endpoint which requires valid JWT
+                    response = requests.get(f"{API_BASE}/auth/me", headers=headers, timeout=30)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        user_info = data
+                        passed_count += 1
+                        self.log_result(
+                            f"JWT Token Validation ({token_name})", 
+                            "PASS", 
+                            f"JWT token valid - retrieved user info for {user_info.get('full_name', 'Unknown')}",
+                            {
+                                "user_id": user_info.get("id"),
+                                "email": user_info.get("email"),
+                                "role": user_info.get("role")
+                            }
+                        )
+                    else:
+                        self.log_result(
+                            f"JWT Token Validation ({token_name})", 
+                            "FAIL", 
+                            f"JWT validation failed: HTTP {response.status_code} - {response.text}"
+                        )
+                except Exception as e:
+                    self.log_result(
+                        f"JWT Token Validation ({token_name})", 
+                        "FAIL", 
+                        f"Error validating JWT: {str(e)}"
+                    )
+            
+            if passed_count == total_tokens and total_tokens > 0:
+                self.log_result(
+                    "JWT Token Validation", 
+                    "PASS", 
+                    f"All {total_tokens} JWT tokens are valid and working"
+                )
+                return True
+            else:
+                self.log_result(
+                    "JWT Token Validation", 
+                    "FAIL", 
+                    f"Only {passed_count}/{total_tokens} JWT tokens are valid"
+                )
+                return False
+                
+        except Exception as e:
+            self.log_result("JWT Token Validation", "FAIL", f"Error testing JWT validation: {str(e)}")
+            return False
+    
+    def run_comprehensive_mobile_login_test(self):
+        """Run comprehensive mobile login functionality testing"""
+        print("🚀 Starting Mobile Login Functionality Testing")
         print(f"Backend URL: {BACKEND_URL}")
         print("=" * 80)
         
@@ -460,59 +717,44 @@ class AuthOrderTester:
             print("❌ Health check failed - cannot proceed")
             return False
         
-        # Step 2: Database seeding verification
-        print("\n🌱 Step 2: Database Seeding Verification...")
-        self.test_database_seeding_verification()
+        # Step 2: Login type detection - Email
+        print("\n📧 Step 2: Login Type Detection - Email...")
+        self.test_login_type_detection_email()
         
-        # Step 3: Authentication testing
-        print("\n🔐 Step 3: Authentication Testing...")
-        authenticated_users = []
+        # Step 3: Login type detection - Phone
+        print("\n📱 Step 3: Login Type Detection - Phone...")
+        self.test_login_type_detection_phone()
         
-        # Test customer and admin authentication (main focus)
-        priority_users = [
-            {"email": "customer@vallmark.com", "password": "Customer123!", "role": "customer"},
-            {"email": "admin@vallmark.com", "password": "Admin123!", "role": "admin"}
-        ]
+        # Step 4: Login type detection - Invalid
+        print("\n❌ Step 4: Login Type Detection - Invalid Formats...")
+        self.test_login_type_detection_invalid()
         
-        for user_data in priority_users:
-            email = user_data["email"]
-            password = user_data["password"]
-            role = user_data["role"]
-            
-            if self.authenticate_user(email, password, role):
-                authenticated_users.append(role)
+        # Step 5: OTP sending
+        print("\n📲 Step 5: OTP Sending...")
+        self.test_otp_sending()
         
-        if not authenticated_users:
-            print("❌ No users authenticated - cannot proceed with order testing")
-            return False
+        # Step 6: Mobile login with OTP
+        print("\n🔐 Step 6: Mobile Login with OTP...")
+        self.test_mobile_login_with_otp()
         
-        # Step 4: JWT Token validation
-        print("\n🎫 Step 4: JWT Token Validation...")
-        for role in authenticated_users:
-            self.test_jwt_token_validation(role)
+        # Step 7: Traditional email login
+        print("\n📧 Step 7: Traditional Email Login...")
+        self.test_traditional_email_login()
         
-        # Step 5: Get test products
-        print("\n📦 Step 5: Getting Test Products...")
-        if not self.get_test_products():
-            print("❌ Cannot get test products - order testing will be limited")
+        # Step 8: JWT token validation
+        print("\n🎫 Step 8: JWT Token Validation...")
+        self.test_jwt_token_validation()
         
-        # Step 6: Order creation testing
-        print("\n🛒 Step 6: Order Creation Testing...")
-        for role in authenticated_users:
-            self.test_order_creation(role)
+        # Step 9: Password reset request
+        print("\n🔑 Step 9: Password Reset Request...")
+        self.test_password_reset_request()
         
-        # Step 7: Order retrieval testing
-        print("\n📋 Step 7: Order Retrieval Testing...")
-        for role in authenticated_users:
-            self.test_order_retrieval(role)
+        # Step 10: Password reset confirm
+        print("\n✅ Step 10: Password Reset Confirm...")
+        self.test_password_reset_confirm()
         
-        # Step 8: Order details testing
-        print("\n🔍 Step 8: Order Details Testing...")
-        for role in authenticated_users:
-            self.test_order_details(role)
-        
-        # Step 9: Summary and analysis
-        print("\n📊 Step 9: Test Results Summary...")
+        # Step 11: Summary and analysis
+        print("\n📊 Step 11: Test Results Summary...")
         self.print_test_summary()
         
         return True
@@ -520,7 +762,7 @@ class AuthOrderTester:
     def print_test_summary(self):
         """Print comprehensive test summary"""
         print("\n" + "=" * 80)
-        print("📊 AUTHENTICATION AND ORDER TESTING RESULTS")
+        print("📊 MOBILE LOGIN FUNCTIONALITY TESTING RESULTS")
         print("=" * 80)
         
         print(f"Total Tests: {self.total_tests}")
@@ -533,9 +775,9 @@ class AuthOrderTester:
             user_info = token_data.get("user", {})
             print(f"  - {role}: {user_info.get('full_name', 'Unknown')} ({user_info.get('email', 'Unknown')})")
         
-        print(f"\n🛒 Orders Created: {len(self.created_orders)}")
-        for order in self.created_orders:
-            print(f"  - {order['role']}: {order['order_number']} (${order['total_amount']:.2f})")
+        print(f"\n📲 OTP Sessions: {len(self.otp_sessions)}")
+        for phone, otp_info in self.otp_sessions.items():
+            print(f"  - {phone}: OTP {otp_info.get('test_otp', 'Unknown')}")
         
         print("\n❌ Failed Tests:")
         failed_tests = [r for r in self.results if r["status"] == "FAIL"]
@@ -548,66 +790,87 @@ class AuthOrderTester:
         print("\n🔍 Key Findings:")
         
         # Analyze critical functionality
-        auth_failures = [r for r in self.results if "Authentication" in r["test"] and r["status"] == "FAIL"]
+        login_detection_failures = [r for r in self.results if "Login Type Detection" in r["test"] and r["status"] == "FAIL"]
+        otp_failures = [r for r in self.results if "OTP" in r["test"] and r["status"] == "FAIL"]
+        mobile_login_failures = [r for r in self.results if "Mobile Login" in r["test"] and r["status"] == "FAIL"]
+        email_login_failures = [r for r in self.results if "Traditional Email Login" in r["test"] and r["status"] == "FAIL"]
+        password_reset_failures = [r for r in self.results if "Password Reset" in r["test"] and r["status"] == "FAIL"]
         jwt_failures = [r for r in self.results if "JWT" in r["test"] and r["status"] == "FAIL"]
-        order_creation_failures = [r for r in self.results if "Order Creation" in r["test"] and r["status"] == "FAIL"]
-        order_retrieval_failures = [r for r in self.results if "Order Retrieval" in r["test"] and r["status"] == "FAIL"]
         
-        if not auth_failures:
-            print("  - ✅ Authentication system working correctly")
-            print("    • Seeded users can login successfully")
-            print("    • JWT tokens generated properly")
+        if not login_detection_failures:
+            print("  - ✅ Login type detection working correctly")
+            print("    • Email addresses correctly detected as email type")
+            print("    • Phone numbers correctly detected as phone type")
+            print("    • Invalid formats correctly rejected")
         else:
-            print(f"  - ❌ Authentication issues found ({len(auth_failures)} failures)")
+            print(f"  - ❌ Login type detection issues found ({len(login_detection_failures)} failures)")
+        
+        if not otp_failures:
+            print("  - ✅ OTP system working correctly")
+            print("    • OTP sending successful for valid phone numbers")
+        else:
+            print(f"  - ❌ OTP system issues ({len(otp_failures)} failures)")
+        
+        if not mobile_login_failures:
+            print("  - ✅ Mobile login flow working correctly")
+            print("    • Users can login with phone number and OTP")
+            print("    • JWT tokens generated properly for mobile login")
+        else:
+            print(f"  - ❌ Mobile login issues found ({len(mobile_login_failures)} failures)")
+            print("    • Mobile login is NOT working - CRITICAL ISSUE")
+        
+        if not email_login_failures:
+            print("  - ✅ Traditional email login still working")
+            print("    • Backward compatibility maintained")
+        else:
+            print(f"  - ❌ Traditional email login issues ({len(email_login_failures)} failures)")
+            print("    • Email login compatibility broken - CRITICAL ISSUE")
+        
+        if not password_reset_failures:
+            print("  - ✅ Password reset flow working correctly")
+            print("    • Password reset request and confirmation working")
+        else:
+            print(f"  - ❌ Password reset issues ({len(password_reset_failures)} failures)")
         
         if not jwt_failures:
             print("  - ✅ JWT token validation working correctly")
-            print("    • Tokens properly validated on protected endpoints")
+            print("    • Tokens from both mobile and email login work properly")
         else:
             print(f"  - ❌ JWT token validation issues ({len(jwt_failures)} failures)")
         
-        if not order_creation_failures:
-            print("  - ✅ Order creation working for authenticated users")
-            print("    • Logged-in users can successfully place orders")
-        else:
-            print(f"  - ❌ Order creation issues found ({len(order_creation_failures)} failures)")
-            print("    • Logged-in users CANNOT place orders - CRITICAL ISSUE")
-        
-        if not order_retrieval_failures:
-            print("  - ✅ Order retrieval working correctly")
-            print("    • Users can view their order history")
-        else:
-            print(f"  - ❌ Order retrieval issues ({len(order_retrieval_failures)} failures)")
-        
         # Overall assessment
-        critical_issues = len(auth_failures) + len(order_creation_failures)
+        critical_issues = len(mobile_login_failures) + len(email_login_failures) + len(login_detection_failures)
         if critical_issues == 0:
-            print("\n🎉 OVERALL ASSESSMENT: AUTHENTICATION AND ORDER SYSTEM WORKING CORRECTLY")
-            print("  • Users can authenticate with seeded credentials")
-            print("  • JWT tokens are properly generated and validated")
-            print("  • Authenticated users can successfully place orders")
-            print("  • Order retrieval and details work as expected")
+            print("\n🎉 OVERALL ASSESSMENT: MOBILE LOGIN FUNCTIONALITY WORKING CORRECTLY")
+            print("  • Login type detection working for emails and phone numbers")
+            print("  • OTP system functioning properly")
+            print("  • Mobile login with OTP verification working")
+            print("  • Traditional email login compatibility maintained")
+            print("  • Password reset flow functional")
+            print("  • JWT tokens working for both login methods")
         else:
             print(f"\n🚨 OVERALL ASSESSMENT: {critical_issues} CRITICAL ISSUES FOUND")
-            if auth_failures:
-                print("  • Authentication system has issues")
-            if order_creation_failures:
-                print("  • Order placement is NOT working for logged-in users")
+            if login_detection_failures:
+                print("  • Login type detection has issues")
+            if mobile_login_failures:
+                print("  • Mobile login flow is NOT working")
+            if email_login_failures:
+                print("  • Traditional email login compatibility broken")
 
 
 def main():
-    """Main function to run authentication and order tests"""
-    tester = AuthOrderTester()
+    """Main function to run mobile login tests"""
+    tester = MobileLoginTester()
     
     try:
-        success = tester.run_comprehensive_auth_order_test()
+        success = tester.run_comprehensive_mobile_login_test()
         
         # Exit with appropriate code
         if tester.failed_tests == 0:
-            print("\n✅ All authentication and order tests passed!")
+            print("\n✅ All mobile login functionality tests passed!")
             sys.exit(0)
         else:
-            print(f"\n❌ {tester.failed_tests} tests failed. Issues found in authentication or order system.")
+            print(f"\n❌ {tester.failed_tests} tests failed. Issues found in mobile login functionality.")
             sys.exit(1)
             
     except KeyboardInterrupt:
