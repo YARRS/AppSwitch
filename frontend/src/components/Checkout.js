@@ -719,6 +719,10 @@ const ShippingForm = ({
             )}
           </div>
         )}
+
+        {errors.otp_verification && (
+          <p className="text-red-500 text-sm mt-2">{errors.otp_verification}</p>
+        )}
       </div>
     )}
 
