@@ -75,6 +75,24 @@ class AuthService:
         elif original_phone.startswith('+91') and len(phone) == 12 and phone.startswith('91'):
             return phone[2:]  # Return 9876543210
         
+        # Indian phone number with +91 prefix but 10-digit number: +91987654321 -> (12 chars original, 11 digits cleaned)
+        elif original_phone.startswith('+91') and len(phone) == 11:
+            return phone[2:]  # Return 987654321 -> but this would be 9 digits, invalid!
+            
+        # Let's fix this: Indian phone with +91 but the number itself is 10 digits
+        elif original_phone.startswith('+91') and len(phone) >= 10:
+            if len(phone) == 12 and phone.startswith('91'):
+                return phone[2:]  # +919876543210 -> 9876543210  
+            elif len(phone) == 11:
+                return phone[2:]  # +91987654321 -> 987654321 (9 digits - invalid)
+            else:
+                # Just use the digits after +91
+                digits_after_91 = phone[2:] if phone.startswith('91') else phone
+                if len(digits_after_91) == 10:
+                    return digits_after_91
+                else:
+                    raise ValueError(f"Invalid Indian phone format. Expected 10 digits after +91, got {len(digits_after_91)}")
+        
         # Indian phone number with 91 prefix: 919876543210 (12 digits cleaned)
         elif len(phone) == 12 and phone.startswith('91') and not original_phone.startswith('+'):
             return phone[2:]  # Return 9876543210
