@@ -488,7 +488,7 @@ const Checkout = () => {
                 setOtpState={setOtpState}
                 sendOtp={sendOtp}
                 verifyOtp={verifyOtp}
-                onNext={() => setCurrentStep(2)}
+                onNext={handleStep1Next}
               />
             )}
 
