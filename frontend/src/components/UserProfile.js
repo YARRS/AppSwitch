@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useLocation } from 'react-router-dom';
 import { User, Mail, Phone, Shield, Calendar, AlertCircle, CheckCircle, Package, ShoppingCart, Clock, DollarSign, Eye, ArrowRight } from 'lucide-react';
 
 const UserProfile = () => {
   const { user, updateProfile, logout, getAuthenticatedAxios } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile');
+  const location = useLocation();
+  const urlParams = new URLSearchParams(location.search);
+  const initialTab = urlParams.get('tab') || 'profile';
+  
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
@@ -14,6 +19,31 @@ const UserProfile = () => {
     full_name: user?.full_name || '',
     phone: user?.phone || '',
   });
+
+  // Update tab when URL changes
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search);
+    const tabFromUrl = urlParams.get('tab');
+    if (tabFromUrl && (tabFromUrl === 'profile' || tabFromUrl === 'orders')) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [location.search]);
+
+  // Function to decrypt phone number for display
+  const decryptPhoneNumber = (encryptedPhone) => {
+    // For now, we'll display the phone as is since we don't have the decryption key on frontend
+    // In a real app, you'd want to decrypt this on the backend and send the decrypted version
+    // or handle decryption securely on the frontend
+    if (!encryptedPhone || encryptedPhone.includes('@placeholder.com')) {
+      return 'Not provided';
+    }
+    // If it looks like a regular phone number, display it
+    if (/^\d{10}$/.test(encryptedPhone)) {
+      return encryptedPhone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
+    }
+    // For encrypted values, we'll need to decrypt via API call
+    return encryptedPhone;
+  };
 
   // Fetch user orders when orders tab is selected
   useEffect(() => {
