@@ -56,8 +56,10 @@ class AuthService:
         if not phone_input:
             raise ValueError("Phone number is required")
         
-        # Remove all non-digit characters
-        phone = re.sub(r'\D', '', phone_input.strip())
+        original_phone = phone_input.strip()
+        
+        # Remove all non-digit characters for processing
+        phone = re.sub(r'\D', '', original_phone)
         
         # Handle different input formats
         if len(phone) == 11 and phone.startswith('0'):
@@ -71,26 +73,26 @@ class AuthService:
             phone = phone[2:]
         elif len(phone) == 11 and phone.startswith('1'):
             # US format: +1234567890 -> 1234567890 (11 digits)
-            # Keep as is for US numbers
-            pass
+            # For consistency, store as original format if it had +
+            if original_phone.startswith('+'):
+                return original_phone  # Keep the + for US numbers
+            else:
+                return phone  # Return without +
         elif len(phone) == 12 and phone.startswith('1'):
             # Handle case where US number has extra digit
             phone = phone[1:] if phone.startswith('11') else phone
         
         # Validate final phone number
         if len(phone) == 10:
-            # Indian mobile number validation
-            if phone.startswith(('6', '7', '8', '9')):
-                return phone
-            else:
-                # Allow any 10-digit number for testing/international
-                return phone
+            # 10-digit number (Indian or US without country code)
+            return phone
         elif len(phone) == 11 and phone.startswith('1'):
             # US phone number format (11 digits with country code 1)
-            return phone
-        elif len(phone) == 10:
-            # Generic 10-digit number
-            return phone
+            # Preserve original format if it had +
+            if original_phone.startswith('+'):
+                return f"+{phone}"
+            else:
+                return phone
         else:
             raise ValueError(f"Invalid phone number format. Expected 10 or 11 digits, got {len(phone)}")
         
