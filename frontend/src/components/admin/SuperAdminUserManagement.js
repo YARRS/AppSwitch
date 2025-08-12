@@ -335,6 +335,7 @@ const SuperAdminUserManagement = () => {
                 <UserRow
                   key={user.id}
                   user={user}
+                  decryptedPhone={decryptedPhones.get(user.id) || 'Loading...'}
                   onViewDetails={viewUserDetails}
                   onUpdateRole={updateUserRole}
                   onUpdateStatus={updateUserStatus}
