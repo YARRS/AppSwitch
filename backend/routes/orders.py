@@ -355,6 +355,39 @@ async def get_db():
     from server import db
     return db
 
+@router.get("/", response_model=APIResponse)
+async def get_user_orders(
+    current_user: UserInDB = Depends(get_current_active_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Get orders for the current user"""
+    try:
+        order_service = OrderService(db)
+        
+        # Get user orders
+        cursor = order_service.orders_collection.find({"user_id": current_user.id})
+        orders = []
+        async for order_doc in cursor:
+            orders.append(OrderInDB(**order_doc))
+        
+        # Sort by created date descending
+        orders.sort(key=lambda x: x.created_at, reverse=True)
+        
+        # Convert to response format
+        order_responses = [OrderResponse(**order.dict()) for order in orders]
+        
+        return APIResponse(
+            success=True,
+            message="Orders retrieved successfully",
+            data=[order.dict() for order in order_responses]
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve orders"
+        )
+
 @router.post("/", response_model=APIResponse)
 async def create_order(
     order_data: OrderCreate,
