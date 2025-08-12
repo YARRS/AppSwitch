@@ -363,7 +363,7 @@ const CustomerManagement = () => {
 };
 
 // Customer Row Component
-const CustomerRow = ({ customer, onViewDetails, onUpdateStatus }) => {
+const CustomerRow = ({ customer, decryptedPhone, onViewDetails, onUpdateStatus }) => {
   return (
     <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
       <td className="px-6 py-4 whitespace-nowrap">
