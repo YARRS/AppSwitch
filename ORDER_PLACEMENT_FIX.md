@@ -90,7 +90,7 @@ const validateForm = () => {
 
 ### **Backend API Test** ✅
 ```bash
-curl -X POST "https://order-auth-portal.preview.emergentagent.com/api/orders/guest" \
+curl -X POST "https://otp-layout-fix.preview.emergentagent.com/api/orders/guest" \
   -H "Content-Type: application/json" \
   -d '{...order data...}'
 
@@ -115,7 +115,7 @@ Auto Login: True
 ## 📋 **Testing Instructions**
 
 ### **For Guest Users:**
-1. Go to: https://order-auth-portal.preview.emergentagent.com
+1. Go to: https://otp-layout-fix.preview.emergentagent.com
 2. Add products to cart
 3. Go to checkout
 4. Fill out shipping form (all fields)

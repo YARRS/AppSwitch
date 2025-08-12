@@ -78,7 +78,7 @@
 
 1. **Visit Homepage**
    ```
-   https://order-auth-portal.preview.emergentagent.com
+   https://otp-layout-fix.preview.emergentagent.com
    ```
 
 2. **Add Products to Cart**
