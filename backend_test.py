@@ -456,8 +456,8 @@ class AuthOrderTester:
         
         # Test customer and admin authentication (main focus)
         priority_users = [
-            {"email": "customer@smartswitch.com", "password": "Customer123!", "role": "customer"},
-            {"email": "admin@smartswitch.com", "password": "Admin123!", "role": "admin"}
+            {"email": "customer@vallmark.com", "password": "Customer123!", "role": "customer"},
+            {"email": "admin@vallmark.com", "password": "Admin123!", "role": "admin"}
         ]
         
         for user_data in priority_users:
