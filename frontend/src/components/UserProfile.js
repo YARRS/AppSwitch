@@ -16,10 +16,30 @@ const UserProfile = () => {
   const [message, setMessage] = useState({ type: '', text: '' });
   const [orders, setOrders] = useState([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+  const [decryptedPhone, setDecryptedPhone] = useState('Loading...');
   const [formData, setFormData] = useState({
     full_name: user?.full_name || '',
     phone: user?.phone || '',
   });
+
+  // Decrypt phone number when component loads or user data changes
+  useEffect(() => {
+    const decryptUserPhone = async () => {
+      if (user?.phone) {
+        try {
+          const decrypted = await decryptPhoneNumber(user.phone, getAuthenticatedAxios);
+          setDecryptedPhone(decrypted);
+        } catch (error) {
+          console.error('Failed to decrypt phone:', error);
+          setDecryptedPhone(user.phone); // Fallback to original
+        }
+      } else {
+        setDecryptedPhone('Not provided');
+      }
+    };
+
+    decryptUserPhone();
+  }, [user?.phone, getAuthenticatedAxios]);
 
   // Update tab when URL changes
   useEffect(() => {
