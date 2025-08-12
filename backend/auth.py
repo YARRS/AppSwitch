@@ -51,6 +51,65 @@ cipher_suite = Fernet(encryption_key)
 
 class AuthService:
     @staticmethod
+    def format_phone_number(phone_input: str) -> str:
+        """Format and validate Indian phone number"""
+        if not phone_input:
+            raise ValueError("Phone number is required")
+        
+        # Remove all non-digit characters
+        phone = re.sub(r'\D', '', phone_input.strip())
+        
+        # Handle different input formats
+        if phone.startswith('0'):
+            # Remove leading 0 (Indian format: 09876543210)
+            phone = phone[1:]
+        elif phone.startswith('91') and len(phone) == 12:
+            # Remove country code 91 (format: 919876543210)
+            phone = phone[2:]
+        elif phone.startswith('91') and len(phone) == 13:
+            # Handle +91 case where + was removed (format: +919876543210)
+            phone = phone[2:]
+        
+        # Validate final phone number
+        if len(phone) != 10:
+            raise ValueError("Phone number must be exactly 10 digits")
+        
+        if not phone.startswith(('6', '7', '8', '9')):
+            raise ValueError("Invalid Indian mobile number format")
+        
+        return phone
+    
+    @staticmethod
+    def is_email(input_str: str) -> bool:
+        """Check if input string is an email address"""
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        return bool(re.match(email_pattern, input_str.strip()))
+    
+    @staticmethod
+    def is_phone_number(input_str: str) -> bool:
+        """Check if input string looks like a phone number"""
+        # Check if it contains mostly digits and phone-like patterns
+        phone_clean = re.sub(r'\D', '', input_str.strip())
+        
+        # Must have between 10-13 digits (accounting for country codes)
+        if len(phone_clean) < 10 or len(phone_clean) > 13:
+            return False
+        
+        # Check for common phone number patterns
+        phone_patterns = [
+            r'^[0-9]{10}$',  # 9876543210
+            r'^0[0-9]{10}$',  # 09876543210
+            r'^91[0-9]{10}$',  # 919876543210
+            r'^\+91[0-9]{10}$',  # +919876543210
+        ]
+        
+        for pattern in phone_patterns:
+            if re.match(pattern, input_str.strip()):
+                return True
+        
+        return False
+
+    @staticmethod
     def hash_password(password: str) -> str:
         """Hash a password using bcrypt"""
         return pwd_context.hash(password)
