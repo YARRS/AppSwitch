@@ -497,7 +497,7 @@ const Checkout = () => {
               <PaymentForm
                 formData={formData}
                 handleInputChange={handleInputChange}
-                onNext={() => setCurrentStep(3)}
+                onNext={handleStep2Next}
                 onBack={() => setCurrentStep(1)}
               />
             )}
