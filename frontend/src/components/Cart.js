@@ -162,30 +162,74 @@ const Cart = () => {
   );
 };
 
-// Empty Cart Component
+// Modern Empty Cart Component with Animations
 const EmptyCart = () => (
-  <div className="text-center py-16">
-    <div className="max-w-md mx-auto">
-      <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center">
-        <ShoppingBag className="w-12 h-12 text-gray-400" />
+  <div className="text-center py-20">
+    <div className="max-w-lg mx-auto">
+      {/* Animated Empty Cart Illustration */}
+      <div className="relative mb-8">
+        <div className="w-32 h-32 mx-auto bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-full flex items-center justify-center shadow-2xl">
+          <ShoppingBag className="w-16 h-16 text-purple-400 dark:text-purple-300" />
+        </div>
+        
+        {/* Floating Elements */}
+        <div className="absolute -top-4 -right-4 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center animate-bounce shadow-lg">
+          <Sparkles className="w-4 h-4 text-white" />
+        </div>
+        <div className="absolute -bottom-2 -left-6 w-6 h-6 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center animate-bounce delay-300 shadow-lg">
+          <Gift className="w-3 h-3 text-white" />
+        </div>
+        <div className="absolute top-8 -left-8 w-4 h-4 bg-gradient-to-r from-pink-400 to-purple-500 rounded-full animate-pulse shadow-lg"></div>
+        <div className="absolute top-12 right-8 w-3 h-3 bg-gradient-to-r from-blue-400 to-cyan-500 rounded-full animate-pulse delay-500 shadow-lg"></div>
       </div>
       
-      <h2 className="text-2xl font-semibold text-gray-900 dark:text-white mb-4">
-        Your cart is empty
+      <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+        Your cart feels a bit lonely
       </h2>
       
-      <p className="text-gray-600 dark:text-gray-400 mb-8">
-        Looks like you haven't added any items to your cart yet.
-        Discover our amazing collection of gift articles!
+      <p className="text-gray-600 dark:text-gray-400 text-lg mb-8 max-w-md mx-auto leading-relaxed">
+        Time to fill it with amazing gifts! Discover our curated collection of beautiful articles perfect for every occasion.
       </p>
+
+      {/* Features */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl p-4 border border-white/20 dark:border-gray-700/20 shadow-lg">
+          <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-2">
+            <Zap className="w-5 h-5 text-white" />
+          </div>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Fast Shipping</p>
+        </div>
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl p-4 border border-white/20 dark:border-gray-700/20 shadow-lg">
+          <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-2">
+            <Heart className="w-5 h-5 text-white" />
+          </div>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Premium Quality</p>
+        </div>
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl p-4 border border-white/20 dark:border-gray-700/20 shadow-lg">
+          <div className="w-10 h-10 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center mx-auto mb-2">
+            <Gift className="w-5 h-5 text-white" />
+          </div>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Gift Wrapping</p>
+        </div>
+      </div>
       
       <Link
         to="/"
-        className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200"
+        className="inline-flex items-center space-x-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-purple-500/30 active:scale-95"
       >
-        <ShoppingCart className="w-5 h-5" />
+        <ShoppingCart className="w-6 h-6" />
         <span>Start Shopping</span>
+        <Sparkles className="w-5 h-5" />
       </Link>
+
+      {/* Decorative Elements */}
+      <div className="mt-12 flex items-center justify-center space-x-4 text-sm text-gray-400 dark:text-gray-500">
+        <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
+        <span>Find the perfect gift</span>
+        <div className="w-2 h-2 bg-pink-400 rounded-full animate-pulse delay-300"></div>
+        <span>Make someone happy</span>
+        <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse delay-500"></div>
+      </div>
     </div>
   </div>
 );
