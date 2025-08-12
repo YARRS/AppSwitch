@@ -82,73 +82,198 @@ const ProductsPage = () => {
     }
   };
 
-  // Sample products for fallback
+  // Sample products for fallback with beautiful images
   const getSampleProducts = () => [
     {
       id: '1',
       name: 'Elegant Crystal Vase',
-      description: 'Beautiful hand-crafted crystal vase perfect for any home decor',
+      description: 'A beautiful handcrafted crystal vase perfect for displaying flowers or as a decorative piece.',
       price: 89.99,
+      discount_price: 74.99,
       category: 'home_decor',
-      images: [],
+      categories: ['home_decor'],
+      sku: 'VL-CV001',
+      brand: 'Vallmark',
+      images: ['https://images.unsplash.com/photo-1668463876833-339717e58c4c?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwyfHxnaWZ0JTIwYXJ0aWNsZXN8ZW58MHx8fHwxNzU0OTk0MDI5fDA&ixlib=rb-4.1.0&q=85'],
       is_in_stock: true,
-      stock_quantity: 15,
-      features: 'Hand-crafted crystal, elegant design, perfect for flowers'
+      stock_quantity: 25,
+      features: ['Handcrafted', 'Lead Crystal', 'Gift Box Included', 'Care Instructions Provided'],
+      specifications: {
+        material: 'Crystal Glass',
+        height: '12 inches',
+        diameter: '6 inches',
+        weight: '2.5 lbs'
+      },
+      rating: 4.8,
+      review_count: 24,
+      created_at: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000) // 2 days ago
     },
     {
       id: '2',
       name: 'Personalized Photo Frame',
-      description: 'Custom engraved wooden photo frame for cherished memories',
+      description: 'Custom engraved wooden photo frame with your personal message or name.',
       price: 34.99,
+      discount_price: 27.99,
       category: 'personalized_gifts',
-      images: [],
+      categories: ['personalized_gifts', 'keepsakes'],
+      sku: 'VL-PF002',
+      brand: 'Vallmark',
+      images: ['https://images.unsplash.com/photo-1464348123218-0ee63dfd2746?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHwzfHxnaWZ0JTIwYXJ0aWNsZXN8ZW58MHx8fHwxNzU0OTk0MDI5fDA&ixlib=rb-4.1.0&q=85'],
       is_in_stock: true,
-      stock_quantity: 25,
-      features: 'Custom engraving, premium wood, multiple sizes available'
+      stock_quantity: 50,
+      features: ['Laser Engraving', 'Custom Text', 'Multiple Font Options', 'Protective Glass'],
+      specifications: {
+        material: 'Premium Oak Wood',
+        size: '8x10 inches',
+        frame_width: '2 inches',
+        backing: 'MDF with easel stand'
+      },
+      rating: 4.9,
+      review_count: 67,
+      created_at: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000) // 5 days ago
     },
     {
       id: '3',
-      name: 'Sterling Silver Pendant',
-      description: 'Exquisite sterling silver pendant with intricate design',
-      price: 124.99,
+      name: 'Sterling Silver Necklace',
+      description: 'Delicate sterling silver necklace with a beautiful pendant, perfect for everyday wear.',
+      price: 125.00,
+      discount_price: 99.99,
       category: 'jewelry',
-      images: [],
+      categories: ['jewelry', 'accessories'],
+      sku: 'VL-SN003',
+      brand: 'Vallmark',
+      images: ['https://images.unsplash.com/photo-1616837874254-8d5aaa63e273?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwyfHxqZXdlbHJ5fGVufDB8fHx8MTc1NDk5NDA0MHww&ixlib=rb-4.1.0&q=85'],
       is_in_stock: true,
-      stock_quantity: 8,
-      features: 'Sterling silver, hypoallergenic, comes with gift box'
+      stock_quantity: 15,
+      features: ['Hypoallergenic', 'Tarnish Resistant', 'Gift Box Included', 'Certificate of Authenticity'],
+      specifications: {
+        material: '925 Sterling Silver',
+        chain_length: '18 inches',
+        pendant_size: '1 inch',
+        clasp_type: 'Spring Ring'
+      },
+      rating: 4.7,
+      review_count: 89,
+      created_at: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000) // 1 day ago - NEW
     },
     {
       id: '4',
-      name: 'Memory Box Set',
-      description: 'Beautiful keepsake box set for storing precious memories',
-      price: 59.99,
-      category: 'keepsakes',
-      images: [],
+      name: 'Luxury Scented Candle Set',
+      description: 'Set of 3 premium soy wax candles with exotic fragrances in elegant glass holders.',
+      price: 55.00,
+      discount_price: 45.00,
+      category: 'home_decor',
+      categories: ['home_decor', 'special_occasions'],
+      sku: 'VL-CS004',
+      brand: 'Vallmark',
+      images: ['https://images.unsplash.com/photo-1513252446706-49071cffaedb?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Njd8MHwxfHNlYXJjaHw0fHxnaWZ0JTIwYXJ0aWNsZXN8ZW58MHx8fHwxNzU0OTk0MDI5fDA&ixlib=rb-4.1.0&q=85'],
       is_in_stock: true,
-      stock_quantity: 20,
-      features: 'Multiple compartments, velvet lining, lock and key included'
+      stock_quantity: 30,
+      features: ['Natural Soy Wax', 'Lead-Free Wicks', 'Reusable Containers', 'Gift Ready'],
+      specifications: {
+        material: '100% Soy Wax',
+        burn_time: '45 hours each',
+        fragrances: 'Vanilla, Lavender, Sandalwood',
+        container: 'Glass with wooden lid'
+      },
+      rating: 4.6,
+      review_count: 43,
+      created_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // 30 days ago
     },
     {
       id: '5',
-      name: 'Anniversary Wine Glasses',
-      description: 'Elegant pair of wine glasses perfect for celebrating love',
-      price: 45.99,
-      category: 'special_occasions',
-      images: [],
+      name: 'Rose Gold Watch Gift Set',
+      description: 'Elegant rose gold watch with matching bracelet set. Perfect for special occasions and everyday elegance.',
+      price: 299.99,
+      discount_price: 249.99,
+      category: 'jewelry',
+      categories: ['jewelry', 'accessories'],
+      sku: 'RGW-008',
+      brand: 'Vallmark',
+      images: ['https://images.unsplash.com/photo-1612817159949-195b6eb9e31a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwxfHxlbGVnYW50JTIwcHJvZHVjdHN8ZW58MHx8fHwxNzU0OTk0MDM0fDA&ixlib=rb-4.1.0&q=85'],
       is_in_stock: true,
-      stock_quantity: 30,
-      features: 'Premium crystal, dishwasher safe, comes in gift packaging'
+      stock_quantity: 8,
+      features: ['Rose gold plated', 'Water resistant', 'Matching bracelet', 'Luxury gift box'],
+      specifications: {
+        case_material: 'Rose Gold Plated Steel',
+        water_resistance: '50 meters',
+        movement: 'Quartz',
+        warranty: '2 years'
+      },
+      rating: 4.9,
+      review_count: 156,
+      created_at: new Date(Date.now() - 3 * 60 * 60 * 1000) // 3 hours ago - NEW
     },
     {
       id: '6',
-      name: 'Luxury Scented Candle Set',
-      description: 'Premium scented candle collection for relaxation and ambiance',
-      price: 67.99,
+      name: 'Premium Beauty Collection',
+      description: 'Luxurious skincare and beauty collection with golden accents, perfect for self-care enthusiasts.',
+      price: 159.99,
       category: 'accessories',
-      images: [],
+      categories: ['accessories', 'special_occasions'],
+      sku: 'PBC-009',
+      brand: 'Vallmark',
+      images: ['https://images.unsplash.com/photo-1740490278517-21ec451914f6?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwyfHxlbGVnYW50JTIwcHJvZHVjdHN8ZW58MHx8fHwxNzU0OTk0MDM0fDA&ixlib=rb-4.1.0&q=85'],
+      is_in_stock: true,
+      stock_quantity: 12,
+      features: ['Premium ingredients', 'Elegant packaging', 'Travel-friendly', 'Complete set'],
+      specifications: {
+        set_includes: '5 beauty essentials',
+        packaging: 'Gold-accented boxes',
+        skin_type: 'All skin types',
+        size: 'Full size products'
+      },
+      rating: 4.8,
+      review_count: 92,
+      created_at: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000) // 15 days ago
+    },
+    {
+      id: '7',
+      name: 'Diamond Bracelet Collection',
+      description: 'Exquisite gold and diamond bracelet perfect for special occasions and celebrations.',
+      price: 899.99,
+      discount_price: 699.99,
+      category: 'jewelry',
+      categories: ['jewelry', 'luxury_items'],
+      sku: 'DBC-010',
+      brand: 'Vallmark',
+      images: ['https://images.unsplash.com/photo-1637632668117-947db0a9c01e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2Nzh8MHwxfHNlYXJjaHwzfHxlbGVnYW50JTIwcHJvZHVjdHN8ZW58MHx8fHwxNzU0OTk0MDM0fDA&ixlib=rb-4.1.0&q=85'],
+      is_in_stock: true,
+      stock_quantity: 5,
+      features: ['Genuine diamonds', '18K gold', 'Certified quality', 'Luxury presentation'],
+      specifications: {
+        metal: '18K Gold',
+        diamonds: 'Genuine certified',
+        length: '7.5 inches',
+        clasp: 'Secure lobster clasp'
+      },
+      rating: 5.0,
+      review_count: 23,
+      created_at: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000) // 4 days ago
+    },
+    {
+      id: '8',
+      name: 'Artisan Jewelry Collection',
+      description: 'Handcrafted silver jewelry collection featuring multiple elegant pieces for the discerning collector.',
+      price: 189.99,
+      discount_price: 149.99,
+      category: 'jewelry',
+      categories: ['jewelry', 'keepsakes'],
+      sku: 'AJC-011',
+      brand: 'Vallmark',
+      images: ['https://images.unsplash.com/photo-1602173574767-37ac01994b2a?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwzfHxqZXdlbHJ5fGVufDB8fHx8MTc1NDk5NDA0MHww&ixlib=rb-4.1.0&q=85'],
       is_in_stock: true,
       stock_quantity: 18,
-      features: 'Natural soy wax, long burning time, beautiful packaging'
+      features: ['Handcrafted silver', 'Multiple pieces', 'Artisan design', 'Collector quality'],
+      specifications: {
+        material: '925 Sterling Silver',
+        pieces_included: '3 jewelry items',
+        finish: 'Polished silver',
+        style: 'Contemporary artisan'
+      },
+      rating: 4.7,
+      review_count: 34,
+      created_at: new Date(Date.now() - 12 * 24 * 60 * 60 * 1000) // 12 days ago
     }
   ];
 
