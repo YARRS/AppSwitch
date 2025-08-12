@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from cryptography.fernet import Fernet
 import base64
 import secrets
+import re
 
 from models import UserInDB, TokenData
 
