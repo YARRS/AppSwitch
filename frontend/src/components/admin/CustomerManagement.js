@@ -18,6 +18,7 @@ const CustomerManagement = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
   const [customerOrders, setCustomerOrders] = useState([]);
+  const [decryptedPhones, setDecryptedPhones] = useState(new Map());
 
   useEffect(() => {
     fetchCustomers();
