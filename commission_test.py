@@ -17,7 +17,7 @@ import uuid
 import time
 
 # Backend URL from frontend .env
-BACKEND_URL = "https://unique-mobile-auth.preview.emergentagent.com"
+BACKEND_URL = "https://frontend-overhaul-3.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Test user credentials
