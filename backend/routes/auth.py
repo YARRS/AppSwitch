@@ -749,3 +749,58 @@ async def change_user_password(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to change password"
         )
+
+# Decryption models
+class DecryptRequest(BaseModel):
+    encrypted_data: str
+
+class DecryptResponse(BaseModel):
+    decrypted_data: str
+
+@router.post("/decrypt-phone", response_model=APIResponse)
+async def decrypt_phone_number(request: DecryptRequest, current_user: UserInDB = Depends(get_current_active_user)):
+    """Decrypt phone number for display purposes"""
+    try:
+        decrypted_phone = AuthService.decrypt_sensitive_data(request.encrypted_data)
+        
+        # Format the phone number for display
+        if len(decrypted_phone) == 10:  # US format
+            formatted = f"({decrypted_phone[:3]}) {decrypted_phone[3:6]}-{decrypted_phone[6:]}"
+        else:
+            formatted = decrypted_phone
+        
+        return APIResponse(
+            success=True,
+            message="Phone number decrypted successfully",
+            data={
+                "decrypted_data": formatted,
+                "raw_data": decrypted_phone
+            }
+        )
+        
+    except Exception as e:
+        # If decryption fails, it might be an unencrypted phone number
+        # Try to format it directly
+        try:
+            phone_data = request.encrypted_data
+            if phone_data and len(phone_data) == 10 and phone_data.isdigit():
+                formatted = f"({phone_data[:3]}) {phone_data[3:6]}-{phone_data[6:]}"
+                return APIResponse(
+                    success=True,
+                    message="Phone number processed successfully",
+                    data={
+                        "decrypted_data": formatted,
+                        "raw_data": phone_data
+                    }
+                )
+        except:
+            pass
+            
+        return APIResponse(
+            success=True,
+            message="Phone number processed successfully",
+            data={
+                "decrypted_data": request.encrypted_data,
+                "raw_data": request.encrypted_data
+            }
+        )
