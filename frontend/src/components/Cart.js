@@ -234,77 +234,117 @@ const EmptyCart = () => (
   </div>
 );
 
-// Cart Item Component
-const CartItem = ({ item, isUpdating, onQuantityUpdate, onRemove, formatPrice }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 lg:p-6 hover:shadow-xl transition-shadow duration-300">
-    <div className="flex items-start space-x-4">
+// Modern Cart Item Component with Animations
+const CartItem = ({ item, isUpdating, onQuantityUpdate, onRemove, formatPrice, index }) => (
+  <div 
+    className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 p-6 border border-white/20 dark:border-gray-700/20 transform hover:-translate-y-1 group"
+    style={{
+      animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`
+    }}
+  >
+    {/* Shimmer Effect */}
+    <div className="absolute inset-0 -top-2 -left-2 bg-gradient-to-r from-transparent via-white/10 to-transparent transform -skew-x-12 opacity-0 group-hover:opacity-100 group-hover:animate-shimmer transition-opacity duration-500 pointer-events-none rounded-2xl"></div>
+    
+    <div className="flex items-start space-x-6 relative z-10">
       {/* Product Image */}
-      <div className="w-20 h-20 lg:w-24 lg:h-24 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0">
+      <div className="w-24 h-24 lg:w-28 lg:h-28 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg group-hover:shadow-xl transition-shadow duration-300 overflow-hidden">
         {item.product_image ? (
           <img
             src={item.product_image.startsWith('data:') ? item.product_image : `data:image/jpeg;base64,${item.product_image}`}
             alt={item.product_name}
-            className="w-full h-full object-cover rounded-lg"
+            className="w-full h-full object-cover rounded-xl group-hover:scale-110 transition-transform duration-300"
           />
         ) : (
-          <Package className="w-8 h-8 text-gray-400" />
+          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
+            <span className="text-2xl font-bold text-white">
+              {item.product_name?.charAt(0) || 'P'}
+            </span>
+          </div>
         )}
       </div>
 
       {/* Product Details */}
       <div className="flex-1 min-w-0">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-1">
-          {item.product_name}
-        </h3>
-        
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col space-y-2">
-            <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-              {formatPrice(item.price)}
-            </span>
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-1 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
+              {item.product_name}
+            </h3>
             
-            <div className="text-sm text-gray-500 dark:text-gray-400">
-              Subtotal: {formatPrice(item.price * item.quantity)}
+            {/* Price Section */}
+            <div className="flex items-center space-x-3 mb-4">
+              <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                {formatPrice(item.price)}
+              </span>
+              <span className="text-sm text-gray-500 dark:text-gray-400">per item</span>
+            </div>
+
+            {/* Subtotal */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg p-3 mb-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Subtotal:</span>
+                <span className="text-lg font-bold text-purple-600 dark:text-purple-400">
+                  {formatPrice(item.price * item.quantity)}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Quantity Controls */}
-          <div className="flex items-center space-x-3">
-            <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+          {/* Remove Button */}
+          <button
+            onClick={() => onRemove(item.product_id)}
+            disabled={isUpdating}
+            className="p-3 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group/remove transform hover:scale-110 active:scale-95"
+            title="Remove item"
+          >
+            <Trash2 className="w-5 h-5 group-hover/remove:animate-bounce" />
+          </button>
+        </div>
+
+        {/* Quantity Controls */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Quantity:</span>
+            <div className="flex items-center space-x-2 bg-gradient-to-r from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600 rounded-xl p-1 shadow-inner">
               <button
                 onClick={() => onQuantityUpdate(item.product_id, item.quantity - 1)}
                 disabled={isUpdating || item.quantity <= 1}
-                className="p-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-10 h-10 flex items-center justify-center text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/20 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-110 active:scale-95"
               >
                 <Minus className="w-4 h-4" />
               </button>
               
-              <span className="w-12 text-center font-medium text-gray-900 dark:text-white">
+              <div className="w-16 h-10 flex items-center justify-center bg-white dark:bg-gray-800 rounded-lg shadow-lg">
                 {isUpdating ? (
-                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+                  <div className="w-4 h-4 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
                 ) : (
-                  item.quantity
+                  <span className="text-lg font-bold text-gray-900 dark:text-white">
+                    {item.quantity}
+                  </span>
                 )}
-              </span>
+              </div>
               
               <button
                 onClick={() => onQuantityUpdate(item.product_id, item.quantity + 1)}
                 disabled={isUpdating}
-                className="p-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="w-10 h-10 flex items-center justify-center text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/20 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-110 active:scale-95"
               >
                 <Plus className="w-4 h-4" />
               </button>
             </div>
+          </div>
 
-            {/* Remove Button */}
-            <button
-              onClick={() => onRemove(item.product_id)}
-              disabled={isUpdating}
-              className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Remove item"
-            >
-              <Trash2 className="w-5 h-5" />
+          {/* Item Actions */}
+          <div className="flex items-center space-x-3">
+            <button className="p-2 text-gray-400 hover:text-pink-500 hover:bg-pink-50 dark:hover:bg-pink-900/20 rounded-lg transition-all duration-200 transform hover:scale-110">
+              <Heart className="w-5 h-5" />
             </button>
+            <Link
+              to={`/products/${item.product_id}`}
+              className="text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-800 dark:hover:text-purple-300 transition-colors duration-200"
+            >
+              View Details →
+            </Link>
           </div>
         </div>
       </div>
