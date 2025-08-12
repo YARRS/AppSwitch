@@ -63,23 +63,23 @@ class AuthService:
         
         # Handle different input formats based on original input and length
         
-        # US phone number with +1 prefix: +1234567890 (11 digits original, 11 digits cleaned)
-        if original_phone.startswith('+1') and len(phone) == 11 and phone.startswith('1'):
+        # US phone number with +1 prefix: +1234567890 (11 chars original, 10 digits cleaned)
+        if original_phone.startswith('+1') and len(phone) == 10:
             return original_phone  # Keep +1234567890 format
         
-        # US phone number with 1 prefix: 12345678901 (11 digits)
+        # US phone number with 1 prefix: 12345678901 (11 digits cleaned)
         elif len(phone) == 11 and phone.startswith('1') and not original_phone.startswith('+'):
             return phone  # Keep 12345678901 format
         
-        # Indian phone number with +91 prefix: +919876543210 (13 digits original, 12 digits cleaned)
+        # Indian phone number with +91 prefix: +919876543210 (13 chars original, 12 digits cleaned)
         elif original_phone.startswith('+91') and len(phone) == 12 and phone.startswith('91'):
             return phone[2:]  # Return 9876543210
         
-        # Indian phone number with 91 prefix: 919876543210 (12 digits)
-        elif len(phone) == 12 and phone.startswith('91'):
+        # Indian phone number with 91 prefix: 919876543210 (12 digits cleaned)
+        elif len(phone) == 12 and phone.startswith('91') and not original_phone.startswith('+'):
             return phone[2:]  # Return 9876543210
         
-        # Indian phone number with 0 prefix: 09876543210 (11 digits)
+        # Indian phone number with 0 prefix: 09876543210 (11 digits cleaned)
         elif len(phone) == 11 and phone.startswith('0'):
             return phone[1:]  # Return 9876543210
         
@@ -88,7 +88,7 @@ class AuthService:
             return phone  # Return as-is
         
         else:
-            raise ValueError(f"Invalid phone number format. Got {len(phone)} digits: {phone}")
+            raise ValueError(f"Invalid phone number format. Input: '{original_phone}', Cleaned: '{phone}' ({len(phone)} digits)")
         
         return phone
     
