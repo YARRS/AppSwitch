@@ -50,21 +50,7 @@ const UserProfile = () => {
     }
   }, [location.search]);
 
-  // Function to decrypt phone number for display
-  const decryptPhoneNumber = (encryptedPhone) => {
-    // For now, we'll display the phone as is since we don't have the decryption key on frontend
-    // In a real app, you'd want to decrypt this on the backend and send the decrypted version
-    // or handle decryption securely on the frontend
-    if (!encryptedPhone || encryptedPhone.includes('@placeholder.com')) {
-      return 'Not provided';
-    }
-    // If it looks like a regular phone number, display it
-    if (/^\d{10}$/.test(encryptedPhone)) {
-      return encryptedPhone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
-    }
-    // For encrypted values, we'll need to decrypt via API call
-    return encryptedPhone;
-  };
+  // Remove the old decryptPhoneNumber function since we're now using the utility
 
   // Fetch user orders when orders tab is selected
   useEffect(() => {
