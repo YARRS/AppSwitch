@@ -4,6 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from datetime import timedelta
 from typing import Optional
 from pydantic import BaseModel
+from typing import Optional
 
 from models import (
     UserCreate, UserResponse, UserUpdate, Token, APIResponse,
@@ -12,6 +13,22 @@ from models import (
 from auth import AuthService, UserService, get_current_active_user, get_admin_user
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
+
+# New models for mobile login and password reset
+class LoginDetectRequest(BaseModel):
+    identifier: str  # Can be email or phone number
+
+class MobileLoginRequest(BaseModel):
+    phone_number: str
+    otp: str
+
+class PasswordResetRequest(BaseModel):
+    email: str
+
+class PasswordResetConfirm(BaseModel):
+    email: str
+    reset_code: str
+    new_password: str
 
 # Database dependency
 async def get_db():
