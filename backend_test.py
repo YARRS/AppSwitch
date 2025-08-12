@@ -25,10 +25,10 @@ BACKEND_URL = "https://unique-mobile-auth.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Auto-seeded user credentials for testing (from seed_database.py)
-# Updated with phone numbers from seeded users
+# Updated with phone numbers from seeded users - these are the actual seeded users
 AUTO_SEEDED_USERS = [
     {"email": "customer@vallmark.com", "password": "Customer123!", "role": "customer", "phone": "+1234567898"},
-    {"email": "admin@vallmark.com", "password": "Admin123!", "role": "admin", "phone": "+1234567891"},
+    {"email": "admin@vallmark.com", "password": "Admin123!", "role": "admin", "phone": "+1234567891"},  # This is the main admin user mentioned in review
     {"email": "superadmin@vallmark.com", "password": "SuperAdmin123!", "role": "super_admin", "phone": "+1234567890"},
     {"email": "storeowner@vallmark.com", "password": "StoreOwner123!", "role": "store_owner", "phone": "+1234567892"},
     {"email": "storemanager@vallmark.com", "password": "StoreManager123!", "role": "store_admin", "phone": "+1234567893"},
@@ -38,13 +38,22 @@ AUTO_SEEDED_USERS = [
     {"email": "marketing@vallmark.com", "password": "Marketing123!", "role": "marketing_manager", "phone": "+1234567897"}
 ]
 
-# Test phone numbers in different formats for testing
+# Test phone numbers in different formats for comprehensive testing
 TEST_PHONE_FORMATS = [
-    "1234567898",      # 10 digits
-    "+1234567898",     # With + prefix
-    "01234567898",     # With leading 0
-    "911234567898",    # With country code 91
-    "+911234567898"    # With +91 country code
+    # US formats (admin user phone +1234567891)
+    {"input": "+1234567891", "expected_format": "+1234567891", "description": "US format with +"},
+    {"input": "1234567891", "expected_format": "1234567891", "description": "US format without +"},
+    {"input": "12345678901", "expected_format": "12345678901", "description": "US format with country code 1"},
+    
+    # Indian formats (test phone 9876543210)
+    {"input": "9876543210", "expected_format": "9876543210", "description": "Indian 10-digit"},
+    {"input": "+919876543210", "expected_format": "9876543210", "description": "Indian with +91"},
+    {"input": "919876543210", "expected_format": "9876543210", "description": "Indian with 91"},
+    {"input": "09876543210", "expected_format": "9876543210", "description": "Indian with leading 0"},
+    
+    # Additional test formats
+    {"input": "+1234567898", "expected_format": "+1234567898", "description": "Customer US format with +"},
+    {"input": "1234567898", "expected_format": "1234567898", "description": "Customer US format without +"}
 ]
 
 class MobileLoginTester:
