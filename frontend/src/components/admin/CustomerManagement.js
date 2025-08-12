@@ -60,8 +60,28 @@ const CustomerManagement = () => {
           ...(statusFilter && { is_active: statusFilter === 'active' })
         }
       });
-      setCustomers(response.data.data || []);
+      const customerData = response.data.data || [];
+      setCustomers(customerData);
       setTotalPages(response.data.total_pages || 1);
+      
+      // Decrypt all phone numbers
+      const phonePromises = customerData.map(async (customer) => {
+        if (customer.phone) {
+          try {
+            const decrypted = await decryptPhoneNumber(customer.phone, getAuthenticatedAxios);
+            return [customer.id, decrypted];
+          } catch (error) {
+            console.error(`Failed to decrypt phone for customer ${customer.id}:`, error);
+            return [customer.id, customer.phone]; // Fallback to original
+          }
+        }
+        return [customer.id, 'Not provided'];
+      });
+      
+      const phoneResults = await Promise.all(phonePromises);
+      const phoneMap = new Map(phoneResults);
+      setDecryptedPhones(phoneMap);
+      
     } catch (error) {
       console.error('Failed to fetch customers:', error);
       // Mock data for demo purposes if API fails
