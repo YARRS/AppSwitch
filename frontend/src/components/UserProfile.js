@@ -149,103 +149,138 @@ const UserProfile = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-      <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg">
-        {/* Header with tabs */}
-        <div className="px-4 py-5 sm:px-6 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                My Account
-              </h3>
-              <p className="mt-1 max-w-2xl text-sm text-gray-500 dark:text-gray-400">
-                Manage your account details, settings and order history.
-              </p>
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        {/* Hero Header */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full mb-6 shadow-xl">
+            <User className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-blue-600 bg-clip-text text-transparent mb-4">
+            My Account
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+            Manage your personal information, track orders, and customize your experience
+          </p>
+          <div className="flex items-center justify-center space-x-6 mt-6 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>Profile Active</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span>Secure Account</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+              <span>Premium Member</span>
             </div>
           </div>
-
-          {/* Tab Navigation */}
-          <nav className="flex space-x-4 sm:space-x-8 overflow-x-auto">
-            <button
-              onClick={() => setActiveTab('profile')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
-                activeTab === 'profile'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-              }`}
-            >
-              <User className="w-4 h-4 inline mr-2" />
-              <span className="hidden sm:inline">Profile Information</span>
-              <span className="sm:hidden">Profile</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('orders')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors whitespace-nowrap ${
-                activeTab === 'orders'
-                  ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
-              }`}
-            >
-              <Package className="w-4 h-4 inline mr-2" />
-              <span className="hidden sm:inline">My Orders ({orders.length})</span>
-              <span className="sm:hidden">Orders ({orders.length})</span>
-            </button>
-          </nav>
         </div>
 
-        <div className="px-4 py-5 sm:p-6">
-          {message.text && (
-            <div className={`mb-4 rounded-md p-4 ${
-              message.type === 'success' 
-                ? 'bg-green-50 dark:bg-green-900/20' 
-                : 'bg-red-50 dark:bg-red-900/20'
-            }`}>
-              <div className="flex">
-                {message.type === 'success' ? (
-                  <CheckCircle className="h-5 w-5 text-green-400 dark:text-green-300" />
-                ) : (
-                  <AlertCircle className="h-5 w-5 text-red-400 dark:text-red-300" />
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg shadow-2xl rounded-3xl border border-white/20 dark:border-gray-700/20 overflow-hidden">
+          {/* Modern Tab Navigation */}
+          <div className="px-8 py-6 border-b border-gray-200 dark:border-gray-700">
+            <nav className="flex space-x-8 justify-center">
+              <button
+                onClick={() => setActiveTab('profile')}
+                className={`group relative py-4 px-6 font-semibold text-lg transition-all duration-300 rounded-xl ${
+                  activeTab === 'profile'
+                    ? 'text-white bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg transform scale-105'
+                    : 'text-gray-500 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <User className="w-6 h-6" />
+                  <span>Profile Information</span>
+                </div>
+                {activeTab === 'profile' && (
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white rounded-full"></div>
                 )}
-                <div className="ml-3">
-                  <p className={`text-sm ${
-                    message.type === 'success' 
-                      ? 'text-green-800 dark:text-green-300' 
-                      : 'text-red-800 dark:text-red-300'
+              </button>
+              
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`group relative py-4 px-6 font-semibold text-lg transition-all duration-300 rounded-xl ${
+                  activeTab === 'orders'
+                    ? 'text-white bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg transform scale-105'
+                    : 'text-gray-500 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <Package className="w-6 h-6" />
+                  <span>My Orders ({orders.length})</span>
+                  {orders.length > 0 && (
+                    <span className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
+                      {orders.length}
+                    </span>
+                  )}
+                </div>
+                {activeTab === 'orders' && (
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white rounded-full"></div>
+                )}
+              </button>
+            </nav>
+          </div>
+
+          <div className="px-8 py-8">
+            {message.text && (
+              <div className={`mb-8 rounded-2xl p-6 shadow-lg ${
+                message.type === 'success' 
+                  ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-800' 
+                  : 'bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border-2 border-red-200 dark:border-red-800'
+              }`}>
+                <div className="flex items-center space-x-4">
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                    message.type === 'success' ? 'bg-green-500' : 'bg-red-500'
                   }`}>
-                    {message.text}
-                  </p>
+                    {message.type === 'success' ? (
+                      <CheckCircle className="h-6 w-6 text-white" />
+                    ) : (
+                      <AlertCircle className="h-6 w-6 text-white" />
+                    )}
+                  </div>
+                  <div>
+                    <p className={`font-semibold ${
+                      message.type === 'success' 
+                        ? 'text-green-800 dark:text-green-300' 
+                        : 'text-red-800 dark:text-red-300'
+                    }`}>
+                      {message.text}
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Tab Content */}
-          {activeTab === 'profile' && (
-            <ProfileTab
-              user={user}
-              isEditing={isEditing}
-              formData={formData}
-              handleChange={handleChange}
-              handleSubmit={handleSubmit}
-              handleCancel={handleCancel}
-              setIsEditing={setIsEditing}
-              isLoading={isLoading}
-              getRoleBadgeColor={getRoleBadgeColor}
-              formatRole={formatRole}
-              formatDate={formatDate}
-              logout={logout}
-              decryptedPhone={decryptedPhone}
-            />
-          )}
+            {/* Tab Content */}
+            {activeTab === 'profile' && (
+              <ProfileTab
+                user={user}
+                isEditing={isEditing}
+                formData={formData}
+                handleChange={handleChange}
+                handleSubmit={handleSubmit}
+                handleCancel={handleCancel}
+                setIsEditing={setIsEditing}
+                isLoading={isLoading}
+                getRoleBadgeColor={getRoleBadgeColor}
+                formatRole={formatRole}
+                formatDate={formatDate}
+                logout={logout}
+                decryptedPhone={decryptedPhone}
+              />
+            )}
 
-          {activeTab === 'orders' && (
-            <OrdersTab
-              orders={orders}
-              ordersLoading={ordersLoading}
-              formatPrice={formatPrice}
-              formatDate={formatDate}
-            />
-          )}
+            {activeTab === 'orders' && (
+              <OrdersTab
+                orders={orders}
+                ordersLoading={ordersLoading}
+                formatPrice={formatPrice}
+                formatDate={formatDate}
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>
