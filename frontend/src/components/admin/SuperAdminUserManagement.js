@@ -20,6 +20,7 @@ const SuperAdminUserManagement = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [decryptedPhones, setDecryptedPhones] = useState(new Map());
 
   const userRoles = [
     { value: 'super_admin', label: 'Super Admin', icon: Crown },
