@@ -397,7 +397,7 @@ const SuperAdminUserManagement = () => {
 };
 
 // User Row Component
-const UserRow = ({ user, onViewDetails, onUpdateRole, onUpdateStatus, userRoles }) => {
+const UserRow = ({ user, decryptedPhone, onViewDetails, onUpdateRole, onUpdateStatus, userRoles }) => {
   const roleInfo = userRoles.find(r => r.value === user.role) || { label: user.role, icon: User };
   const RoleIcon = roleInfo.icon;
 
