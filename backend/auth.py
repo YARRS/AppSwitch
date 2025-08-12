@@ -324,23 +324,36 @@ class UserService:
     
     async def authenticate_user(self, email_or_phone_or_username: str, password: str) -> Optional[UserInDB]:
         """Authenticate user with email/phone/username and password"""
-        # Try to find user by email first
+        # First try to find user by email
         user = await self.get_user_by_email(email_or_phone_or_username)
         
-        # If not found by email, try by phone
-        if not user:
-            user = await self.get_user_by_phone(email_or_phone_or_username)
+        # If not found by email, check if it looks like a phone number
+        if not user and AuthService.is_phone_number(email_or_phone_or_username):
+            try:
+                # Try to find by phone with proper formatting
+                user = await self.get_user_by_phone(email_or_phone_or_username)
+            except (ValueError, Exception) as e:
+                # If phone formatting fails, try original input as username
+                pass
         
         # If still not found, try by username
         if not user:
             user = await self.get_user_by_username(email_or_phone_or_username)
         
+        # If no user found at all
         if not user:
             return None
         
+        # Check if user has a password set
+        if not user.hashed_password:
+            # User doesn't have a password (probably registered via phone/OTP)
+            return None
+        
+        # Verify password
         if not AuthService.verify_password(password, user.hashed_password):
             return None
         
+        # Check if user is active
         if not user.is_active:
             return None
         
