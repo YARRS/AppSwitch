@@ -359,7 +359,7 @@ async def get_db():
 
 @router.post("/", response_model=APIResponse)
 async def create_order(
-    order_data: OrderCreate,
+    order_data: AuthenticatedOrderCreate,
     current_user: UserInDB = Depends(get_current_active_user),
     db: AsyncIOMotorDatabase = Depends(get_db)
 ):
@@ -370,8 +370,12 @@ async def create_order(
         # Validate order items
         await order_service.validate_order_items(order_data.items)
         
+        # Add user_id to order data (extracted from JWT token)
+        order_dict = order_data.dict()
+        order_dict["user_id"] = current_user.id
+        
         # Create order
-        order = await order_service.create_order(current_user.id, order_data.dict())
+        order = await order_service.create_order(current_user.id, order_dict)
         
         # Create response
         order_response = OrderResponse(**order.dict())
