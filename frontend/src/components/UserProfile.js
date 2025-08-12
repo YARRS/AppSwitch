@@ -234,7 +234,7 @@ const UserProfile = () => {
               formatRole={formatRole}
               formatDate={formatDate}
               logout={logout}
-              decryptPhoneNumber={decryptPhoneNumber}
+              decryptedPhone={decryptedPhone}
             />
           )}
 
