@@ -4,7 +4,7 @@ import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { 
   ShoppingCart, Plus, Minus, Trash2, ArrowLeft, 
-  Package, CreditCard, ShoppingBag, Heart 
+  Package, CreditCard, ShoppingBag, Heart, Sparkles, Zap, Gift 
 } from 'lucide-react';
 
 const Cart = () => {
