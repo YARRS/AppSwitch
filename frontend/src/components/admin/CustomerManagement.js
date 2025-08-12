@@ -566,7 +566,7 @@ const CustomerDetailsModal = ({ customer, decryptedPhone, orders, onClose, onUpd
                     {customer.phone && (
                       <div className="flex items-center space-x-3">
                         <Phone className="w-5 h-5 text-gray-400" />
-                        <span className="text-sm">{customer.phone}</span>
+                        <span className="text-sm">{decryptedPhone}</span>
                       </div>
                     )}
                     <div className="flex items-center space-x-3">
