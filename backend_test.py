@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Backend API Testing Script for Vallmark Gift Articles E-commerce System
-SPECIAL FOCUS: Order Placement Functionality Testing
-Testing complete order placement functionality for both guest and authenticated users.
+SPECIAL FOCUS: Authentication and Order System Fixes Testing
+Testing guest user authentication, order creation, and user management system.
 """
 
 import requests
