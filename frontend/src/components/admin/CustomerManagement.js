@@ -390,7 +390,7 @@ const CustomerRow = ({ customer, decryptedPhone, onViewDetails, onUpdateStatus }
           {customer.phone && (
             <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
               <Phone className="w-4 h-4 text-gray-400 mr-2" />
-              {customer.phone}
+              {decryptedPhone}
             </div>
           )}
         </div>
