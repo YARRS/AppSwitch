@@ -316,11 +316,21 @@ async def register(user_data: UserCreate, db: AsyncIOMotorDatabase = Depends(get
         
         # Check if phone already exists (if provided)
         if hasattr(user_data, 'phone') and user_data.phone:
-            existing_phone = await user_service.get_user_by_phone(user_data.phone)
-            if existing_phone:
+            # Format the phone number first
+            try:
+                formatted_phone = AuthService.format_phone_number(user_data.phone)
+                existing_phone = await user_service.get_user_by_phone(formatted_phone)
+                if existing_phone:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Phone number already registered"
+                    )
+                # Update user_data with formatted phone
+                user_data.phone = formatted_phone
+            except ValueError as e:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Phone number already registered"
+                    detail=f"Invalid phone number format: {str(e)}"
                 )
         
         # Create user
