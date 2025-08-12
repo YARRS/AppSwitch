@@ -364,20 +364,27 @@ const Login = () => {
         <div>
           <div className="flex justify-center">
             <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-              <span className="text-2xl font-bold text-white">S</span>
+              {loginType === 'phone' ? (
+                <Phone className="w-8 h-8 text-white" />
+              ) : (
+                <Mail className="w-6 h-6 text-white" />
+              )}
             </div>
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-            Sign in to your account
+            {getStepTitle()}
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Or{' '}
-            <Link
-              to="/register"
-              className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-            >
-              create a new account
-            </Link>
+            {getStepDescription()}{' '}
+            {loginStep !== 'identifier' && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+              >
+                Start over
+              </button>
+            )}
           </p>
         </div>
 
@@ -393,74 +400,128 @@ const Login = () => {
             </div>
           )}
 
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email address
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
-                  placeholder="Enter your email"
-                />
-                <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+          {otpSent && loginStep === 'otp' && (
+            <div className="rounded-md bg-green-50 dark:bg-green-900/20 p-4">
+              <div className="flex">
+                <Phone className="h-5 w-5 text-green-400 dark:text-green-300" />
+                <div className="ml-3">
+                  <p className="text-sm text-green-800 dark:text-green-300">
+                    OTP sent to {formData.identifier}. Use 123456 for testing.
+                  </p>
+                </div>
               </div>
             </div>
+          )}
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Password
-              </label>
-              <div className="mt-1 relative">
+          <div className="space-y-4">
+            {loginStep === 'identifier' && (
+              <div>
+                <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Email address or Mobile number
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    id="identifier"
+                    name="identifier"
+                    type="text"
+                    required
+                    value={formData.identifier}
+                    onChange={handleChange}
+                    className="appearance-none relative block w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
+                    placeholder="Enter email or mobile number"
+                  />
+                  <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+            )}
+
+            {loginType === 'email' && loginStep === 'password' && (
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Password
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? 'text' : 'password'}
+                    autoComplete="current-password"
+                    required
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="appearance-none relative block w-full px-3 py-2 pl-10 pr-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
+                    placeholder="Enter your password"
+                  />
+                  <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {loginType === 'phone' && loginStep === 'otp' && (
+              <div>
+                <label htmlFor="otp" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Enter OTP
+                </label>
+                <div className="mt-1 relative">
+                  <input
+                    id="otp"
+                    name="otp"
+                    type="text"
+                    required
+                    maxLength="6"
+                    value={formData.otp}
+                    onChange={handleChange}
+                    className="appearance-none relative block w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800 text-center text-2xl tracking-widest"
+                    placeholder="123456"
+                  />
+                  <Key className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                </div>
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">
+                  Didn't receive OTP?{' '}
+                  <button
+                    type="button"
+                    onClick={() => sendOTP(formData.identifier)}
+                    className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
+                  >
+                    Resend
+                  </button>
+                </p>
+              </div>
+            )}
+          </div>
+
+          {loginType === 'email' && loginStep === 'password' && (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
                 <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="appearance-none relative block w-full px-3 py-2 pl-10 pr-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
-                  placeholder="Enter your password"
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                 />
-                <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
+                  Remember me
+                </label>
+              </div>
+
+              <div className="text-sm">
                 <button
                   type="button"
-                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowResetPassword(true)}
+                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  Forgot your password?
                 </button>
               </div>
             </div>
-          </div>
-
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember-me"
-                name="remember-me"
-                type="checkbox"
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-              />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                Remember me
-              </label>
-            </div>
-
-            <div className="text-sm">
-              <a href="#" className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
-                Forgot your password?
-              </a>
-            </div>
-          </div>
+          )}
 
           <div>
             <button
@@ -471,7 +532,11 @@ const Login = () => {
               {isLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
               ) : (
-                'Sign in'
+                <>
+                  {loginStep === 'identifier' && 'Continue'}
+                  {loginStep === 'password' && 'Sign in'}
+                  {loginStep === 'otp' && 'Verify & Sign in'}
+                </>
               )}
             </button>
           </div>
