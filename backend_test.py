@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-Backend API Testing Script for SuperAdmin User Management CRUD Functionality
-FOCUS: Testing enhanced SuperAdmin User Management CRUD operations including:
-- GET /api/auth/users/decrypted - Get all users with decrypted phone numbers
-- GET /api/auth/users/{user_id} - Get user by ID  
-- PUT /api/auth/users/{user_id} - Update user (full fields including username, email, phone, role, password, etc.)
-- DELETE /api/auth/users/{user_id} - Delete user
-- POST /api/auth/users - Create new user
-- Phone number decryption functionality
-- Role-based access control
+Backend API Testing Script for Mobile Login Functionality
+FOCUS: Testing mobile login functionality that was just fixed including:
+- Phone Number Login with Password for different formats (US +1234567891, US without +, Indian 9876543210)
+- Phone Number + OTP Login for same formats
+- Phone Number Detection endpoint /api/auth/login/detect with various formats
+- Registration Duplicate Prevention for phone numbers
+- Email Login still working after phone number changes
+- Phone number encryption/decryption with Fernet
+- "decrypt-all" lookup mechanism for encrypted phone numbers
 """
 
 import requests
