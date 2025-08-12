@@ -10,7 +10,7 @@ from models import (
     UserCreate, UserResponse, UserUpdate, Token, APIResponse,
     UserInDB, UserRole
 )
-from auth import AuthService, UserService, get_current_active_user, get_admin_user
+from auth import AuthService, UserService, get_current_active_user, get_admin_user, get_super_admin_user
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
