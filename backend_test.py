@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Backend API Testing Script for Vallmark Gift Articles E-commerce System
-SPECIAL FOCUS: Authentication and Order System Fixes Testing
-Testing guest user authentication, order creation, and user management system.
+Backend API Testing Script for Authentication and Order Placement
+FOCUS: Testing authentication system and order placement for logged-in users
+Testing seeded user credentials and order creation functionality.
 """
 
 import requests
@@ -18,17 +18,17 @@ import time
 BACKEND_URL = "https://order-auth-fix.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
-# Auto-seeded user credentials for testing (Vallmark Gift Articles)
+# Auto-seeded user credentials for testing (from test_result.md)
 AUTO_SEEDED_USERS = [
-    {"email": "superadmin@vallmark.com", "password": "SuperAdmin123!", "role": "super_admin"},
-    {"email": "admin@vallmark.com", "password": "Admin123!", "role": "admin"},
-    {"email": "storeowner@vallmark.com", "password": "StoreOwner123!", "role": "store_owner"},
-    {"email": "storemanager@vallmark.com", "password": "StoreManager123!", "role": "store_admin"},
-    {"email": "salesperson@vallmark.com", "password": "Salesperson123!", "role": "salesperson"},
-    {"email": "salesmanager@vallmark.com", "password": "SalesManager123!", "role": "sales_manager"},
-    {"email": "support@vallmark.com", "password": "Support123!", "role": "support_executive"},
-    {"email": "marketing@vallmark.com", "password": "Marketing123!", "role": "marketing_manager"},
-    {"email": "customer@vallmark.com", "password": "Customer123!", "role": "customer"}
+    {"email": "customer@smartswitch.com", "password": "Customer123!", "role": "customer"},
+    {"email": "admin@smartswitch.com", "password": "Admin123!", "role": "admin"},
+    {"email": "superadmin@smartswitch.com", "password": "SuperAdmin123!", "role": "super_admin"},
+    {"email": "storeowner@smartswitch.com", "password": "StoreOwner123!", "role": "store_owner"},
+    {"email": "storemanager@smartswitch.com", "password": "StoreManager123!", "role": "store_admin"},
+    {"email": "salesperson@smartswitch.com", "password": "Salesperson123!", "role": "salesperson"},
+    {"email": "salesmanager@smartswitch.com", "password": "SalesManager123!", "role": "sales_manager"},
+    {"email": "support@smartswitch.com", "password": "Support123!", "role": "support_executive"},
+    {"email": "marketing@smartswitch.com", "password": "Marketing123!", "role": "marketing_manager"}
 ]
 
 # Test product data
