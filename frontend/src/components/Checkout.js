@@ -272,7 +272,7 @@ const Checkout = () => {
     }
 
     if (!validateForm()) {
-      setCurrentStep(1); // Go back to address step if validation fails
+      // Don't jump back to step 1, validation errors will show on current page
       return;
     }
 
