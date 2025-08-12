@@ -175,69 +175,83 @@ class MobileLoginTester:
             self.log_result("Login Type Detection - Email", "FAIL", f"Error testing email detection: {str(e)}")
             return False
     
-    def test_login_type_detection_phone(self):
-        """Test login type detection with phone numbers in different formats"""
+    def test_phone_number_detection_comprehensive(self):
+        """Test phone number detection with various formats as specified in review"""
         try:
-            test_phones = [
-                "9876543210",      # 10 digits
-                "+919876543210",   # With +91 country code
-                "09876543210",     # With leading 0
-                "919876543210",    # With 91 country code
-                "1234567898"       # From seeded user
+            # Test cases from review request
+            test_cases = [
+                # US formats
+                {"input": "+1234567891", "expected_type": "phone", "description": "US with + (admin user)"},
+                {"input": "1234567891", "expected_type": "phone", "description": "US without + (admin user)"},
+                
+                # Indian formats  
+                {"input": "9876543210", "expected_type": "phone", "description": "Indian 10-digit"},
+                {"input": "+919876543210", "expected_type": "phone", "description": "Indian with +91"},
+                {"input": "919876543210", "expected_type": "phone", "description": "Indian with 91"},
+                
+                # Additional formats for comprehensive testing
+                {"input": "+1234567898", "expected_type": "phone", "description": "Customer US with +"},
+                {"input": "1234567898", "expected_type": "phone", "description": "Customer US without +"},
+                {"input": "09876543210", "expected_type": "phone", "description": "Indian with leading 0"}
             ]
             
             passed_count = 0
-            for phone in test_phones:
+            for test_case in test_cases:
                 try:
                     response = requests.post(
                         f"{API_BASE}/auth/login/detect",
-                        json={"identifier": phone},
+                        json={"identifier": test_case["input"]},
                         timeout=30
                     )
                     
                     if response.status_code == 200:
                         data = response.json()
                         if (data.get("success") and 
-                            data.get("data", {}).get("login_type") == "phone" and
+                            data.get("data", {}).get("login_type") == test_case["expected_type"] and
                             data.get("data", {}).get("requires") == "otp"):
                             passed_count += 1
+                            self.log_result(
+                                f"Phone Detection ({test_case['description']})", 
+                                "PASS", 
+                                f"Correctly detected as {test_case['expected_type']} type"
+                            )
                         else:
                             self.log_result(
-                                f"Login Detection Phone ({phone})", 
+                                f"Phone Detection ({test_case['description']})", 
                                 "FAIL", 
                                 f"Incorrect detection result", 
                                 data
                             )
                     else:
                         self.log_result(
-                            f"Login Detection Phone ({phone})", 
+                            f"Phone Detection ({test_case['description']})", 
                             "FAIL", 
                             f"HTTP {response.status_code}: {response.text}"
                         )
                 except Exception as e:
                     self.log_result(
-                        f"Login Detection Phone ({phone})", 
+                        f"Phone Detection ({test_case['description']})", 
                         "FAIL", 
                         f"Error: {str(e)}"
                     )
             
-            if passed_count == len(test_phones):
+            if passed_count == len(test_cases):
                 self.log_result(
-                    "Login Type Detection - Phone", 
+                    "Phone Number Detection - Comprehensive", 
                     "PASS", 
-                    f"All {len(test_phones)} phone numbers correctly detected as phone type"
+                    f"All {len(test_cases)} phone formats correctly detected"
                 )
                 return True
             else:
                 self.log_result(
-                    "Login Type Detection - Phone", 
+                    "Phone Number Detection - Comprehensive", 
                     "FAIL", 
-                    f"Only {passed_count}/{len(test_phones)} phones correctly detected"
+                    f"Only {passed_count}/{len(test_cases)} phone formats correctly detected"
                 )
                 return False
                 
         except Exception as e:
-            self.log_result("Login Type Detection - Phone", "FAIL", f"Error testing phone detection: {str(e)}")
+            self.log_result("Phone Number Detection - Comprehensive", "FAIL", f"Error testing phone detection: {str(e)}")
             return False
     
     def test_login_type_detection_invalid(self):
