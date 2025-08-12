@@ -112,16 +112,27 @@ class AuthService:
         if len(phone_clean) < 10 or len(phone_clean) > 13:
             return False
         
-        # Check for common phone number patterns
+        # Check for common phone number patterns (expanded for international support)
         phone_patterns = [
-            r'^[0-9]{10}$',  # 9876543210
-            r'^0[0-9]{10}$',  # 09876543210
-            r'^91[0-9]{10}$',  # 919876543210
-            r'^\+91[0-9]{10}$',  # +919876543210
+            r'^[0-9]{10}$',        # 9876543210 (10 digits)
+            r'^0[0-9]{10}$',       # 09876543210 (11 digits with leading 0)
+            r'^91[0-9]{10}$',      # 919876543210 (Indian with country code)
+            r'^\+91[0-9]{10}$',    # +919876543210 (Indian with +)
+            r'^1[0-9]{10}$',       # 12345678901 (US with country code)
+            r'^\+1[0-9]{10}$',     # +12345678901 (US with +)
+            r'^\+[0-9]{10,12}$',   # Generic international format
         ]
         
         for pattern in phone_patterns:
             if re.match(pattern, input_str.strip()):
+                return True
+        
+        # Additional check: if it's mostly numbers and reasonable length
+        if len(phone_clean) >= 10 and len(phone_clean) <= 13:
+            # Check if at least 80% of characters are digits in original string
+            total_chars = len(input_str.strip())
+            digit_ratio = len(phone_clean) / total_chars if total_chars > 0 else 0
+            if digit_ratio >= 0.7:  # 70% digits threshold
                 return True
         
         return False
