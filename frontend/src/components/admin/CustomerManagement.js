@@ -446,7 +446,7 @@ const CustomerRow = ({ customer, decryptedPhone, onViewDetails, onUpdateStatus }
 };
 
 // Customer Details Modal Component
-const CustomerDetailsModal = ({ customer, orders, onClose, onUpdateStatus }) => {
+const CustomerDetailsModal = ({ customer, decryptedPhone, orders, onClose, onUpdateStatus }) => {
   const [activeTab, setActiveTab] = useState('profile');
 
   const totalOrders = orders.length;
