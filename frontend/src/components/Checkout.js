@@ -574,24 +574,105 @@ const ShippingForm = ({
         )}
       </div>
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-          Phone Number *
-        </label>
-        <input
-          type="tel"
-          value={formData.shipping_address.phone}
-          onChange={(e) => handleInputChange('shipping_address', 'phone', e.target.value)}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-            errors.shipping_address_phone ? 'border-red-500' : 'border-gray-300'
-          }`}
-          placeholder="Enter phone number"
-        />
-        {errors.shipping_address_phone && (
-          <p className="text-red-500 text-sm mt-1">{errors.shipping_address_phone}</p>
+      {/* Contact Information Section - Combined Email and Phone */}
+      {!isAuthenticated ? (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Email Address *
+          </label>
+          <input
+            type="email"
+            value={formData.customer_email}
+            onChange={(e) => handleInputChange(null, 'customer_email', e.target.value)}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+              errors.customer_email ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="Email for order updates"
+          />
+          {errors.customer_email && (
+            <p className="text-red-500 text-sm mt-1">{errors.customer_email}</p>
+          )}
+        </div>
+      ) : (
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Phone Number *
+          </label>
+          <input
+            type="tel"
+            value={formData.shipping_address.phone}
+            onChange={(e) => handleInputChange('shipping_address', 'phone', e.target.value)}
+            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+              errors.shipping_address_phone ? 'border-red-500' : 'border-gray-300'
+            }`}
+            placeholder="Enter phone number"
+          />
+          {errors.shipping_address_phone && (
+            <p className="text-red-500 text-sm mt-1">{errors.shipping_address_phone}</p>
+          )}
+        </div>
+      )}
+    </div>
+
+    {/* Phone Number Section for Guest Users with OTP */}
+    {!isAuthenticated && (
+      <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+        <h3 className="text-lg font-medium text-blue-800 dark:text-blue-300 mb-4 flex items-center space-x-2">
+          <Phone className="w-5 h-5" />
+          <span>Phone Verification Required</span>
+        </h3>
+        
+        <div>
+          <label className="block text-sm font-medium text-blue-700 dark:text-blue-300 mb-2">
+            Phone Number *
+          </label>
+          <div className="flex space-x-2">
+            <input
+              type="tel"
+              value={formData.shipping_address.phone}
+              onChange={(e) => handleInputChange('shipping_address', 'phone', e.target.value)}
+              className={`flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
+                errors.shipping_address_phone ? 'border-red-500' : 'border-gray-300'
+              }`}
+              placeholder="Enter phone number"
+            />
+            
+            {/* Send OTP Button - positioned directly next to phone input */}
+            <button
+              type="button"
+              onClick={sendOtp}
+              disabled={otpState.sendingOtp || !formData.shipping_address.phone || otpState.resendTimer > 0}
+              className="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            >
+              {otpState.sendingOtp ? (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Sending...</span>
+                </div>
+              ) : otpState.resendTimer > 0 ? (
+                `Resend ${otpState.resendTimer}s`
+              ) : otpState.otpSent ? (
+                'Resend OTP'
+              ) : (
+                'Send OTP'
+              )}
+            </button>
+          </div>
+          {errors.shipping_address_phone && (
+            <p className="text-red-500 text-sm mt-1">{errors.shipping_address_phone}</p>
+          )}
+        </div>
+
+        {otpState.otpVerified && (
+          <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+            <div className="flex items-center space-x-2 text-green-800 dark:text-green-300">
+              <CheckCircle2 className="w-5 h-5" />
+              <span className="font-medium">Phone number verified successfully!</span>
+            </div>
+          </div>
         )}
       </div>
-    </div>
+    )}
 
     <div className="mt-6">
       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
