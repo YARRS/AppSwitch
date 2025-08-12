@@ -162,6 +162,18 @@ const Checkout = () => {
     return validateStep1(); // For now, all validation is in step 1
   };
 
+  // Handle step transitions with validation
+  const handleStep1Next = () => {
+    if (validateStep1()) {
+      setCurrentStep(2);
+    }
+  };
+
+  const handleStep2Next = () => {
+    // Step 2 doesn't have additional validation for now, just move to step 3
+    setCurrentStep(3);
+  };
+
   // OTP Functions
   const sendOtp = async () => {
     const phoneNumber = formData.shipping_address.phone;
