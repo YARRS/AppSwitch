@@ -314,6 +314,7 @@ const CustomerManagement = () => {
                 <CustomerRow
                   key={customer.id}
                   customer={customer}
+                  decryptedPhone={decryptedPhones.get(customer.id) || 'Loading...'}
                   onViewDetails={viewCustomerDetails}
                   onUpdateStatus={updateCustomerStatus}
                 />
