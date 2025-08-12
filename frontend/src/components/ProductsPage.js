@@ -561,10 +561,12 @@ const ProductsPage = () => {
   );
 };
 
-// Product Card Component
-const ProductCard = ({ product, isAuthenticated }) => {
+// Modern Product Card Component with Advanced Animations
+const ProductCard = ({ product, isAuthenticated, index }) => {
   const { addToCart } = useCart();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
@@ -580,7 +582,7 @@ const ProductCard = ({ product, isAuthenticated }) => {
     try {
       const result = await addToCart(product.id, 1);
       if (result.success) {
-        // Show success feedback - you could add a toast notification here
+        // Show success feedback
         console.log('Product added to cart successfully');
       } else {
         console.error('Failed to add to cart:', result.error);
@@ -594,6 +596,11 @@ const ProductCard = ({ product, isAuthenticated }) => {
     }
   };
 
+  const toggleWishlist = () => {
+    setIsWishlisted(!isWishlisted);
+    // Here you could add actual wishlist functionality
+  };
+
   // Check if product is new (within last 7 days)
   const isNewProduct = () => {
     if (!product.created_at) return false;
@@ -603,135 +610,276 @@ const ProductCard = ({ product, isAuthenticated }) => {
     return daysDifference <= 7;
   };
 
+  // Calculate discount percentage
+  const getDiscountPercentage = () => {
+    if (!product.discount_price || !product.price) return 0;
+    return Math.round(((product.price - product.discount_price) / product.price) * 100);
+  };
+
+  const discountPercent = getDiscountPercentage();
+
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 ${
-      isNewProduct() ? 'relative' : ''
-    }`}>
-      {/* Animated Golden Border for New Products */}
+    <div 
+      className="group relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-white/20 dark:border-gray-700/20 transform hover:-translate-y-2 hover:scale-[1.02]"
+      style={{
+        animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`
+      }}
+    >
+      {/* Animated Background Gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-pink-500/10 via-purple-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+      
+      {/* New Product Golden Border Animation */}
       {isNewProduct() && (
-        <div className="absolute inset-0 rounded-lg overflow-hidden pointer-events-none">
-          <div className="absolute inset-0 rounded-lg border-4 border-transparent bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-400 animate-pulse"></div>
-          <div className="absolute inset-1 rounded-lg bg-white dark:bg-gray-800"></div>
-          {/* Rotating Golden Border Animation */}
-          <div className="absolute inset-0 rounded-lg">
-            <div className="absolute inset-0 rounded-lg border-4 border-transparent bg-gradient-conic from-yellow-400 via-orange-500 via-yellow-300 to-yellow-400 animate-spin-slow opacity-75"></div>
-            <div className="absolute inset-1 rounded-lg bg-white dark:bg-gray-800"></div>
+        <>
+          <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+            <div className="absolute inset-0 rounded-2xl border-4 border-transparent bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-400 animate-pulse"></div>
+            <div className="absolute inset-1 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg"></div>
           </div>
-        </div>
+          <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none opacity-75">
+            <div className="absolute inset-0 rounded-2xl border-4 border-transparent bg-gradient-conic from-yellow-400 via-orange-500 via-yellow-300 to-yellow-400 animate-spin-slow opacity-50"></div>
+            <div className="absolute inset-1 rounded-2xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg"></div>
+          </div>
+        </>
       )}
       
-      {/* Product Image */}
-      <div className="relative z-10">
-        <div className="w-full h-40 sm:h-48 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-gray-700 dark:to-gray-600 flex items-center justify-center">
+      {/* Product Image Container */}
+      <div className="relative z-10 aspect-square overflow-hidden">
+        <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-600">
           {product.images && product.images.length > 0 ? (
-            <img
-              src={product.images[0].startsWith('data:') ? product.images[0] : `data:image/jpeg;base64,${product.images[0]}`}
-              alt={product.name}
-              className="w-full h-full object-cover"
-            />
+            <>
+              <img
+                src={product.images[0]}
+                alt={product.name}
+                className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${
+                  imageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+                onLoad={() => setImageLoaded(true)}
+                loading="lazy"
+              />
+              {!imageLoaded && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-12 h-12 border-4 border-purple-200 dark:border-purple-800 rounded-full animate-spin border-t-purple-600 dark:border-t-purple-400"></div>
+                </div>
+              )}
+            </>
           ) : (
-            <div className="text-center">
-              <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-2 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-lg sm:text-2xl font-bold text-white">
+            <div className="flex items-center justify-center h-full">
+              <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg transform group-hover:rotate-12 transition-transform duration-300">
+                <span className="text-2xl font-bold text-white">
                   {product.name.charAt(0)}
                 </span>
               </div>
-              <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">No Image</p>
             </div>
           )}
         </div>
         
-        {/* Stock Status & New Badge */}
-        <div className="absolute top-2 right-2 flex flex-col gap-1 z-20">
-          {/* New Badge */}
-          {isNewProduct() && (
-            <span className="px-2 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg animate-bounce">
-              ✨ NEW
-            </span>
-          )}
+        {/* Overlay Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        
+        {/* Badges Container */}
+        <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-20">
+          <div className="flex flex-col gap-2">
+            {/* New Badge */}
+            {isNewProduct() && (
+              <span className="px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg animate-bounce flex items-center space-x-1">
+                <Sparkles className="w-3 h-3" />
+                <span>NEW</span>
+              </span>
+            )}
+            
+            {/* Discount Badge */}
+            {discountPercent > 0 && (
+              <span className="px-3 py-1 text-xs font-bold rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg">
+                -{discountPercent}%
+              </span>
+            )}
+          </div>
           
-          {/* Stock Status */}
-          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+          {/* Wishlist Button */}
+          <button
+            onClick={toggleWishlist}
+            className={`w-10 h-10 rounded-full backdrop-blur-lg flex items-center justify-center transition-all duration-300 transform hover:scale-110 active:scale-95 shadow-lg ${
+              isWishlisted 
+                ? 'bg-red-500/80 text-white' 
+                : 'bg-white/80 dark:bg-gray-800/80 text-gray-600 dark:text-gray-300 hover:bg-red-50 dark:hover:bg-red-900/20'
+            }`}
+          >
+            <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+          </button>
+        </div>
+
+        {/* Stock Status */}
+        <div className="absolute bottom-3 right-3 z-20">
+          <span className={`px-3 py-1 text-xs font-medium rounded-full backdrop-blur-lg shadow-lg ${
             product.is_in_stock
-              ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-              : 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+              ? 'bg-green-500/80 text-white'
+              : 'bg-red-500/80 text-white'
           }`}>
-            {product.is_in_stock ? 'In Stock' : 'Out of Stock'}
+            {product.is_in_stock ? '✓ In Stock' : '✗ Out of Stock'}
           </span>
+        </div>
+
+        {/* Quick Actions Overlay */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-15">
+          <div className="flex space-x-3">
+            <Link
+              to={`/products/${product.id}`}
+              className="w-12 h-12 bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 active:scale-95 transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              title="Quick View"
+            >
+              <Eye className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            </Link>
+            
+            {product.is_in_stock && (
+              <button 
+                onClick={handleAddToCart}
+                disabled={isAddingToCart}
+                className="w-12 h-12 bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-full flex items-center justify-center shadow-lg transform hover:scale-110 active:scale-95 transition-all duration-200 hover:bg-green-50 dark:hover:bg-green-900/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Add to Cart"
+              >
+                {isAddingToCart ? (
+                  <div className="w-5 h-5 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <ShoppingCart className="w-5 h-5 text-green-600 dark:text-green-400" />
+                )}
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Product Info */}
-      <div className="p-3 sm:p-4 relative z-10">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-1">
+      <div className="relative z-10 p-5">
+        {/* Rating */}
+        {product.rating && product.review_count && (
+          <div className="flex items-center space-x-1 mb-3">
+            <div className="flex items-center">
+              {[...Array(5)].map((_, i) => (
+                <Star 
+                  key={i} 
+                  className={`w-4 h-4 ${
+                    i < Math.floor(product.rating) 
+                      ? 'text-yellow-400 fill-current' 
+                      : 'text-gray-300 dark:text-gray-600'
+                  }`} 
+                />
+              ))}
+            </div>
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              {product.rating} ({product.review_count})
+            </span>
+          </div>
+        )}
+
+        {/* Product Name */}
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
           {product.name}
         </h3>
         
+        {/* Description */}
         <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 line-clamp-2">
           {product.description}
         </p>
 
         {/* Features */}
         {product.features && Array.isArray(product.features) && product.features.length > 0 && (
-          <p className="text-xs text-blue-600 dark:text-blue-400 mb-3 line-clamp-1">
-            {product.features.join(', ')}
-          </p>
+          <div className="flex flex-wrap gap-1 mb-4">
+            {product.features.slice(0, 2).map((feature, index) => (
+              <span 
+                key={index}
+                className="px-2 py-1 text-xs bg-gradient-to-r from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 text-blue-700 dark:text-blue-300 rounded-full border border-blue-200 dark:border-blue-800"
+              >
+                {feature}
+              </span>
+            ))}
+            {product.features.length > 2 && (
+              <span className="px-2 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full">
+                +{product.features.length - 2} more
+              </span>
+            )}
+          </div>
         )}
 
-        {/* Price */}
+        {/* Price Section */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex flex-col">
             {product.discount_price ? (
               <>
-                <span className="text-lg sm:text-2xl font-bold text-red-600 dark:text-red-400">
-                  {formatPrice(product.discount_price)}
-                </span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-pink-600 bg-clip-text text-transparent">
+                    {formatPrice(product.discount_price)}
+                  </span>
+                  <span className="px-2 py-1 text-xs font-bold bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-full">
+                    SAVE {discountPercent}%
+                  </span>
+                </div>
                 <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
                   {formatPrice(product.price)}
                 </span>
               </>
             ) : (
-              <span className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white">
+              <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                 {formatPrice(product.price)}
               </span>
             )}
           </div>
+          
           {product.stock_quantity && (
-            <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-              {product.stock_quantity} left
-            </span>
+            <div className="text-right">
+              <span className="text-sm text-gray-500 dark:text-gray-400">
+                {product.stock_quantity} left
+              </span>
+              {product.stock_quantity <= 5 && (
+                <div className="flex items-center space-x-1 text-orange-500">
+                  <Zap className="w-3 h-3" />
+                  <span className="text-xs font-medium">Low Stock!</span>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
-        {/* Actions */}
-        <div className="flex space-x-2">
+        {/* Action Buttons */}
+        <div className="flex space-x-3">
           <Link
             to={`/products/${product.id}`}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-center py-2.5 sm:py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2 font-medium"
+            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-center py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 font-medium shadow-lg hover:shadow-blue-500/30 transform hover:scale-105 active:scale-95"
           >
             <Eye className="w-4 h-4" />
-            <span className="text-sm sm:text-base">View Details</span>
+            <span>View Details</span>
           </Link>
           
           {product.is_in_stock && (
             <button 
               onClick={handleAddToCart}
               disabled={isAddingToCart}
-              className={`${isAddingToCart 
-                ? 'bg-gray-400 cursor-not-allowed' 
-                : 'bg-green-600 hover:bg-green-700'} 
-              text-white p-2.5 sm:p-2 rounded-lg transition-colors duration-200 flex-shrink-0 flex items-center justify-center`}
+              className={`px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-center font-medium shadow-lg transform hover:scale-105 active:scale-95 ${
+                isAddingToCart 
+                  ? 'bg-gray-400 cursor-not-allowed text-white' 
+                  : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white hover:shadow-green-500/30'
+              }`}
               title="Add to Cart"
             >
               {isAddingToCart ? (
-                <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
-                <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+                <ShoppingCart className="w-5 h-5" />
               )}
             </button>
           )}
         </div>
+
+        {/* Trending Indicator */}
+        {product.review_count > 50 && (
+          <div className="flex items-center justify-center mt-3 text-orange-500">
+            <TrendingUp className="w-4 h-4 mr-1" />
+            <span className="text-xs font-medium">Trending</span>
+          </div>
+        )}
       </div>
+
+      {/* Shimmer Effect on Hover */}
+      <div className="absolute inset-0 -top-2 -left-2 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 opacity-0 group-hover:opacity-100 group-hover:animate-shimmer transition-opacity duration-500 pointer-events-none"></div>
     </div>
   );
 };
