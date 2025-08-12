@@ -381,7 +381,7 @@ class DatabaseSeeder:
                 user_data["phone"] = AuthService.encrypt_sensitive_data(user_data["phone"])
             
             # Hash password
-            user_data["password_hash"] = AuthService.hash_password(user_data.pop("password"))
+            user_data["hashed_password"] = AuthService.hash_password(user_data.pop("password"))
             
             # Create user document
             user = UserInDB(**user_data)
