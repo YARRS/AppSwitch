@@ -208,12 +208,39 @@ class UserService:
             return UserInDB(**user_doc)
         return None
     
-    async def get_user_by_username(self, username: str) -> Optional[UserInDB]:
-        """Get user by username"""
-        user_doc = await self.users_collection.find_one({"username": username})
-        if user_doc:
-            return UserInDB(**user_doc)
-        return None
+    async def get_user_by_phone(self, phone: str) -> Optional[UserInDB]:
+        """Get user by phone number (handles both encrypted and plain phone numbers)"""
+        try:
+            # Clean and format the phone number
+            clean_phone = AuthService.format_phone_number(phone)
+            
+            # Try to find by encrypted phone (standard way)
+            encrypted_phone = AuthService.encrypt_sensitive_data(clean_phone)
+            user_doc = await self.users_collection.find_one({"phone": encrypted_phone})
+            
+            if user_doc:
+                return UserInDB(**user_doc)
+            
+            # If not found, try to find by plain phone (for legacy data)
+            user_doc = await self.users_collection.find_one({"phone": clean_phone})
+            
+            if user_doc:
+                # Update to encrypted phone for consistency
+                await self.users_collection.update_one(
+                    {"id": user_doc["id"]},
+                    {"$set": {"phone": encrypted_phone, "updated_at": datetime.utcnow()}}
+                )
+                user_doc["phone"] = encrypted_phone
+                return UserInDB(**user_doc)
+                
+            return None
+            
+        except ValueError as e:
+            # Invalid phone format
+            return None
+        except Exception as e:
+            # Other errors in processing
+            return None
     
     async def create_user(self, user_data: dict) -> UserInDB:
         """Create new user"""
