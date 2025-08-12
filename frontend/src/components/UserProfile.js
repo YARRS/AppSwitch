@@ -246,7 +246,7 @@ const UserProfile = () => {
 };
 
 // Profile Tab Component
-const ProfileTab = ({ user, isEditing, formData, handleChange, handleSubmit, handleCancel, setIsEditing, isLoading, getRoleBadgeColor, formatRole, formatDate, logout }) => (
+const ProfileTab = ({ user, isEditing, formData, handleChange, handleSubmit, handleCancel, setIsEditing, isLoading, getRoleBadgeColor, formatRole, formatDate, logout, decryptPhoneNumber }) => (
   <>
     <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
       <div className="sm:col-span-1">
@@ -322,7 +322,7 @@ const ProfileTab = ({ user, isEditing, formData, handleChange, handleSubmit, han
           ) : (
             <div className="flex items-center">
               <Phone className="h-4 w-4 text-gray-400 mr-2" />
-              {user?.phone || 'Not specified'}
+              {decryptPhoneNumber(user?.phone) || 'Not specified'}
             </div>
           )}
         </dd>
@@ -355,13 +355,13 @@ const ProfileTab = ({ user, isEditing, formData, handleChange, handleSubmit, han
       </div>
     </dl>
 
-    <div className="mt-6 flex justify-end space-x-3">
+    <div className="mt-6 flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-3">
       {isEditing ? (
         <>
           <button
             type="button"
             onClick={handleCancel}
-            className="bg-white dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="w-full sm:w-auto bg-white dark:bg-gray-700 py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             Cancel
           </button>
@@ -369,7 +369,7 @@ const ProfileTab = ({ user, isEditing, formData, handleChange, handleSubmit, han
             type="button"
             onClick={handleSubmit}
             disabled={isLoading}
-            className="bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full sm:w-auto bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isLoading ? 'Saving...' : 'Save Changes'}
           </button>
@@ -378,7 +378,7 @@ const ProfileTab = ({ user, isEditing, formData, handleChange, handleSubmit, han
         <button
           type="button"
           onClick={() => setIsEditing(true)}
-          className="bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="w-full sm:w-auto bg-blue-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
         >
           Edit Profile
         </button>
@@ -386,14 +386,14 @@ const ProfileTab = ({ user, isEditing, formData, handleChange, handleSubmit, han
     </div>
 
     <div className="px-4 py-4 sm:px-6 border-t border-gray-200 dark:border-gray-700 mt-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
         <div>
           <h4 className="text-sm font-medium text-gray-900 dark:text-white">Account Actions</h4>
           <p className="text-sm text-gray-500 dark:text-gray-400">Manage your account</p>
         </div>
         <button
           onClick={logout}
-          className="bg-red-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          className="w-full sm:w-auto bg-red-600 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
         >
           Sign Out
         </button>
