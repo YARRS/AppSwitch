@@ -357,18 +357,32 @@ async def register(user_data: UserCreate, db: AsyncIOMotorDatabase = Depends(get
 
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncIOMotorDatabase = Depends(get_db)):
-    """Login user and return access token"""
+    """Login user and return access token - supports email, phone, and username"""
     try:
         user_service = UserService(db)
         
-        # Authenticate user
-        user = await user_service.authenticate_user(form_data.username, form_data.password)
+        # Determine if the username field contains email, phone, or username
+        login_identifier = form_data.username.strip()
+        
+        # Try to authenticate with email/phone/username and password
+        user = await user_service.authenticate_user(login_identifier, form_data.password)
         if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid credentials",
-                headers={"WWW-Authenticate": "Bearer"},
-            )
+            # If authentication failed and identifier looks like phone, provide helpful error
+            if AuthService.is_phone_number(login_identifier):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid phone number or password. Note: You can also login with phone + OTP using /api/auth/login/mobile endpoint.",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid credentials",
+                    headers={"WWW-Authenticate": "Bearer"},
+                )
+        
+        # Update last login
+        await user_service.update_last_login(user.id)
         
         # Create access token
         access_token_expires = timedelta(hours=24)
