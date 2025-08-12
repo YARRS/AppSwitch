@@ -1191,6 +1191,7 @@ async def get_all_users_with_decrypted_phones(
                         decrypted_phone = f"({decrypted_phone[:3]}) {decrypted_phone[3:6]}-{decrypted_phone[6:]}"
                 except:
                     # If decryption fails, try direct formatting
+                    import re
                     clean_phone = re.sub(r'\D', '', user.phone) if user.phone else ''
                     if len(clean_phone) == 10:
                         decrypted_phone = f"({clean_phone[:3]}) {clean_phone[3:6]}-{clean_phone[6:]}"
