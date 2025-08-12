@@ -47,8 +47,24 @@ class OrderService:
             if len(clean_phone) >= 10:
                 clean_phone = clean_phone[-10:]  # Take last 10 digits
             
-            # Try to find existing user by phone
-            existing_user = await self.users_collection.find_one({"phone": clean_phone})
+            # Try to find existing user by phone (check both encrypted and plain phone numbers)
+            from auth import AuthService
+            encrypted_phone = AuthService.encrypt_sensitive_data(clean_phone)
+            
+            # First try to find by encrypted phone (normal users)
+            existing_user = await self.users_collection.find_one({"phone": encrypted_phone})
+            
+            # If not found, try to find by plain phone (for existing guest users)
+            if not existing_user:
+                existing_user = await self.users_collection.find_one({"phone": clean_phone})
+                
+                # If found with plain phone, encrypt it for consistency
+                if existing_user:
+                    await self.users_collection.update_one(
+                        {"id": existing_user["id"]},
+                        {"$set": {"phone": encrypted_phone, "updated_at": datetime.utcnow()}}
+                    )
+                    existing_user["phone"] = encrypted_phone
             
             if existing_user:
                 # Update the full_name if provided and different
@@ -61,8 +77,8 @@ class OrderService:
                 
                 return UserInDB(**existing_user)
             
-            # Create new user with phone as primary identifier
-            from auth import AuthService
+            # Create new user using UserService for consistency
+            from auth import UserService
             
             # Generate username based on full_name or phone
             if full_name:
@@ -86,27 +102,37 @@ class OrderService:
                 if existing_email_user:
                     customer_email = None  # Don't set email if already exists
             
-            # Generate a temporary password hash (user will need to set password later)
-            temp_password = f"temp_{clean_phone}_{uuid.uuid4().hex[:8]}"
-            password_hash = AuthService.get_password_hash(temp_password)
+            # Generate a secure password that the user can use to login
+            # Use a combination of name and phone for memorable password
+            if full_name:
+                # Use first name + last 4 digits of phone
+                name_part = re.sub(r'[^a-zA-Z]', '', full_name.split()[0].lower())[:4]
+                phone_part = clean_phone[-4:]
+                temp_password = f"{name_part.capitalize()}{phone_part}"
+            else:
+                temp_password = f"Guest{clean_phone[-4:]}"
             
-            user_data = {
+            # Create user data for UserService
+            user_create_data = {
                 "id": str(uuid.uuid4()),
                 "username": username,
-                "email": customer_email or f"{username}@placeholder.com",  # Placeholder email
-                "phone": clean_phone,
+                "email": customer_email or f"{username}@placeholder.com",
+                "phone": clean_phone,  # UserService will encrypt this
                 "full_name": full_name or f"Customer {clean_phone}",
                 "role": UserRole.CUSTOMER.value,
                 "is_active": True,
                 "email_verified": False,
                 "created_at": datetime.utcnow(),
                 "updated_at": datetime.utcnow(),
-                "password_hash": password_hash,
-                "needs_password_setup": True  # Flag to indicate password setup needed
+                "password": temp_password,  # UserService will hash this correctly
+                "needs_password_setup": False  # User can login with the generated password
             }
             
-            await self.users_collection.insert_one(user_data)
-            return UserInDB(**user_data)
+            # Use UserService to create user (ensures consistency with auth system)
+            user_service = UserService(self.db)
+            user = await user_service.create_user(user_create_data)
+            
+            return user
             
         except Exception as e:
             # If user creation fails, return a temporary user object
