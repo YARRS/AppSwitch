@@ -245,64 +245,84 @@ class UserService:
             # Clean and format the phone number
             clean_phone = AuthService.format_phone_number(phone)
             
-            # Try to find by encrypted phone (standard way)
-            encrypted_phone = AuthService.encrypt_sensitive_data(clean_phone)
-            user_doc = await self.users_collection.find_one({"phone": encrypted_phone})
+            # Strategy 1: Try to find by exact encrypted match (unlikely to work with Fernet)
+            try:
+                encrypted_phone = AuthService.encrypt_sensitive_data(clean_phone)
+                user_doc = await self.users_collection.find_one({"phone": encrypted_phone})
+                if user_doc:
+                    return UserInDB(**user_doc)
+            except:
+                pass
             
-            if user_doc:
-                return UserInDB(**user_doc)
-            
-            # If not found, try to find by plain phone (for legacy data or different formats)
+            # Strategy 2: Try to find by plain phone (for legacy/unencrypted data)
             user_doc = await self.users_collection.find_one({"phone": clean_phone})
-            
             if user_doc:
                 # Update to encrypted phone for consistency
-                await self.users_collection.update_one(
-                    {"id": user_doc["id"]},
-                    {"$set": {"phone": encrypted_phone, "updated_at": datetime.utcnow()}}
-                )
-                user_doc["phone"] = encrypted_phone
+                try:
+                    encrypted_phone = AuthService.encrypt_sensitive_data(clean_phone)
+                    await self.users_collection.update_one(
+                        {"id": user_doc["id"]},
+                        {"$set": {"phone": encrypted_phone, "updated_at": datetime.utcnow()}}
+                    )
+                    user_doc["phone"] = encrypted_phone
+                except:
+                    pass
                 return UserInDB(**user_doc)
             
-            # Try some variations if not found
+            # Strategy 3: Decrypt all phone numbers and compare (required for Fernet encryption)
+            users_cursor = self.users_collection.find({}, {"id": 1, "email": 1, "phone": 1, "username": 1, "full_name": 1, "role": 1, "is_active": 1, "hashed_password": 1, "email_verified": 1, "last_login": 1, "created_at": 1, "updated_at": 1, "store_owner_id": 1, "needs_password_setup": 1})
+            users = await users_cursor.to_list(length=1000)  # Reasonable limit
+            
+            for user_doc in users:
+                stored_phone = user_doc.get('phone')
+                if not stored_phone:
+                    continue
+                
+                try:
+                    # Try to decrypt the stored phone
+                    decrypted_phone = AuthService.decrypt_sensitive_data(stored_phone)
+                    if decrypted_phone == clean_phone:
+                        return UserInDB(**user_doc)
+                except:
+                    # If decryption fails, maybe it's plain text
+                    if stored_phone == clean_phone:
+                        return UserInDB(**user_doc)
+            
+            # Strategy 4: Try some variations if not found
             # This handles cases where phone might be stored in different formats
             possible_formats = set()
             
-            # Add the clean phone we tried
-            possible_formats.add(clean_phone)
-            
             # For 10-digit numbers, try with +1 prefix (US format)
-            if len(clean_phone) == 10:
-                possible_formats.add(f"1{clean_phone}")
+            if len(clean_phone) == 10 and not clean_phone.startswith('+'):
+                possible_formats.add(f"+1{clean_phone}")
                 
             # For 11-digit numbers starting with 1, try without the 1
             elif len(clean_phone) == 11 and clean_phone.startswith('1'):
                 possible_formats.add(clean_phone[1:])
+                
+            # For +1 format, try without +
+            elif clean_phone.startswith('+1'):
+                possible_formats.add(clean_phone[2:])  # Remove +1
+                possible_formats.add(clean_phone[1:])   # Remove just +
             
-            # Try to find with these alternate formats
+            # Try to find with these alternate formats using the same decrypt-all approach
             for alt_phone in possible_formats:
                 if alt_phone == clean_phone:
                     continue  # Already tried this
                     
-                try:
-                    encrypted_alt = AuthService.encrypt_sensitive_data(alt_phone)
-                    user_doc = await self.users_collection.find_one({"phone": encrypted_alt})
-                    if user_doc:
-                        return UserInDB(**user_doc)
-                        
-                    # Also try plain format
-                    user_doc = await self.users_collection.find_one({"phone": alt_phone})
-                    if user_doc:
-                        # Update to use the standardized encrypted format
-                        await self.users_collection.update_one(
-                            {"id": user_doc["id"]},
-                            {"$set": {"phone": encrypted_phone, "updated_at": datetime.utcnow()}}
-                        )
-                        user_doc["phone"] = encrypted_phone
-                        return UserInDB(**user_doc)
-                except:
-                    # If encryption fails for alt format, skip it
-                    continue
+                # Use the same decrypt-all approach for variations
+                for user_doc in users:
+                    stored_phone = user_doc.get('phone')
+                    if not stored_phone:
+                        continue
+                    
+                    try:
+                        decrypted_phone = AuthService.decrypt_sensitive_data(stored_phone)
+                        if decrypted_phone == alt_phone:
+                            return UserInDB(**user_doc)
+                    except:
+                        if stored_phone == alt_phone:
+                            return UserInDB(**user_doc)
                 
             return None
             
