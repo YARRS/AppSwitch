@@ -413,6 +413,19 @@ class OrderBase(BaseModel):
 class OrderCreate(OrderBase):
     pass
 
+class AuthenticatedOrderCreate(BaseModel):
+    """Order creation model for authenticated users (user_id extracted from JWT)"""
+    items: List[OrderItem]
+    shipping_address: ShippingAddress
+    total_amount: float
+    tax_amount: float = 0.0
+    shipping_cost: float = 0.0
+    discount_amount: float = 0.0
+    final_amount: float
+    status: OrderStatus = OrderStatus.PENDING
+    payment_method: str = "COD"
+    notes: Optional[str] = None
+
 class OrderUpdate(BaseModel):
     status: Optional[OrderStatus] = None
     tracking_number: Optional[str] = None
