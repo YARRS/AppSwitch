@@ -256,7 +256,7 @@ class UserService:
             if user_doc:
                 return UserInDB(**user_doc)
             
-            # If not found, try to find by plain phone (for legacy data)
+            # If not found, try to find by plain phone (for legacy data or different formats)
             user_doc = await self.users_collection.find_one({"phone": clean_phone})
             
             if user_doc:
@@ -267,6 +267,46 @@ class UserService:
                 )
                 user_doc["phone"] = encrypted_phone
                 return UserInDB(**user_doc)
+            
+            # Try some variations if not found
+            # This handles cases where phone might be stored in different formats
+            possible_formats = set()
+            
+            # Add the clean phone we tried
+            possible_formats.add(clean_phone)
+            
+            # For 10-digit numbers, try with +1 prefix (US format)
+            if len(clean_phone) == 10:
+                possible_formats.add(f"1{clean_phone}")
+                
+            # For 11-digit numbers starting with 1, try without the 1
+            elif len(clean_phone) == 11 and clean_phone.startswith('1'):
+                possible_formats.add(clean_phone[1:])
+            
+            # Try to find with these alternate formats
+            for alt_phone in possible_formats:
+                if alt_phone == clean_phone:
+                    continue  # Already tried this
+                    
+                try:
+                    encrypted_alt = AuthService.encrypt_sensitive_data(alt_phone)
+                    user_doc = await self.users_collection.find_one({"phone": encrypted_alt})
+                    if user_doc:
+                        return UserInDB(**user_doc)
+                        
+                    # Also try plain format
+                    user_doc = await self.users_collection.find_one({"phone": alt_phone})
+                    if user_doc:
+                        # Update to use the standardized encrypted format
+                        await self.users_collection.update_one(
+                            {"id": user_doc["id"]},
+                            {"$set": {"phone": encrypted_phone, "updated_at": datetime.utcnow()}}
+                        )
+                        user_doc["phone"] = encrypted_phone
+                        return UserInDB(**user_doc)
+                except:
+                    # If encryption fails for alt format, skip it
+                    continue
                 
             return None
             
