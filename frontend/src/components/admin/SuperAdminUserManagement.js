@@ -4,7 +4,8 @@ import {
   Users, Search, Filter, Eye, Edit, Mail, Phone, 
   Calendar, ShoppingCart, DollarSign, MapPin, User,
   Star, Package, Clock, TrendingUp, Plus, Trash2,
-  UserPlus, UserMinus, Shield, Crown, UserCheck
+  UserPlus, UserMinus, Shield, Crown, UserCheck, Save,
+  X, AlertTriangle, CheckCircle
 } from 'lucide-react';
 import { decryptPhoneNumber } from '../../utils/phoneDecryption';
 
@@ -20,6 +21,9 @@ const SuperAdminUserManagement = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
   const [decryptedPhones, setDecryptedPhones] = useState(new Map());
 
   const userRoles = [
@@ -64,7 +68,7 @@ const SuperAdminUserManagement = () => {
   const fetchUsers = async () => {
     try {
       const axios = getAuthenticatedAxios();
-      const response = await axios.get('/api/auth/users', {
+      const response = await axios.get('/api/auth/users/decrypted', {
         params: {
           page: currentPage,
           per_page: 20,
@@ -75,119 +79,147 @@ const SuperAdminUserManagement = () => {
       });
       
       if (response.data.success) {
-        const userData = response.data.data || [];
+        const userData = response.data.data.users || [];
         setUsers(userData);
-        setTotalPages(Math.ceil((response.data.data || []).length / 20) || 1);
+        setTotalPages(response.data.data.total_pages || 1);
         
-        // Decrypt all phone numbers
-        const phonePromises = userData.map(async (user) => {
-          if (user.phone) {
-            try {
-              const decrypted = await decryptPhoneNumber(user.phone, getAuthenticatedAxios);
-              return [user.id, decrypted];
-            } catch (error) {
-              console.error(`Failed to decrypt phone for user ${user.id}:`, error);
-              return [user.id, user.phone]; // Fallback to original
-            }
-          }
-          return [user.id, 'Not provided'];
+        // Create phone map from decrypted data
+        const phoneMap = new Map();
+        userData.forEach(user => {
+          phoneMap.set(user.id, user.decrypted_phone || 'Not provided');
         });
-        
-        const phoneResults = await Promise.all(phonePromises);
-        const phoneMap = new Map(phoneResults);
         setDecryptedPhones(phoneMap);
       }
     } catch (error) {
       console.error('Failed to fetch users:', error);
-      // Mock data for demo purposes
-      setUsers([
-        {
-          id: '1',
-          username: 'superadmin',
-          email: 'superadmin@vallmark.com',
-          full_name: 'Super Admin',
-          phone: '+91-9876543210',
-          role: 'super_admin',
-          is_active: true,
-          created_at: '2024-01-01T10:30:00Z',
-          last_login: '2024-01-20T14:45:00Z'
-        },
-        {
-          id: '2',
-          username: 'admin',
-          email: 'admin@vallmark.com',
-          full_name: 'Admin User',
-          phone: '+91-9876543211',
-          role: 'admin',
-          is_active: true,
-          created_at: '2024-01-02T08:15:00Z',
-          last_login: '2024-01-19T16:20:00Z'
-        },
-        {
-          id: '3',
-          username: 'storeowner',
-          email: 'storeowner@vallmark.com',
-          full_name: 'Store Owner',
-          phone: '+91-9876543212',
-          role: 'store_owner',
-          is_active: true,
-          created_at: '2024-01-03T09:20:00Z',
-          last_login: '2024-01-18T12:30:00Z'
-        },
-        {
-          id: '4',
-          username: 'salesmanager',
-          email: 'salesmanager@vallmark.com',
-          full_name: 'Sales Manager',
-          phone: '+91-9876543213',
-          role: 'sales_manager',
-          is_active: true,
-          created_at: '2024-01-04T11:45:00Z',
-          last_login: '2024-01-17T10:15:00Z'
-        },
-        {
-          id: '5',
-          username: 'customer',
-          email: 'customer@vallmark.com',
-          full_name: 'Customer User',
-          phone: '+91-9876543214',
-          role: 'customer',
-          is_active: true,
-          created_at: '2024-01-05T14:20:00Z',
-          last_login: '2024-01-16T18:45:00Z'
+      // Fallback to original endpoint if new one fails
+      try {
+        const response = await getAuthenticatedAxios().get('/api/auth/users', {
+          params: {
+            page: currentPage,
+            per_page: 20,
+            ...(searchTerm && { search: searchTerm }),
+            ...(roleFilter && { role: roleFilter }),
+            ...(statusFilter === 'active' && { is_active: true }),
+            ...(statusFilter === 'inactive' && { is_active: false })
+          }
+        });
+        
+        if (response.data.success) {
+          const userData = response.data.data || [];
+          setUsers(userData);
+          setTotalPages(Math.ceil((response.data.data || []).length / 20) || 1);
+          
+          // Decrypt all phone numbers
+          const phonePromises = userData.map(async (user) => {
+            if (user.phone) {
+              try {
+                const decrypted = await decryptPhoneNumber(user.phone, getAuthenticatedAxios);
+                return [user.id, decrypted];
+              } catch (error) {
+                console.error(`Failed to decrypt phone for user ${user.id}:`, error);
+                return [user.id, user.phone]; // Fallback to original
+              }
+            }
+            return [user.id, 'Not provided'];
+          });
+          
+          const phoneResults = await Promise.all(phonePromises);
+          const phoneMap = new Map(phoneResults);
+          setDecryptedPhones(phoneMap);
         }
-      ]);
-      setTotalPages(1);
+      } catch (fallbackError) {
+        console.error('Fallback fetch also failed:', fallbackError);
+        // Use mock data as final fallback
+        setUsers([
+          {
+            id: '1',
+            username: 'superadmin',
+            email: 'superadmin@vallmark.com',
+            full_name: 'Super Admin',
+            phone: '+91-9876543210',
+            role: 'super_admin',
+            is_active: true,
+            created_at: '2024-01-01T10:30:00Z',
+            last_login: '2024-01-20T14:45:00Z'
+          }
+        ]);
+        setTotalPages(1);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const updateUserRole = async (userId, newRole) => {
+  const handleDeleteUser = async (user) => {
     try {
       const axios = getAuthenticatedAxios();
-      await axios.put(`/api/auth/users/${userId}/role`, { role: newRole });
+      await axios.delete(`/api/auth/users/${user.id}`);
+      
+      // Show success message
+      alert(`User "${user.username}" has been deleted successfully.`);
+      
+      // Refresh users list
       fetchUsers();
+      setShowDeleteConfirm(false);
+      setUserToDelete(null);
     } catch (error) {
-      console.error('Failed to update user role:', error);
-      alert('Failed to update user role');
+      console.error('Failed to delete user:', error);
+      const errorMessage = error.response?.data?.detail || 'Failed to delete user';
+      alert(`Error: ${errorMessage}`);
     }
   };
 
-  const updateUserStatus = async (userId, isActive) => {
+  const handleUpdateUser = async (userId, updateData) => {
     try {
       const axios = getAuthenticatedAxios();
-      await axios.put(`/api/auth/users/${userId}`, { is_active: isActive });
+      await axios.put(`/api/auth/users/${userId}`, updateData);
+      
+      // Show success message
+      alert('User updated successfully!');
+      
+      // Refresh users list
       fetchUsers();
+      setShowEditModal(false);
+      setSelectedUser(null);
     } catch (error) {
-      console.error('Failed to update user status:', error);
-      alert('Failed to update user status');
+      console.error('Failed to update user:', error);
+      const errorMessage = error.response?.data?.detail || 'Failed to update user';
+      alert(`Error: ${errorMessage}`);
+    }
+  };
+
+  const handleCreateUser = async (userData) => {
+    try {
+      const axios = getAuthenticatedAxios();
+      await axios.post('/api/auth/users', userData);
+      
+      // Show success message
+      alert('User created successfully!');
+      
+      // Refresh users list
+      fetchUsers();
+      setShowCreateModal(false);
+    } catch (error) {
+      console.error('Failed to create user:', error);
+      const errorMessage = error.response?.data?.detail || 'Failed to create user';
+      alert(`Error: ${errorMessage}`);
     }
   };
 
   const viewUserDetails = (user) => {
     setSelectedUser(user);
     setShowUserModal(true);
+  };
+
+  const editUser = (user) => {
+    setSelectedUser(user);
+    setShowEditModal(true);
+  };
+
+  const confirmDelete = (user) => {
+    setUserToDelete(user);
+    setShowDeleteConfirm(true);
   };
 
   const getRoleInfo = (role) => {
@@ -337,8 +369,8 @@ const SuperAdminUserManagement = () => {
                   user={user}
                   decryptedPhone={decryptedPhones.get(user.id) || 'Loading...'}
                   onViewDetails={viewUserDetails}
-                  onUpdateRole={updateUserRole}
-                  onUpdateStatus={updateUserStatus}
+                  onEditUser={editUser}
+                  onDeleteUser={confirmDelete}
                   userRoles={userRoles}
                 />
               ))}
@@ -378,8 +410,16 @@ const SuperAdminUserManagement = () => {
           user={selectedUser}
           decryptedPhone={decryptedPhones.get(selectedUser.id) || 'Loading...'}
           onClose={() => setShowUserModal(false)}
-          onUpdateRole={updateUserRole}
-          onUpdateStatus={updateUserStatus}
+          userRoles={userRoles}
+        />
+      )}
+
+      {/* Edit User Modal */}
+      {showEditModal && selectedUser && (
+        <EditUserModal
+          user={selectedUser}
+          onClose={() => setShowEditModal(false)}
+          onUpdateUser={handleUpdateUser}
           userRoles={userRoles}
         />
       )}
@@ -388,16 +428,25 @@ const SuperAdminUserManagement = () => {
       {showCreateModal && (
         <CreateUserModal
           onClose={() => setShowCreateModal(false)}
-          onUserCreated={fetchUsers}
+          onCreateUser={handleCreateUser}
           userRoles={userRoles}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && userToDelete && (
+        <DeleteConfirmModal
+          user={userToDelete}
+          onClose={() => setShowDeleteConfirm(false)}
+          onConfirmDelete={handleDeleteUser}
         />
       )}
     </div>
   );
 };
 
-// User Row Component
-const UserRow = ({ user, decryptedPhone, onViewDetails, onUpdateRole, onUpdateStatus, userRoles }) => {
+// Enhanced User Row Component with full CRUD actions
+const UserRow = ({ user, decryptedPhone, onViewDetails, onEditUser, onDeleteUser, userRoles }) => {
   const roleInfo = userRoles.find(r => r.value === user.role) || { label: user.role, icon: User };
   const RoleIcon = roleInfo.icon;
 
@@ -463,19 +512,24 @@ const UserRow = ({ user, decryptedPhone, onViewDetails, onUpdateRole, onUpdateSt
         <div className="flex items-center space-x-2">
           <button
             onClick={() => onViewDetails(user)}
-            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 p-1 rounded"
+            title="View Details"
           >
             <Eye className="w-4 h-4" />
           </button>
           <button
-            onClick={() => onUpdateStatus(user.id, !user.is_active)}
-            className={`${
-              user.is_active 
-                ? 'text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300'
-                : 'text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300'
-            }`}
+            onClick={() => onEditUser(user)}
+            className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 p-1 rounded"
+            title="Edit User"
           >
-            {user.is_active ? <UserMinus className="w-4 h-4" /> : <UserPlus className="w-4 h-4" />}
+            <Edit className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => onDeleteUser(user)}
+            className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded"
+            title="Delete User"
+          >
+            <Trash2 className="w-4 h-4" />
           </button>
         </div>
       </td>
@@ -511,17 +565,8 @@ const UserStatsCard = ({ title, value, icon: Icon, color }) => {
   );
 };
 
-// User Details Modal Component
-const UserDetailsModal = ({ user, decryptedPhone, onClose, onUpdateRole, onUpdateStatus, userRoles }) => {
-  const [selectedRole, setSelectedRole] = useState(user.role);
-  
-  const handleRoleUpdate = () => {
-    if (selectedRole !== user.role) {
-      onUpdateRole(user.id, selectedRole);
-    }
-    onClose();
-  };
-
+// Enhanced User Details Modal Component (Read-only)
+const UserDetailsModal = ({ user, decryptedPhone, onClose, userRoles }) => {
   const roleInfo = userRoles.find(r => r.value === user.role) || { label: user.role, icon: User };
   const RoleIcon = roleInfo.icon;
 
@@ -549,9 +594,9 @@ const UserDetailsModal = ({ user, decryptedPhone, onClose, onUpdateRole, onUpdat
             </div>
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded"
             >
-              ×
+              <X className="w-6 h-6" />
             </button>
           </div>
 
@@ -618,17 +663,165 @@ const UserDetailsModal = ({ user, decryptedPhone, onClose, onUpdateRole, onUpdat
             </div>
           </div>
 
-          {/* Role Management */}
-          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Role Management</h4>
-            <div className="space-y-4">
+          {/* Actions */}
+          <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+            <button
+              onClick={onClose}
+              className="btn-secondary"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Enhanced Edit User Modal Component
+const EditUserModal = ({ user, onClose, onUpdateUser, userRoles }) => {
+  const [formData, setFormData] = useState({
+    username: user.username || '',
+    email: user.email || '',
+    full_name: user.full_name || '',
+    phone: user.phone || '',
+    role: user.role || 'customer',
+    is_active: user.is_active !== undefined ? user.is_active : true,
+    password: ''
+  });
+  const [loading, setLoading] = useState(false);
+  const [showPasswordField, setShowPasswordField] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    setLoading(true);
+    try {
+      // Only include fields that have changed or are not empty
+      const updateData = {};
+      
+      if (formData.username !== user.username) {
+        updateData.username = formData.username;
+      }
+      if (formData.email !== user.email) {
+        updateData.email = formData.email;
+      }
+      if (formData.full_name !== (user.full_name || '')) {
+        updateData.full_name = formData.full_name;
+      }
+      if (formData.phone !== (user.phone || '')) {
+        updateData.phone = formData.phone;
+      }
+      if (formData.role !== user.role) {
+        updateData.role = formData.role;
+      }
+      if (formData.is_active !== user.is_active) {
+        updateData.is_active = formData.is_active;
+      }
+      if (formData.password) {
+        updateData.password = formData.password;
+      }
+      
+      await onUpdateUser(user.id, updateData);
+    } catch (error) {
+      console.error('Failed to update user:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Edit User: {user.username}
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Change Role
+                  Username
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  required
+                  className="input-field"
+                  placeholder="Enter username"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  className="input-field"
+                  placeholder="Enter email"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="full_name"
+                  value={formData.full_name}
+                  onChange={handleInputChange}
+                  className="input-field"
+                  placeholder="Enter full name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className="input-field"
+                  placeholder="Enter phone number"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Role
                 </label>
                 <select
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
+                  name="role"
+                  value={formData.role}
+                  onChange={handleInputChange}
                   className="input-field"
                 >
                   {userRoles.map((role) => (
@@ -638,217 +831,47 @@ const UserDetailsModal = ({ user, decryptedPhone, onClose, onUpdateRole, onUpdat
                   ))}
                 </select>
               </div>
-            </div>
-          </div>
 
-          {/* Actions */}
-          <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-            <button
-              onClick={onClose}
-              className="btn-secondary"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => onUpdateStatus(user.id, !user.is_active)}
-              className={`btn-primary ${
-                user.is_active 
-                  ? 'bg-red-600 hover:bg-red-700' 
-                  : 'bg-green-600 hover:bg-green-700'
-              }`}
-            >
-              {user.is_active ? 'Deactivate' : 'Activate'} User
-            </button>
-            {selectedRole !== user.role && (
-              <button
-                onClick={handleRoleUpdate}
-                className="btn-primary"
-              >
-                Update Role
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Create User Modal Component
-const CreateUserModal = ({ onClose, onUserCreated, userRoles }) => {
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    full_name: '',
-    phone: '',
-    role: 'customer',
-    password: '',
-    confirmPassword: ''
-  });
-  const [loading, setLoading] = useState(false);
-  const { getAuthenticatedAxios } = useAuth();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const axios = getAuthenticatedAxios();
-      await axios.post('/api/auth/register', {
-        username: formData.username,
-        email: formData.email,
-        full_name: formData.full_name,
-        phone: formData.phone,
-        role: formData.role,
-        password: formData.password
-      });
-      
-      onUserCreated();
-      onClose();
-    } catch (error) {
-      console.error('Failed to create user:', error);
-      alert('Failed to create user');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleInputChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full max-h-screen overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Create New User
-            </h3>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-            >
-              ×
-            </button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Username
-              </label>
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleInputChange}
-                required
-                className="input-field"
-                placeholder="Enter username"
-              />
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="is_active"
+                  checked={formData.is_active}
+                  onChange={handleInputChange}
+                  className="mr-2"
+                />
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Account Active
+                </label>
+              </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Email
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                required
-                className="input-field"
-                placeholder="Enter email"
-              />
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setShowPasswordField(!showPasswordField)}
+                  className="text-sm text-blue-600 hover:text-blue-500"
+                >
+                  {showPasswordField ? 'Hide' : 'Change Password'}
+                </button>
+              </div>
+              {showPasswordField && (
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  className="input-field"
+                  placeholder="Enter new password (leave blank to keep current)"
+                />
+              )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Full Name
-              </label>
-              <input
-                type="text"
-                name="full_name"
-                value={formData.full_name}
-                onChange={handleInputChange}
-                className="input-field"
-                placeholder="Enter full name"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Phone
-              </label>
-              <input
-                type="tel"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="input-field"
-                placeholder="Enter phone number"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Role
-              </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleInputChange}
-                className="input-field"
-              >
-                {userRoles.map((role) => (
-                  <option key={role.value} value={role.value}>
-                    {role.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleInputChange}
-                required
-                className="input-field"
-                placeholder="Enter password"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleInputChange}
-                required
-                className="input-field"
-                placeholder="Confirm password"
-              />
-            </div>
-
-            <div className="flex justify-end space-x-3 pt-4">
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
               <button
                 type="button"
                 onClick={onClose}
@@ -861,10 +884,330 @@ const CreateUserModal = ({ onClose, onUserCreated, userRoles }) => {
                 disabled={loading}
                 className="btn-primary disabled:opacity-50"
               >
-                {loading ? 'Creating...' : 'Create User'}
+                {loading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Updating...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <Save className="w-4 h-4" />
+                    <span>Update User</span>
+                  </div>
+                )}
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Enhanced Create User Modal Component
+const CreateUserModal = ({ onClose, onCreateUser, userRoles }) => {
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    full_name: '',
+    phone: '',
+    role: 'customer',
+    is_active: true,
+    password: '',
+    confirmPassword: ''
+  });
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (formData.password !== formData.confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      alert('Password must be at least 6 characters long');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const createData = {
+        username: formData.username,
+        email: formData.email,
+        full_name: formData.full_name || null,
+        phone: formData.phone || null,
+        role: formData.role,
+        is_active: formData.is_active,
+        password: formData.password
+      };
+      
+      await onCreateUser(createData);
+    } catch (error) {
+      console.error('Failed to create user:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData({
+      ...formData,
+      [name]: type === 'checkbox' ? checked : value
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full max-h-screen overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Create New User
+            </h3>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Username *
+                </label>
+                <input
+                  type="text"
+                  name="username"
+                  value={formData.username}
+                  onChange={handleInputChange}
+                  required
+                  className="input-field"
+                  placeholder="Enter username"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  className="input-field"
+                  placeholder="Enter email"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  name="full_name"
+                  value={formData.full_name}
+                  onChange={handleInputChange}
+                  className="input-field"
+                  placeholder="Enter full name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Phone
+                </label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className="input-field"
+                  placeholder="Enter phone number"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Role
+                </label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleInputChange}
+                  className="input-field"
+                >
+                  {userRoles.map((role) => (
+                    <option key={role.value} value={role.value}>
+                      {role.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  name="is_active"
+                  checked={formData.is_active}
+                  onChange={handleInputChange}
+                  className="mr-2"
+                />
+                <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Account Active
+                </label>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Password *
+                </label>
+                <input
+                  type="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  required
+                  className="input-field"
+                  placeholder="Enter password"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Confirm Password *
+                </label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                  required
+                  className="input-field"
+                  placeholder="Confirm password"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+              <button
+                type="button"
+                onClick={onClose}
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="btn-primary disabled:opacity-50"
+              >
+                {loading ? (
+                  <div className="flex items-center space-x-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>Creating...</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center space-x-2">
+                    <UserPlus className="w-4 h-4" />
+                    <span>Create User</span>
+                  </div>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Delete Confirmation Modal Component
+const DeleteConfirmModal = ({ user, onClose, onConfirmDelete }) => {
+  const [loading, setLoading] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+
+  const handleDelete = async () => {
+    if (confirmText !== 'DELETE') {
+      alert('Please type DELETE to confirm');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await onConfirmDelete(user);
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-md w-full">
+        <div className="p-6">
+          <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
+            <AlertTriangle className="w-6 h-6 text-red-600" />
+          </div>
+          
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white text-center mb-2">
+            Delete User Account
+          </h3>
+          
+          <p className="text-gray-600 dark:text-gray-400 text-center mb-4">
+            Are you sure you want to delete the user account for <strong>{user.username}</strong>? 
+            This action cannot be undone and will permanently remove all user data.
+          </p>
+
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Type <strong>DELETE</strong> to confirm:
+            </label>
+            <input
+              type="text"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              className="input-field"
+              placeholder="DELETE"
+            />
+          </div>
+
+          <div className="flex justify-end space-x-3">
+            <button
+              onClick={onClose}
+              className="btn-secondary"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDelete}
+              disabled={loading || confirmText !== 'DELETE'}
+              className="btn-primary bg-red-600 hover:bg-red-700 disabled:opacity-50"
+            >
+              {loading ? (
+                <div className="flex items-center space-x-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <span>Deleting...</span>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Trash2 className="w-4 h-4" />
+                  <span>Delete User</span>
+                </div>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
