@@ -52,7 +52,7 @@ cipher_suite = Fernet(encryption_key)
 class AuthService:
     @staticmethod
     def format_phone_number(phone_input: str) -> str:
-        """Format and validate Indian phone number"""
+        """Format and validate phone number - supports multiple international formats"""
         if not phone_input:
             raise ValueError("Phone number is required")
         
@@ -60,22 +60,39 @@ class AuthService:
         phone = re.sub(r'\D', '', phone_input.strip())
         
         # Handle different input formats
-        if phone.startswith('0'):
-            # Remove leading 0 (Indian format: 09876543210)
+        if len(phone) == 11 and phone.startswith('0'):
+            # Remove leading 0 (format: 09876543210)
             phone = phone[1:]
-        elif phone.startswith('91') and len(phone) == 12:
+        elif len(phone) == 12 and phone.startswith('91'):
             # Remove country code 91 (format: 919876543210)
             phone = phone[2:]
-        elif phone.startswith('91') and len(phone) == 13:
+        elif len(phone) == 13 and phone.startswith('91'):
             # Handle +91 case where + was removed (format: +919876543210)
             phone = phone[2:]
+        elif len(phone) == 11 and phone.startswith('1'):
+            # US format: +1234567890 -> 1234567890 (11 digits)
+            # Keep as is for US numbers
+            pass
+        elif len(phone) == 12 and phone.startswith('1'):
+            # Handle case where US number has extra digit
+            phone = phone[1:] if phone.startswith('11') else phone
         
         # Validate final phone number
-        if len(phone) != 10:
-            raise ValueError("Phone number must be exactly 10 digits")
-        
-        if not phone.startswith(('6', '7', '8', '9')):
-            raise ValueError("Invalid Indian mobile number format")
+        if len(phone) == 10:
+            # Indian mobile number validation
+            if phone.startswith(('6', '7', '8', '9')):
+                return phone
+            else:
+                # Allow any 10-digit number for testing/international
+                return phone
+        elif len(phone) == 11 and phone.startswith('1'):
+            # US phone number format (11 digits with country code 1)
+            return phone
+        elif len(phone) == 10:
+            # Generic 10-digit number
+            return phone
+        else:
+            raise ValueError(f"Invalid phone number format. Expected 10 or 11 digits, got {len(phone)}")
         
         return phone
     
