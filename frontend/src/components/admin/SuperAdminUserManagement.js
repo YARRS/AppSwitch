@@ -6,6 +6,7 @@ import {
   Star, Package, Clock, TrendingUp, Plus, Trash2,
   UserPlus, UserMinus, Shield, Crown, UserCheck
 } from 'lucide-react';
+import { decryptPhoneNumber } from '../../utils/phoneDecryption';
 
 const SuperAdminUserManagement = () => {
   const { getAuthenticatedAxios } = useAuth();
