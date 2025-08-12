@@ -10,7 +10,7 @@ from models import (
     OrderCreate, OrderUpdate, OrderResponse, OrderInDB,
     OrderItem, OrderStatus, APIResponse, PaginatedResponse,
     UserInDB, ProductInDB, CartInDB, GuestCart, ShippingAddress,
-    UserRole
+    UserRole, AuthenticatedOrderCreate
 )
 from auth import get_current_active_user, get_admin_user
 
