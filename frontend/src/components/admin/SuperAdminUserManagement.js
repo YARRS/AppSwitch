@@ -579,7 +579,7 @@ const UserDetailsModal = ({ user, decryptedPhone, onClose, onUpdateRole, onUpdat
                     <Phone className="w-5 h-5 text-gray-400" />
                     <div>
                       <span className="text-sm text-gray-500 dark:text-gray-400">Phone: </span>
-                      <span className="text-sm text-gray-900 dark:text-white">{user.phone}</span>
+                      <span className="text-sm text-gray-900 dark:text-white">{decryptedPhone}</span>
                     </div>
                   </div>
                 )}
