@@ -353,6 +353,7 @@ const CustomerManagement = () => {
       {showCustomerModal && selectedCustomer && (
         <CustomerDetailsModal
           customer={selectedCustomer}
+          decryptedPhone={decryptedPhones.get(selectedCustomer.id) || 'Loading...'}
           orders={customerOrders}
           onClose={() => setShowCustomerModal(false)}
           onUpdateStatus={updateCustomerStatus}
