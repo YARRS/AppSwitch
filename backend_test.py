@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """
-Backend API Testing Script for Authentication and Order Placement
-FOCUS: Testing authentication system and order placement for logged-in users
-Testing seeded user credentials and order creation functionality.
+Backend API Testing Script for Mobile Login Functionality
+FOCUS: Testing new mobile number login functionality including:
+- Login type detection (email vs phone)
+- Mobile login flow with OTP verification
+- OTP sending and verification
+- Password reset flow
+- Traditional email login compatibility
 """
 
 import requests
@@ -19,16 +23,26 @@ BACKEND_URL = "https://order-auth-portal.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Auto-seeded user credentials for testing (from seed_database.py)
+# Updated with phone numbers from seeded users
 AUTO_SEEDED_USERS = [
-    {"email": "customer@vallmark.com", "password": "Customer123!", "role": "customer"},
-    {"email": "admin@vallmark.com", "password": "Admin123!", "role": "admin"},
-    {"email": "superadmin@vallmark.com", "password": "SuperAdmin123!", "role": "super_admin"},
-    {"email": "storeowner@vallmark.com", "password": "StoreOwner123!", "role": "store_owner"},
-    {"email": "storemanager@vallmark.com", "password": "StoreManager123!", "role": "store_admin"},
-    {"email": "salesperson@vallmark.com", "password": "Salesperson123!", "role": "salesperson"},
-    {"email": "salesmanager@vallmark.com", "password": "SalesManager123!", "role": "sales_manager"},
-    {"email": "support@vallmark.com", "password": "Support123!", "role": "support_executive"},
-    {"email": "marketing@vallmark.com", "password": "Marketing123!", "role": "marketing_manager"}
+    {"email": "customer@vallmark.com", "password": "Customer123!", "role": "customer", "phone": "+1234567898"},
+    {"email": "admin@vallmark.com", "password": "Admin123!", "role": "admin", "phone": "+1234567891"},
+    {"email": "superadmin@vallmark.com", "password": "SuperAdmin123!", "role": "super_admin", "phone": "+1234567890"},
+    {"email": "storeowner@vallmark.com", "password": "StoreOwner123!", "role": "store_owner", "phone": "+1234567892"},
+    {"email": "storemanager@vallmark.com", "password": "StoreManager123!", "role": "store_admin", "phone": "+1234567893"},
+    {"email": "salesperson@vallmark.com", "password": "Salesperson123!", "role": "salesperson", "phone": "+1234567894"},
+    {"email": "salesmanager@vallmark.com", "password": "SalesManager123!", "role": "sales_manager", "phone": "+1234567895"},
+    {"email": "support@vallmark.com", "password": "Support123!", "role": "support_executive", "phone": "+1234567896"},
+    {"email": "marketing@vallmark.com", "password": "Marketing123!", "role": "marketing_manager", "phone": "+1234567897"}
+]
+
+# Test phone numbers in different formats for testing
+TEST_PHONE_FORMATS = [
+    "1234567898",      # 10 digits
+    "+1234567898",     # With + prefix
+    "01234567898",     # With leading 0
+    "911234567898",    # With country code 91
+    "+911234567898"    # With +91 country code
 ]
 
 class AuthOrderTester:
