@@ -5,6 +5,7 @@ from datetime import timedelta, datetime
 from typing import Optional
 from pydantic import BaseModel
 from typing import Optional
+import re
 
 from models import (
     UserCreate, UserResponse, UserUpdate, Token, APIResponse,
