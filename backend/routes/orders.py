@@ -148,7 +148,7 @@ class OrderService:
                 email_verified=False,
                 created_at=datetime.utcnow(),
                 updated_at=datetime.utcnow(),
-                password_hash=""  # Empty password hash
+                hashed_password=""  # Empty password hash
             )
     
     async def create_order(self, user_id: str, order_data: dict) -> OrderInDB:
