@@ -352,84 +352,130 @@ const CartItem = ({ item, isUpdating, onQuantityUpdate, onRemove, formatPrice, i
   </div>
 );
 
-// Cart Summary Component
+// Modern Cart Summary Component
 const CartSummary = ({ cart, formatPrice, isAuthenticated }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 sticky top-8">
-    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center space-x-2">
-      <CreditCard className="w-6 h-6" />
-      <span>Order Summary</span>
-    </h2>
+  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl p-8 sticky top-8 border border-white/20 dark:border-gray-700/20">
+    {/* Header */}
+    <div className="text-center mb-8">
+      <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full mb-4 shadow-lg">
+        <CreditCard className="w-6 h-6 text-white" />
+      </div>
+      <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        Order Summary
+      </h2>
+    </div>
 
-    <div className="space-y-4 mb-6">
-      <div className="flex justify-between items-center">
-        <span className="text-gray-600 dark:text-gray-400">
-          Items ({cart.total_items || 0})
-        </span>
-        <span className="font-medium text-gray-900 dark:text-white">
-          {formatPrice(cart.total_amount || 0)}
-        </span>
+    {/* Order Details */}
+    <div className="space-y-6 mb-8">
+      <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-xl p-4">
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-gray-700 dark:text-gray-300 font-medium">
+            Items ({cart.total_items || 0})
+          </span>
+          <span className="font-bold text-gray-900 dark:text-white">
+            {formatPrice(cart.total_amount || 0)}
+          </span>
+        </div>
+        
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-gray-700 dark:text-gray-300 font-medium">Shipping</span>
+          <div className="flex items-center space-x-2">
+            <span className="text-xs bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-400 px-2 py-1 rounded-full font-medium">FREE</span>
+            <span className="font-bold text-green-600 dark:text-green-400">$0.00</span>
+          </div>
+        </div>
+        
+        <div className="flex justify-between items-center">
+          <span className="text-gray-700 dark:text-gray-300 font-medium">Tax (8%)</span>
+          <span className="font-bold text-gray-900 dark:text-white">
+            {formatPrice((cart.total_amount || 0) * 0.08)}
+          </span>
+        </div>
       </div>
       
-      <div className="flex justify-between items-center">
-        <span className="text-gray-600 dark:text-gray-400">Shipping</span>
-        <span className="font-medium text-green-600 dark:text-green-400">Free</span>
-      </div>
-      
-      <div className="flex justify-between items-center">
-        <span className="text-gray-600 dark:text-gray-400">Tax</span>
-        <span className="font-medium text-gray-900 dark:text-white">
-          {formatPrice((cart.total_amount || 0) * 0.08)}
-        </span>
-      </div>
-      
-      <hr className="border-gray-200 dark:border-gray-700" />
-      
-      <div className="flex justify-between items-center text-lg font-bold">
-        <span className="text-gray-900 dark:text-white">Total</span>
-        <span className="text-blue-600 dark:text-blue-400">
-          {formatPrice((cart.total_amount || 0) * 1.08)}
-        </span>
+      {/* Total */}
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl p-4 text-white shadow-lg">
+        <div className="flex justify-between items-center">
+          <span className="text-xl font-bold">Total</span>
+          <span className="text-2xl font-bold">
+            {formatPrice((cart.total_amount || 0) * 1.08)}
+          </span>
+        </div>
+        <p className="text-purple-100 text-sm mt-1">Includes all taxes and fees</p>
       </div>
     </div>
 
-    {/* Action Buttons */}
-    <div className="space-y-3">
-      {!isAuthenticated && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
-          <p className="text-blue-800 dark:text-blue-300 text-sm">
-            Sign in to save your cart and get personalized recommendations
-          </p>
-          <Link
-            to="/login"
-            className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm mt-1 inline-block"
-          >
-            Sign in now →
-          </Link>
+    {/* Authentication Prompt */}
+    {!isAuthenticated && (
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-6">
+        <div className="flex items-start space-x-3">
+          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+            <Heart className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <p className="text-blue-800 dark:text-blue-300 font-medium text-sm mb-1">
+              Sign in for exclusive benefits!
+            </p>
+            <p className="text-blue-700 dark:text-blue-400 text-xs mb-2">
+              Save cart, get recommendations & track orders
+            </p>
+            <Link
+              to="/login"
+              className="inline-flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium text-sm transition-colors duration-200"
+            >
+              Sign in now 
+              <span className="ml-1">→</span>
+            </Link>
+          </div>
         </div>
-      )}
-      
+      </div>
+    )}
+
+    {/* Action Buttons */}
+    <div className="space-y-4">
       <Link
         to="/checkout"
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 px-6 rounded-lg font-semibold text-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+        className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 flex items-center justify-center space-x-3 shadow-lg hover:shadow-xl hover:shadow-purple-500/30 transform hover:scale-105 active:scale-95"
       >
         <CreditCard className="w-6 h-6" />
         <span>Proceed to Checkout</span>
+        <Sparkles className="w-5 h-5" />
       </Link>
       
       <Link
         to="/"
-        className="w-full border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 py-3 px-6 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
+        className="w-full border-2 border-purple-200 dark:border-purple-700 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-300 dark:hover:border-purple-600 py-3 px-6 rounded-xl font-medium transition-all duration-200 flex items-center justify-center space-x-2 backdrop-blur-lg"
       >
         <ShoppingCart className="w-5 h-5" />
         <span>Continue Shopping</span>
       </Link>
     </div>
 
-    {/* Security Badge */}
-    <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-      <div className="flex items-center justify-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-        <Heart className="w-4 h-4" />
-        <span>Secure & encrypted checkout</span>
+    {/* Trust Badges */}
+    <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+      <div className="grid grid-cols-3 gap-3 text-center">
+        <div className="flex flex-col items-center">
+          <div className="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mb-1">
+            <Heart className="w-4 h-4 text-green-600 dark:text-green-400" />
+          </div>
+          <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">Secure</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center mb-1">
+            <Zap className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+          </div>
+          <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">Fast</span>
+        </div>
+        <div className="flex flex-col items-center">
+          <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/20 rounded-full flex items-center justify-center mb-1">
+            <Gift className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+          </div>
+          <span className="text-xs text-gray-600 dark:text-gray-400 font-medium">Wrapped</span>
+        </div>
+      </div>
+      
+      <div className="flex items-center justify-center mt-4 text-xs text-gray-500 dark:text-gray-400">
+        <span>🔒 SSL Encrypted Checkout</span>
       </div>
     </div>
   </div>
