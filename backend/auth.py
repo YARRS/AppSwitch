@@ -71,27 +71,19 @@ class AuthService:
         elif len(phone) == 11 and phone.startswith('1') and not original_phone.startswith('+'):
             return phone  # Keep 12345678901 format
         
-        # Indian phone number with +91 prefix: +919876543210 (13 chars original, 12 digits cleaned)
-        elif original_phone.startswith('+91') and len(phone) == 12 and phone.startswith('91'):
-            return phone[2:]  # Return 9876543210
-        
-        # Indian phone number with +91 prefix but 10-digit number: +91987654321 -> (12 chars original, 11 digits cleaned)
-        elif original_phone.startswith('+91') and len(phone) == 11:
-            return phone[2:]  # Return 987654321 -> but this would be 9 digits, invalid!
-            
-        # Let's fix this: Indian phone with +91 but the number itself is 10 digits
-        elif original_phone.startswith('+91') and len(phone) >= 10:
+        # Indian phone number with +91 prefix
+        elif original_phone.startswith('+91'):
             if len(phone) == 12 and phone.startswith('91'):
-                return phone[2:]  # +919876543210 -> 9876543210  
+                # +919876543210 -> 9876543210
+                return phone[2:]
             elif len(phone) == 11:
-                return phone[2:]  # +91987654321 -> 987654321 (9 digits - invalid)
+                # +91987654321 -> 987654321 (only 9 digits, invalid)
+                raise ValueError(f"Invalid Indian phone format. Expected +91 followed by 10 digits, got {len(phone) - 2} digits after +91")
+            elif len(phone) == 10:
+                # +91987654321 where input was malformed, but we got 10 digits somehow
+                return phone
             else:
-                # Just use the digits after +91
-                digits_after_91 = phone[2:] if phone.startswith('91') else phone
-                if len(digits_after_91) == 10:
-                    return digits_after_91
-                else:
-                    raise ValueError(f"Invalid Indian phone format. Expected 10 digits after +91, got {len(digits_after_91)}")
+                raise ValueError(f"Invalid Indian phone format with +91 prefix. Expected 12 total digits, got {len(phone)}")
         
         # Indian phone number with 91 prefix: 919876543210 (12 digits cleaned)
         elif len(phone) == 12 and phone.startswith('91') and not original_phone.startswith('+'):
