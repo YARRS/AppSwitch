@@ -253,7 +253,7 @@ const UserProfile = () => {
 };
 
 // Profile Tab Component
-const ProfileTab = ({ user, isEditing, formData, handleChange, handleSubmit, handleCancel, setIsEditing, isLoading, getRoleBadgeColor, formatRole, formatDate, logout, decryptPhoneNumber }) => (
+const ProfileTab = ({ user, isEditing, formData, handleChange, handleSubmit, handleCancel, setIsEditing, isLoading, getRoleBadgeColor, formatRole, formatDate, logout, decryptedPhone }) => (
   <>
     <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
       <div className="sm:col-span-1">
