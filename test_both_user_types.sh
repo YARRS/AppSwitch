@@ -3,7 +3,7 @@
 echo "🧪 Testing Both Guest & Authenticated User Order Flows"
 echo "=================================================="
 
-BASE_URL="https://02ee6ebf-832a-438b-830c-4fcc5a409047.preview.emergentagent.com"
+BASE_URL="https://guest-order-login.preview.emergentagent.com"
 
 echo ""
 echo "1️⃣ Testing GUEST USER flow..."

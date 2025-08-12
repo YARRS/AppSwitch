@@ -78,7 +78,7 @@
 
 1. **Visit Homepage**
    ```
-   https://02ee6ebf-832a-438b-830c-4fcc5a409047.preview.emergentagent.com
+   https://guest-order-login.preview.emergentagent.com
    ```
 
 2. **Add Products to Cart**
