@@ -376,6 +376,7 @@ const SuperAdminUserManagement = () => {
       {showUserModal && selectedUser && (
         <UserDetailsModal
           user={selectedUser}
+          decryptedPhone={decryptedPhones.get(selectedUser.id) || 'Loading...'}
           onClose={() => setShowUserModal(false)}
           onUpdateRole={updateUserRole}
           onUpdateStatus={updateUserStatus}
