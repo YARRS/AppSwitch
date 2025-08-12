@@ -559,7 +559,7 @@ const Checkout = () => {
   );
 };
 
-// Shipping Form Component
+// Modern Shipping Form Component
 const ShippingForm = ({ 
   formData, 
   handleInputChange, 
@@ -571,66 +571,81 @@ const ShippingForm = ({
   verifyOtp, 
   onNext 
 }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center space-x-2">
-      <MapPin className="w-6 h-6" />
-      <span>Shipping Information</span>
-    </h2>
+  <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20 dark:border-gray-700/20">
+    {/* Header */}
+    <div className="text-center mb-8">
+      <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full mb-4 shadow-lg">
+        <MapPin className="w-6 h-6 text-white" />
+      </div>
+      <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+        Shipping Information
+      </h2>
+      <p className="text-gray-600 dark:text-gray-400 mt-2">Enter your delivery details</p>
+    </div>
 
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
           Full Name *
         </label>
         <input
           type="text"
           value={formData.shipping_address.full_name}
           onChange={(e) => handleInputChange('shipping_address', 'full_name', e.target.value)}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-            errors.shipping_address_full_name ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+            errors.shipping_address_full_name ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
           }`}
           placeholder="Enter your full name"
         />
         {errors.shipping_address_full_name && (
-          <p className="text-red-500 text-sm mt-1">{errors.shipping_address_full_name}</p>
+          <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+            <AlertCircle className="w-4 h-4" />
+            <span>{errors.shipping_address_full_name}</span>
+          </p>
         )}
       </div>
 
       {/* Contact Information Section - Combined Email and Phone */}
       {!isAuthenticated ? (
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
             Email Address *
           </label>
           <input
             type="email"
             value={formData.customer_email}
             onChange={(e) => handleInputChange(null, 'customer_email', e.target.value)}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-              errors.customer_email ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+              errors.customer_email ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
             }`}
             placeholder="Email for order updates"
           />
           {errors.customer_email && (
-            <p className="text-red-500 text-sm mt-1">{errors.customer_email}</p>
+            <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+              <AlertCircle className="w-4 h-4" />
+              <span>{errors.customer_email}</span>
+            </p>
           )}
         </div>
       ) : (
         <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
             Phone Number *
           </label>
           <input
             type="tel"
             value={formData.shipping_address.phone}
             onChange={(e) => handleInputChange('shipping_address', 'phone', e.target.value)}
-            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-              errors.shipping_address_phone ? 'border-red-500' : 'border-gray-300'
+            className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+              errors.shipping_address_phone ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
             }`}
             placeholder="Enter phone number"
           />
           {errors.shipping_address_phone && (
-            <p className="text-red-500 text-sm mt-1">{errors.shipping_address_phone}</p>
+            <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+              <AlertCircle className="w-4 h-4" />
+              <span>{errors.shipping_address_phone}</span>
+            </p>
           )}
         </div>
       )}
@@ -638,23 +653,25 @@ const ShippingForm = ({
 
     {/* Phone Number Section for Guest Users with OTP */}
     {!isAuthenticated && (
-      <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-        <h3 className="text-lg font-medium text-blue-800 dark:text-blue-300 mb-4 flex items-center space-x-2">
-          <Phone className="w-5 h-5" />
+      <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl shadow-lg">
+        <h3 className="text-lg font-bold text-blue-800 dark:text-blue-300 mb-4 flex items-center space-x-3">
+          <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+            <Phone className="w-4 h-4 text-white" />
+          </div>
           <span>Phone Verification Required</span>
         </h3>
         
         <div>
-          <label className="block text-sm font-medium text-blue-700 dark:text-blue-300 mb-2">
+          <label className="block text-sm font-semibold text-blue-700 dark:text-blue-300 mb-3">
             Phone Number *
           </label>
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <input
               type="tel"
               value={formData.shipping_address.phone}
               onChange={(e) => handleInputChange('shipping_address', 'phone', e.target.value)}
-              className={`flex-1 px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-                errors.shipping_address_phone ? 'border-red-500' : 'border-gray-300'
+              className={`flex-1 px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                errors.shipping_address_phone ? 'border-red-500' : 'border-blue-200 dark:border-blue-700 hover:border-blue-300 dark:hover:border-blue-600'
               }`}
               placeholder="Enter phone number"
             />
@@ -664,7 +681,7 @@ const ShippingForm = ({
               type="button"
               onClick={sendOtp}
               disabled={otpState.sendingOtp || !formData.shipping_address.phone || otpState.resendTimer > 0}
-              className="px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              className="px-6 py-4 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap shadow-lg transform hover:scale-105"
             >
               {otpState.sendingOtp ? (
                 <div className="flex items-center space-x-2">
@@ -681,23 +698,28 @@ const ShippingForm = ({
             </button>
           </div>
           {errors.shipping_address_phone && (
-            <p className="text-red-500 text-sm mt-1">{errors.shipping_address_phone}</p>
+            <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+              <AlertCircle className="w-4 h-4" />
+              <span>{errors.shipping_address_phone}</span>
+            </p>
           )}
         </div>
 
         {otpState.otpVerified && (
-          <div className="mt-4 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-            <div className="flex items-center space-x-2 text-green-800 dark:text-green-300">
-              <CheckCircle2 className="w-5 h-5" />
-              <span className="font-medium">Phone number verified successfully!</span>
+          <div className="mt-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl shadow-lg">
+            <div className="flex items-center space-x-3 text-green-800 dark:text-green-300">
+              <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
+                <CheckCircle2 className="w-5 h-5 text-white" />
+              </div>
+              <span className="font-semibold">Phone number verified successfully!</span>
             </div>
           </div>
         )}
 
         {/* OTP Verification Section */}
         {otpState.otpSent && !otpState.otpVerified && (
-          <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
-            <h4 className="text-yellow-800 dark:text-yellow-300 font-medium mb-3 flex items-center space-x-2">
+          <div className="mt-6 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-2 border-yellow-200 dark:border-yellow-800 rounded-xl shadow-lg">
+            <h4 className="text-yellow-800 dark:text-yellow-300 font-semibold mb-3 flex items-center space-x-2">
               <Phone className="w-5 h-5" />
               <span>Verify Your Phone Number</span>
             </h4>
@@ -707,7 +729,7 @@ const ShippingForm = ({
               <strong>For testing: Use OTP 079254</strong>
             </p>
             
-            <div className="flex space-x-2">
+            <div className="flex space-x-3">
               <input
                 type="text"
                 value={otpState.otp}
@@ -715,7 +737,7 @@ const ShippingForm = ({
                   const value = e.target.value.replace(/\D/g, '').slice(0, 6);
                   setOtpState(prev => ({ ...prev, otp: value, otpError: '' }));
                 }}
-                className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white text-center text-lg tracking-wider"
+                className="flex-1 px-4 py-4 border-2 border-gray-300 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700/80 dark:text-white text-center text-lg tracking-wider font-mono"
                 placeholder="Enter 6-digit OTP"
                 maxLength="6"
               />
@@ -723,7 +745,7 @@ const ShippingForm = ({
                 type="button"
                 onClick={verifyOtp}
                 disabled={otpState.verifyingOtp || otpState.otp.length !== 6}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-6 py-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg transform hover:scale-105"
               >
                 {otpState.verifyingOtp ? (
                   <div className="flex items-center space-x-2">
@@ -737,108 +759,126 @@ const ShippingForm = ({
             </div>
             
             {otpState.otpError && (
-              <p className="text-red-600 dark:text-red-400 text-sm mt-2">{otpState.otpError}</p>
+              <p className="text-red-600 dark:text-red-400 text-sm mt-3 flex items-center space-x-1">
+                <AlertCircle className="w-4 h-4" />
+                <span>{otpState.otpError}</span>
+              </p>
             )}
           </div>
         )}
 
         {errors.otp_verification && (
-          <p className="text-red-500 text-sm mt-2">{errors.otp_verification}</p>
+          <p className="text-red-500 text-sm mt-3 flex items-center space-x-1">
+            <AlertCircle className="w-4 h-4" />
+            <span>{errors.otp_verification}</span>
+          </p>
         )}
       </div>
     )}
 
-    <div className="mt-6">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+    <div className="mt-8">
+      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
         Address Line 1 *
       </label>
       <input
         type="text"
         value={formData.shipping_address.address_line1}
         onChange={(e) => handleInputChange('shipping_address', 'address_line1', e.target.value)}
-        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-          errors.shipping_address_address_line1 ? 'border-red-500' : 'border-gray-300'
+        className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+          errors.shipping_address_address_line1 ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
         }`}
         placeholder="Street address, apartment, suite, etc."
       />
       {errors.shipping_address_address_line1 && (
-        <p className="text-red-500 text-sm mt-1">{errors.shipping_address_address_line1}</p>
+        <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+          <AlertCircle className="w-4 h-4" />
+          <span>{errors.shipping_address_address_line1}</span>
+        </p>
       )}
     </div>
 
     <div className="mt-6">
-      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
         Address Line 2
       </label>
       <input
         type="text"
         value={formData.shipping_address.address_line2}
         onChange={(e) => handleInputChange('shipping_address', 'address_line2', e.target.value)}
-        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+        className="w-full px-4 py-4 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:text-white hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200"
         placeholder="Additional address information (optional)"
       />
     </div>
 
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
           City *
         </label>
         <input
           type="text"
           value={formData.shipping_address.city}
           onChange={(e) => handleInputChange('shipping_address', 'city', e.target.value)}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-            errors.shipping_address_city ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+            errors.shipping_address_city ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
           }`}
           placeholder="City"
         />
         {errors.shipping_address_city && (
-          <p className="text-red-500 text-sm mt-1">{errors.shipping_address_city}</p>
+          <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+            <AlertCircle className="w-4 h-4" />
+            <span>{errors.shipping_address_city}</span>
+          </p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
           State *
         </label>
         <input
           type="text"
           value={formData.shipping_address.state}
           onChange={(e) => handleInputChange('shipping_address', 'state', e.target.value)}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-            errors.shipping_address_state ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+            errors.shipping_address_state ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
           }`}
           placeholder="State"
         />
         {errors.shipping_address_state && (
-          <p className="text-red-500 text-sm mt-1">{errors.shipping_address_state}</p>
+          <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+            <AlertCircle className="w-4 h-4" />
+            <span>{errors.shipping_address_state}</span>
+          </p>
         )}
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
           ZIP Code *
         </label>
         <input
           type="text"
           value={formData.shipping_address.zip_code}
           onChange={(e) => handleInputChange('shipping_address', 'zip_code', e.target.value)}
-          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white ${
-            errors.shipping_address_zip_code ? 'border-red-500' : 'border-gray-300'
+          className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+            errors.shipping_address_zip_code ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
           }`}
           placeholder="ZIP Code"
         />
         {errors.shipping_address_zip_code && (
-          <p className="text-red-500 text-sm mt-1">{errors.shipping_address_zip_code}</p>
+          <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+            <AlertCircle className="w-4 h-4" />
+            <span>{errors.shipping_address_zip_code}</span>
+          </p>
         )}
       </div>
     </div>
 
-    <div className="mt-8 flex justify-end">
+    <div className="mt-10 flex justify-end">
       <button
         onClick={onNext}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center space-x-2"
+        className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center space-x-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
       >
         <span>Continue to Payment</span>
         <ArrowLeft className="w-5 h-5 rotate-180" />
