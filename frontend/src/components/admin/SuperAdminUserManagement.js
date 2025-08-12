@@ -435,7 +435,7 @@ const UserRow = ({ user, decryptedPhone, onViewDetails, onUpdateRole, onUpdateSt
           {user.phone && (
             <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
               <Phone className="w-4 h-4 text-gray-400 mr-2" />
-              {user.phone}
+              {decryptedPhone}
             </div>
           )}
         </div>
