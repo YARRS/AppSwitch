@@ -156,8 +156,18 @@ class OrderService:
         # Generate order number
         order_number = f"VL{datetime.now().strftime('%Y%m%d')}{str(uuid.uuid4())[:8].upper()}"
         
-        order_data["order_number"] = order_number
-        order = OrderInDB(**order_data)
+        # Prepare complete order data
+        complete_order_data = {
+            "id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "order_number": order_number,
+            "created_at": datetime.utcnow(),
+            "updated_at": datetime.utcnow(),
+            "status": "pending",  # Default status
+            **order_data
+        }
+        
+        order = OrderInDB(**complete_order_data)
         order_dict = order.dict()
         
         # Insert order
