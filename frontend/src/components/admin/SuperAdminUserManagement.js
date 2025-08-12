@@ -75,8 +75,27 @@ const SuperAdminUserManagement = () => {
       });
       
       if (response.data.success) {
-        setUsers(response.data.data || []);
+        const userData = response.data.data || [];
+        setUsers(userData);
         setTotalPages(Math.ceil((response.data.data || []).length / 20) || 1);
+        
+        // Decrypt all phone numbers
+        const phonePromises = userData.map(async (user) => {
+          if (user.phone) {
+            try {
+              const decrypted = await decryptPhoneNumber(user.phone, getAuthenticatedAxios);
+              return [user.id, decrypted];
+            } catch (error) {
+              console.error(`Failed to decrypt phone for user ${user.id}:`, error);
+              return [user.id, user.phone]; // Fallback to original
+            }
+          }
+          return [user.id, 'Not provided'];
+        });
+        
+        const phoneResults = await Promise.all(phonePromises);
+        const phoneMap = new Map(phoneResults);
+        setDecryptedPhones(phoneMap);
       }
     } catch (error) {
       console.error('Failed to fetch users:', error);
