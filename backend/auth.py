@@ -208,6 +208,13 @@ class UserService:
             return UserInDB(**user_doc)
         return None
     
+    async def get_user_by_username(self, username: str) -> Optional[UserInDB]:
+        """Get user by username"""
+        user_doc = await self.users_collection.find_one({"username": username})
+        if user_doc:
+            return UserInDB(**user_doc)
+        return None
+    
     async def get_user_by_phone(self, phone: str) -> Optional[UserInDB]:
         """Get user by phone number (handles both encrypted and plain phone numbers)"""
         try:
