@@ -512,7 +512,7 @@ const UserStatsCard = ({ title, value, icon: Icon, color }) => {
 };
 
 // User Details Modal Component
-const UserDetailsModal = ({ user, onClose, onUpdateRole, onUpdateStatus, userRoles }) => {
+const UserDetailsModal = ({ user, decryptedPhone, onClose, onUpdateRole, onUpdateStatus, userRoles }) => {
   const [selectedRole, setSelectedRole] = useState(user.role);
   
   const handleRoleUpdate = () => {
