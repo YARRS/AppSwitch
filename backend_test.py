@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """
-Backend API Testing Script for Mobile Login Functionality
-FOCUS: Testing new mobile number login functionality including:
-- Login type detection (email vs phone)
-- Mobile login flow with OTP verification
-- OTP sending and verification
-- Password reset flow
-- Traditional email login compatibility
+Backend API Testing Script for SuperAdmin User Management CRUD Functionality
+FOCUS: Testing enhanced SuperAdmin User Management CRUD operations including:
+- GET /api/auth/users/decrypted - Get all users with decrypted phone numbers
+- GET /api/auth/users/{user_id} - Get user by ID  
+- PUT /api/auth/users/{user_id} - Update user (full fields including username, email, phone, role, password, etc.)
+- DELETE /api/auth/users/{user_id} - Delete user
+- POST /api/auth/users - Create new user
+- Phone number decryption functionality
+- Role-based access control
 """
 
 import requests
