@@ -326,191 +326,237 @@ const ProductsPage = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-          Gift Articles Collection
-        </h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Discover our curated selection of exquisite gift articles for every special occasion and cherished relationship.
-        </p>
-      </div>
-
-      {/* Filters */}
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 lg:p-6 mb-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          {/* Search */}
-          <div className="relative lg:col-span-1">
-            <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={handleSearch}
-              className="w-full pl-10 pr-4 py-3 lg:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Hero Header Section */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-pink-500 to-purple-600 rounded-full mb-6 shadow-lg">
+            <Sparkles className="w-8 h-8 text-white" />
           </div>
-
-          {/* Category Filter */}
-          <div>
-            <select
-              value={selectedCategory}
-              onChange={handleCategoryChange}
-              className="w-full px-3 py-3 lg:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
-              <option value="">All Categories</option>
-              {categories.map((category) => (
-                <option key={category.value} value={category.value}>
-                  {category.label}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Price Range */}
-          <div className="flex space-x-2">
-            <input
-              type="number"
-              placeholder="Min $"
-              value={priceRange.min}
-              onChange={(e) => handlePriceRangeChange('min', e.target.value)}
-              className="w-full px-3 py-3 lg:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-            <input
-              type="number"
-              placeholder="Max $"
-              value={priceRange.max}
-              onChange={(e) => handlePriceRangeChange('max', e.target.value)}
-              className="w-full px-3 py-3 lg:py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
-          </div>
-
-          {/* Clear Filters */}
-          <div>
-            <button
-              onClick={clearFilters}
-              className="w-full px-4 py-3 lg:py-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors font-medium"
-            >
-              Clear Filters
-            </button>
+          <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-pink-600 via-purple-600 to-blue-600 bg-clip-text text-transparent mb-4">
+            Gift Articles Collection
+          </h1>
+          <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto mb-8">
+            Discover our curated selection of exquisite gift articles for every special occasion and cherished relationship.
+          </p>
+          <div className="flex items-center justify-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>Premium Quality</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+              <span>Fast Shipping</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+              <span>Gift Wrapping</span>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Featured Categories Carousel */}
-      {categories.length > 0 && (
-        <FeaturedCategoriesCarousel 
-          categories={categories} 
-          products={products}
-          onCategorySelect={setSelectedCategory}
-          selectedCategory={selectedCategory}
-        />
-      )}
-
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-8">
-          <p className="text-red-800 dark:text-red-300">{error}</p>
-        </div>
-      )}
-
-      {/* Products Grid */}
-      {products.length > 0 ? (
-        <>
-          <div id="products-grid" className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-8">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} isAuthenticated={isAuthenticated} />
-            ))}
-          </div>
-
-          {/* Pagination */}
-          {pagination.total_pages > 1 && (
-            <div className="flex justify-center items-center space-x-2 flex-wrap gap-2">
-              <button
-                onClick={() => fetchProducts(Math.max(1, pagination.page - 1))}
-                disabled={pagination.page === 1}
-                className="px-3 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Previous
-              </button>
-              
-              {/* Page Numbers - Show limited on mobile */}
-              <div className="hidden sm:flex space-x-1">
-                {Array.from({ length: Math.min(pagination.total_pages, 7) }, (_, i) => {
-                  let page;
-                  if (pagination.total_pages <= 7) {
-                    page = i + 1;
-                  } else if (pagination.page <= 4) {
-                    page = i + 1;
-                  } else if (pagination.page >= pagination.total_pages - 3) {
-                    page = pagination.total_pages - 6 + i;
-                  } else {
-                    page = pagination.page - 3 + i;
-                  }
-                  
-                  return (
-                    <button
-                      key={page}
-                      onClick={() => fetchProducts(page)}
-                      className={`px-3 py-2 rounded-lg ${
-                        page === pagination.page
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                      }`}
-                    >
-                      {page}
-                    </button>
-                  );
-                })}
+        {/* Modern Filter Section */}
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-xl border border-white/20 dark:border-gray-700/20 p-6 mb-8">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            {/* Search with Icon */}
+            <div className="relative lg:col-span-2">
+              <div className="absolute left-4 top-1/2 transform -translate-y-1/2">
+                <Search className="h-5 w-5 text-gray-400" />
               </div>
-              
-              {/* Mobile page indicator */}
-              <div className="sm:hidden px-3 py-2 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  Page {pagination.page} of {pagination.total_pages}
-                </span>
-              </div>
-              
-              <button
-                onClick={() => fetchProducts(Math.min(pagination.total_pages, pagination.page + 1))}
-                disabled={pagination.page === pagination.total_pages}
-                className="px-3 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              <input
+                type="text"
+                placeholder="Search for the perfect gift..."
+                value={searchTerm}
+                onChange={handleSearch}
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white/90 dark:bg-gray-700/90 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+              />
+            </div>
+
+            {/* Category Filter */}
+            <div className="relative">
+              <select
+                value={selectedCategory}
+                onChange={handleCategoryChange}
+                className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white/90 dark:bg-gray-700/90 text-gray-900 dark:text-white appearance-none cursor-pointer transition-all duration-200"
               >
-                Next
+                <option value="">✨ All Categories</option>
+                {categories.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Price Range */}
+            <div className="flex space-x-2">
+              <input
+                type="number"
+                placeholder="Min $"
+                value={priceRange.min}
+                onChange={(e) => handlePriceRangeChange('min', e.target.value)}
+                className="w-full px-3 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white/90 dark:bg-gray-700/90 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+              />
+              <input
+                type="number"
+                placeholder="Max $"
+                value={priceRange.max}
+                onChange={(e) => handlePriceRangeChange('max', e.target.value)}
+                className="w-full px-3 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 bg-white/90 dark:bg-gray-700/90 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 transition-all duration-200"
+              />
+            </div>
+
+            {/* Clear Filters */}
+            <div>
+              <button
+                onClick={clearFilters}
+                className="w-full px-4 py-3 bg-gradient-to-r from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 text-gray-700 dark:text-gray-300 rounded-xl hover:from-gray-300 hover:to-gray-400 dark:hover:from-gray-500 dark:hover:to-gray-600 transition-all duration-200 font-medium transform hover:scale-105 active:scale-95"
+              >
+                🗑️ Clear Filters
               </button>
             </div>
-          )}
-        </>
-      ) : (
-        <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
-            <ShoppingCart className="w-16 h-16 mx-auto" />
           </div>
-          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            No products found
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
-            Try adjusting your search criteria or filters.
-          </p>
-          <button
-            onClick={clearFilters}
-            className="btn-primary"
-          >
-            Clear All Filters
-          </button>
         </div>
-      )}
 
-      {/* Loading overlay */}
-      {loading && products.length > 0 && (
-        <div className="fixed inset-0 bg-black bg-opacity-25 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-            <p className="text-gray-600 dark:text-gray-400">Updating products...</p>
+        {/* Featured Categories Carousel */}
+        {categories.length > 0 && (
+          <FeaturedCategoriesCarousel 
+            categories={categories} 
+            products={products}
+            onCategorySelect={setSelectedCategory}
+            selectedCategory={selectedCategory}
+          />
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border-2 border-red-200 dark:border-red-800 rounded-2xl p-6 mb-8 shadow-lg">
+            <div className="flex items-center space-x-3">
+              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                <span className="text-white text-sm">!</span>
+              </div>
+              <p className="text-red-800 dark:text-red-300 font-medium">{error}</p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Products Grid */}
+        {products.length > 0 ? (
+          <>
+            <div id="products-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
+              {products.map((product, index) => (
+                <ProductCard 
+                  key={product.id} 
+                  product={product} 
+                  isAuthenticated={isAuthenticated}
+                  index={index}
+                />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {pagination.total_pages > 1 && (
+              <div className="flex justify-center items-center space-x-3 flex-wrap gap-3">
+                <button
+                  onClick={() => fetchProducts(Math.max(1, pagination.page - 1))}
+                  disabled={pagination.page === 1}
+                  className="px-6 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 hover:border-purple-300 dark:hover:border-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium transform hover:scale-105 active:scale-95 shadow-lg"
+                >
+                  ← Previous
+                </button>
+                
+                {/* Page Numbers */}
+                <div className="hidden sm:flex space-x-2">
+                  {Array.from({ length: Math.min(pagination.total_pages, 7) }, (_, i) => {
+                    let page;
+                    if (pagination.total_pages <= 7) {
+                      page = i + 1;
+                    } else if (pagination.page <= 4) {
+                      page = i + 1;
+                    } else if (pagination.page >= pagination.total_pages - 3) {
+                      page = pagination.total_pages - 6 + i;
+                    } else {
+                      page = pagination.page - 3 + i;
+                    }
+                    
+                    return (
+                      <button
+                        key={page}
+                        onClick={() => fetchProducts(page)}
+                        className={`px-4 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg ${
+                          page === pagination.page
+                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-500/30'
+                            : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 hover:border-purple-300 dark:hover:border-purple-600'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+                </div>
+                
+                {/* Mobile page indicator */}
+                <div className="sm:hidden px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl shadow-lg">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
+                    Page {pagination.page} of {pagination.total_pages}
+                  </span>
+                </div>
+                
+                <button
+                  onClick={() => fetchProducts(Math.min(pagination.total_pages, pagination.page + 1))}
+                  disabled={pagination.page === pagination.total_pages}
+                  className="px-6 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 hover:border-purple-300 dark:hover:border-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium transform hover:scale-105 active:scale-95 shadow-lg"
+                >
+                  Next →
+                </button>
+              </div>
+            )}
+          </>
+        ) : (
+          <div className="text-center py-20">
+            <div className="relative inline-block mb-8">
+              <div className="w-32 h-32 bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 rounded-full flex items-center justify-center mx-auto shadow-lg">
+                <ShoppingCart className="w-16 h-16 text-purple-400" />
+              </div>
+              <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center animate-bounce">
+                <span className="text-white text-sm">✨</span>
+              </div>
+            </div>
+            <h3 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+              No magical gifts found
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-8 max-w-md mx-auto">
+              Your search didn't find any treasures. Try adjusting your filters to discover amazing gifts!
+            </p>
+            <button
+              onClick={clearFilters}
+              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-xl transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg hover:shadow-purple-500/30"
+            >
+              🔍 Clear All Filters
+            </button>
+          </div>
+        )}
+
+        {/* Loading overlay */}
+        {loading && products.length > 0 && (
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center z-50">
+            <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20 dark:border-gray-700/20">
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <div className="w-8 h-8 border-4 border-purple-200 dark:border-purple-800 rounded-full animate-spin border-t-purple-600 dark:border-t-purple-400"></div>
+                  <div className="absolute inset-0 w-8 h-8 border-4 border-transparent rounded-full animate-ping border-t-purple-400"></div>
+                </div>
+                <p className="text-gray-700 dark:text-gray-300 font-medium">Updating magical collection...</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
