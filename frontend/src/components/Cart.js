@@ -66,10 +66,18 @@ const Cart = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400 text-lg">Loading your cart...</p>
+          <div className="relative">
+            <div className="w-20 h-20 border-4 border-purple-200 dark:border-purple-800 rounded-full animate-spin border-t-purple-600 dark:border-t-purple-400 mx-auto mb-6"></div>
+            <div className="absolute inset-0 w-20 h-20 border-4 border-transparent rounded-full animate-ping border-t-purple-400 mx-auto"></div>
+          </div>
+          <p className="text-gray-600 dark:text-gray-400 text-lg font-medium">Loading your magical cart...</p>
+          <div className="flex items-center justify-center mt-4 space-x-2">
+            <Sparkles className="w-4 h-4 text-purple-500 animate-pulse" />
+            <span className="text-sm text-gray-500 dark:text-gray-400">Preparing something special</span>
+            <Sparkles className="w-4 h-4 text-purple-500 animate-pulse" />
+          </div>
         </div>
       </div>
     );
