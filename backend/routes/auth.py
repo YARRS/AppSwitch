@@ -804,3 +804,428 @@ async def decrypt_phone_number(request: DecryptRequest, current_user: UserInDB =
                 "raw_data": request.encrypted_data
             }
         )
+
+# Enhanced CRUD Models for SuperAdmin User Management
+class SuperAdminUserUpdate(BaseModel):
+    """Enhanced user update model for super admin with all fields editable"""
+    username: Optional[str] = None
+    email: Optional[str] = None
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    role: Optional[UserRole] = None
+    is_active: Optional[bool] = None
+    password: Optional[str] = None  # Optional password update
+
+class SuperAdminUserCreate(BaseModel):
+    """Enhanced user creation model for super admin"""
+    username: str
+    email: str
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    role: UserRole = UserRole.CUSTOMER
+    is_active: bool = True
+    password: str
+
+# Enhanced CRUD Endpoints for SuperAdmin User Management
+
+@router.get("/users/{user_id}", response_model=APIResponse)
+async def get_user_by_id(
+    user_id: str,
+    admin_user: UserInDB = Depends(get_admin_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Get user by ID (admin only)"""
+    try:
+        user_service = UserService(db)
+        user = await user_service.get_user_by_id(user_id)
+        
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        # Create user response with decrypted phone
+        user_response = UserResponse(
+            id=user.id,
+            email=user.email,
+            username=user.username,
+            full_name=user.full_name,
+            phone=user.phone,  # Phone will be decrypted on frontend
+            role=user.role,
+            is_active=user.is_active,
+            email_verified=user.email_verified,
+            last_login=user.last_login,
+            created_at=user.created_at,
+            updated_at=user.updated_at
+        )
+        
+        return APIResponse(
+            success=True,
+            message="User retrieved successfully",
+            data=user_response.dict()
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve user"
+        )
+
+@router.put("/users/{user_id}", response_model=APIResponse)
+async def update_user_by_id(
+    user_id: str,
+    update_data: SuperAdminUserUpdate,
+    super_admin_user: UserInDB = Depends(get_super_admin_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Update user by ID with full CRUD capabilities (super admin only)"""
+    try:
+        user_service = UserService(db)
+        
+        # Get existing user
+        existing_user = await user_service.get_user_by_id(user_id)
+        if not existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        # Prepare update data
+        update_dict = {}
+        
+        # Handle username update
+        if update_data.username and update_data.username != existing_user.username:
+            # Check if username already exists
+            existing_username = await user_service.get_user_by_username(update_data.username)
+            if existing_username and existing_username.id != user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already taken"
+                )
+            update_dict["username"] = update_data.username
+        
+        # Handle email update
+        if update_data.email and update_data.email != existing_user.email:
+            # Check if email already exists
+            existing_email = await user_service.get_user_by_email(update_data.email)
+            if existing_email and existing_email.id != user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already registered"
+                )
+            update_dict["email"] = update_data.email
+            update_dict["email_verified"] = False  # Reset verification on email change
+        
+        # Handle phone update
+        if update_data.phone is not None:
+            if update_data.phone.strip():
+                # Format and validate phone
+                try:
+                    formatted_phone = AuthService.format_phone_number(update_data.phone)
+                    # Check if phone already exists
+                    existing_phone = await user_service.get_user_by_phone(formatted_phone)
+                    if existing_phone and existing_phone.id != user_id:
+                        raise HTTPException(
+                            status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="Phone number already registered"
+                        )
+                    # Phone will be encrypted in UserService.update_user
+                    update_dict["phone"] = formatted_phone
+                except ValueError as e:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=str(e)
+                    )
+            else:
+                # Allow clearing phone number
+                update_dict["phone"] = None
+        
+        # Handle other fields
+        if update_data.full_name is not None:
+            update_dict["full_name"] = update_data.full_name.strip() if update_data.full_name else None
+        
+        if update_data.role is not None:
+            update_dict["role"] = update_data.role.value
+        
+        if update_data.is_active is not None:
+            update_dict["is_active"] = update_data.is_active
+        
+        # Handle password update
+        if update_data.password:
+            if len(update_data.password) < 6:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Password must be at least 6 characters long"
+                )
+            update_dict["hashed_password"] = AuthService.hash_password(update_data.password)
+        
+        # Update user
+        updated_user = await user_service.update_user(user_id, update_dict)
+        
+        if not updated_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        # Create response
+        user_response = UserResponse(
+            id=updated_user.id,
+            email=updated_user.email,
+            username=updated_user.username,
+            full_name=updated_user.full_name,
+            phone=updated_user.phone,
+            role=updated_user.role,
+            is_active=updated_user.is_active,
+            email_verified=updated_user.email_verified,
+            last_login=updated_user.last_login,
+            created_at=updated_user.created_at,
+            updated_at=updated_user.updated_at
+        )
+        
+        return APIResponse(
+            success=True,
+            message="User updated successfully",
+            data=user_response.dict()
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to update user"
+        )
+
+@router.delete("/users/{user_id}", response_model=APIResponse)
+async def delete_user_by_id(
+    user_id: str,
+    super_admin_user: UserInDB = Depends(get_super_admin_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Delete user by ID (super admin only)"""
+    try:
+        user_service = UserService(db)
+        
+        # Check if user exists
+        user = await user_service.get_user_by_id(user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        # Prevent deletion of current super admin
+        if user_id == super_admin_user.id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot delete your own account"
+            )
+        
+        # Prevent deletion of other super admins (optional safety measure)
+        if user.role == "super_admin":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot delete other super admin accounts"
+            )
+        
+        # Delete user from database
+        users_collection = db.users
+        result = await users_collection.delete_one({"id": user_id})
+        
+        if result.deleted_count == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="User not found"
+            )
+        
+        return APIResponse(
+            success=True,
+            message="User deleted successfully",
+            data={"deleted_user_id": user_id, "deleted_username": user.username}
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to delete user"
+        )
+
+@router.post("/users", response_model=APIResponse)
+async def create_user(
+    user_data: SuperAdminUserCreate,
+    super_admin_user: UserInDB = Depends(get_super_admin_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Create new user (super admin only)"""
+    try:
+        user_service = UserService(db)
+        
+        # Check if user already exists
+        existing_user = await user_service.get_user_by_email(user_data.email)
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+        
+        # Check if username already exists
+        existing_username = await user_service.get_user_by_username(user_data.username)
+        if existing_username:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already taken"
+            )
+        
+        # Check if phone already exists (if provided)
+        if user_data.phone:
+            try:
+                formatted_phone = AuthService.format_phone_number(user_data.phone)
+                existing_phone = await user_service.get_user_by_phone(formatted_phone)
+                if existing_phone:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail="Phone number already registered"
+                    )
+                user_data.phone = formatted_phone
+            except ValueError as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=str(e)
+                )
+        
+        # Create user
+        user_dict = user_data.dict()
+        user_dict["role"] = user_data.role.value  # Convert enum to string
+        user = await user_service.create_user(user_dict)
+        
+        # Create user response (without sensitive data)
+        user_response = UserResponse(
+            id=user.id,
+            email=user.email,
+            username=user.username,
+            full_name=user.full_name,
+            phone=user.phone,
+            role=user.role,
+            is_active=user.is_active,
+            email_verified=user.email_verified,
+            last_login=user.last_login,
+            created_at=user.created_at,
+            updated_at=user.updated_at
+        )
+        
+        return APIResponse(
+            success=True,
+            message="User created successfully",
+            data=user_response.dict()
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to create user"
+        )
+
+# Enhanced users list endpoint with decrypted phones
+@router.get("/users/decrypted", response_model=APIResponse)
+async def get_all_users_with_decrypted_phones(
+    page: int = 1,
+    per_page: int = 20,
+    role: Optional[str] = None,
+    search: Optional[str] = None,
+    is_active: Optional[bool] = None,
+    admin_user: UserInDB = Depends(get_admin_user),
+    db: AsyncIOMotorDatabase = Depends(get_db)
+):
+    """Get all users with decrypted phone numbers (admin only)"""
+    try:
+        import re
+        users_collection = db.users
+        
+        # Build query
+        query = {}
+        if role:
+            query["role"] = role
+        if is_active is not None:
+            query["is_active"] = is_active
+        
+        # Add search functionality
+        if search:
+            search_regex = {"$regex": search, "$options": "i"}
+            query["$or"] = [
+                {"username": search_regex},
+                {"email": search_regex},
+                {"full_name": search_regex}
+            ]
+        
+        # Calculate skip value
+        skip = (page - 1) * per_page
+        
+        # Get users with pagination
+        cursor = users_collection.find(query).skip(skip).limit(per_page)
+        users = await cursor.to_list(length=per_page)
+        
+        # Get total count
+        total = await users_collection.count_documents(query)
+        
+        # Convert to response format and decrypt phones
+        user_responses = []
+        for user_doc in users:
+            user = UserInDB(**user_doc)
+            
+            # Decrypt phone number if exists
+            decrypted_phone = user.phone
+            if user.phone:
+                try:
+                    decrypted_phone = AuthService.decrypt_sensitive_data(user.phone)
+                    # Format phone number for display
+                    if len(decrypted_phone) == 10:
+                        decrypted_phone = f"({decrypted_phone[:3]}) {decrypted_phone[3:6]}-{decrypted_phone[6:]}"
+                except:
+                    # If decryption fails, try direct formatting
+                    clean_phone = re.sub(r'\D', '', user.phone) if user.phone else ''
+                    if len(clean_phone) == 10:
+                        decrypted_phone = f"({clean_phone[:3]}) {clean_phone[3:6]}-{clean_phone[6:]}"
+                    else:
+                        decrypted_phone = user.phone
+            
+            user_response = {
+                "id": user.id,
+                "email": user.email,
+                "username": user.username,
+                "full_name": user.full_name,
+                "phone": user.phone,  # Keep encrypted for updates
+                "decrypted_phone": decrypted_phone,  # Add decrypted version
+                "role": user.role,
+                "is_active": user.is_active,
+                "email_verified": user.email_verified,
+                "last_login": user.last_login,
+                "created_at": user.created_at,
+                "updated_at": user.updated_at
+            }
+            user_responses.append(user_response)
+        
+        return APIResponse(
+            success=True,
+            message="Users retrieved successfully",
+            data={
+                "users": user_responses,
+                "total": total,
+                "page": page,
+                "per_page": per_page,
+                "total_pages": (total + per_page - 1) // per_page
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to retrieve users"
+        )
