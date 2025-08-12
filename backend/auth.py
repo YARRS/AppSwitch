@@ -294,14 +294,18 @@ class UserService:
         """Verify password against hash"""
         return AuthService.verify_password(plain_password, hashed_password)
     
-    async def authenticate_user(self, email_or_phone: str, password: str) -> Optional[UserInDB]:
-        """Authenticate user with email/phone and password"""
+    async def authenticate_user(self, email_or_phone_or_username: str, password: str) -> Optional[UserInDB]:
+        """Authenticate user with email/phone/username and password"""
         # Try to find user by email first
-        user = await self.get_user_by_email(email_or_phone)
+        user = await self.get_user_by_email(email_or_phone_or_username)
         
         # If not found by email, try by phone
         if not user:
-            user = await self.get_user_by_phone(email_or_phone)
+            user = await self.get_user_by_phone(email_or_phone_or_username)
+        
+        # If still not found, try by username
+        if not user:
+            user = await self.get_user_by_username(email_or_phone_or_username)
         
         if not user:
             return None
