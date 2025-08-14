@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Eye, EyeOff, Mail, Lock, AlertCircle, Phone, Key } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, AlertCircle, Phone, Key, ArrowLeft, Sparkles, Zap, Heart, Shield } from 'lucide-react';
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
@@ -199,360 +199,437 @@ const Login = () => {
   const getStepTitle = () => {
     if (showResetPassword) {
       switch (resetStep) {
-        case 'email': return 'Reset Password';
-        case 'code': return 'Enter Reset Code';
-        case 'password': return 'Set New Password';
+        case 'email': return 'Reset Your Password';
+        case 'code': return 'Verify Reset Code';
+        case 'password': return 'Create New Password';
         default: return 'Reset Password';
       }
     }
     
     switch (loginStep) {
-      case 'identifier': return 'Sign in to your account';
-      case 'password': return 'Enter your password';
-      case 'otp': return 'Enter OTP';
-      default: return 'Sign in to your account';
+      case 'identifier': return 'Welcome Back!';
+      case 'password': return 'Enter Password';
+      case 'otp': return 'Verify OTP';
+      default: return 'Welcome Back!';
     }
   };
 
   const getStepDescription = () => {
     if (showResetPassword) {
       switch (resetStep) {
-        case 'email': return 'Enter your email address to receive a reset code';
-        case 'code': return 'Enter the reset code sent to your email (use RESET123 for testing)';
-        case 'password': return 'Enter your new password';
+        case 'email': return 'Enter your email to receive a password reset code';
+        case 'code': return 'Enter the 6-digit code sent to your email (use RESET123 for testing)';
+        case 'password': return 'Choose a strong password for your account';
         default: return '';
       }
     }
     
     switch (loginStep) {
-      case 'identifier': return 'Enter your email address or mobile number';
-      case 'password': return `Password for ${formData.identifier}`;
-      case 'otp': return `OTP sent to ${formData.identifier} (use 123456 for testing)`;
+      case 'identifier': return 'Sign in with your email or phone number to continue';
+      case 'password': return `Welcome back! Please enter your password for ${formData.identifier}`;
+      case 'otp': return `Enter the OTP sent to ${formData.identifier} (use 123456 for testing)`;
       default: return '';
     }
   };
 
   if (showResetPassword) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div>
-            <div className="flex justify-center">
-              <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-                <Key className="w-8 h-8 text-white" />
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-pink-400 to-red-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse delay-500"></div>
+        </div>
+
+        <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+          <div className="text-center">
+            {/* Back Button */}
+            <button
+              onClick={() => {
+                setShowResetPassword(false);
+                setResetStep('email');
+                setResetData({ email: '', resetCode: '', newPassword: '' });
+                setError('');
+              }}
+              className="inline-flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 mb-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-xl px-4 py-2 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Back to Login</span>
+            </button>
+
+            {/* Logo */}
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl animate-pulse">
+                  <Key className="w-10 h-10 text-white" />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-2xl blur opacity-50 animate-ping"></div>
               </div>
             </div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+            
+            <h2 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent mb-3">
               {getStepTitle()}
             </h2>
-            <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md mx-auto">
               {getStepDescription()}
             </p>
           </div>
+        </div>
 
-          <form className="mt-8 space-y-6" onSubmit={handleResetPassword}>
-            {error && (
-              <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-                <div className="flex">
-                  <AlertCircle className="h-5 w-5 text-red-400 dark:text-red-300" />
-                  <div className="ml-3">
-                    <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg py-12 px-8 shadow-2xl sm:rounded-3xl border border-white/20 dark:border-gray-700/20">
+            <form className="space-y-6" onSubmit={handleResetPassword}>
+              {error && (
+                <div className="rounded-2xl bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800">
+                  <div className="flex items-center">
+                    <AlertCircle className="h-6 w-6 text-red-500 dark:text-red-400 mr-3 flex-shrink-0" />
+                    <p className="text-red-800 dark:text-red-300 font-medium">{error}</p>
                   </div>
                 </div>
+              )}
+
+              <div className="space-y-6">
+                {resetStep === 'email' && (
+                  <div>
+                    <label htmlFor="reset-email" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="reset-email"
+                        name="email"
+                        type="email"
+                        required
+                        value={resetData.email}
+                        onChange={handleResetChange}
+                        className="appearance-none relative block w-full px-4 py-4 pl-12 border-2 border-gray-200 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-lg bg-white dark:bg-gray-700 transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-500"
+                        placeholder="your@email.com"
+                      />
+                      <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
+                    </div>
+                  </div>
+                )}
+
+                {resetStep === 'code' && (
+                  <div>
+                    <label htmlFor="reset-code" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                      Reset Code
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="reset-code"
+                        name="resetCode"
+                        type="text"
+                        required
+                        value={resetData.resetCode}
+                        onChange={handleResetChange}
+                        className="appearance-none relative block w-full px-4 py-4 pl-12 border-2 border-gray-200 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-lg bg-white dark:bg-gray-700 transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-500 text-center tracking-widest"
+                        placeholder="RESET123"
+                        maxLength="7"
+                      />
+                      <Key className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
+                    </div>
+                  </div>
+                )}
+
+                {resetStep === 'password' && (
+                  <div>
+                    <label htmlFor="new-password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                      New Password
+                    </label>
+                    <div className="relative">
+                      <input
+                        id="new-password"
+                        name="newPassword"
+                        type="password"
+                        required
+                        value={resetData.newPassword}
+                        onChange={handleResetChange}
+                        className="appearance-none relative block w-full px-4 py-4 pl-12 border-2 border-gray-200 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-lg bg-white dark:bg-gray-700 transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-500"
+                        placeholder="Create a strong password"
+                      />
+                      <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
 
-            <div className="space-y-4">
-              {resetStep === 'email' && (
-                <div>
-                  <label htmlFor="reset-email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Email address
-                  </label>
-                  <div className="mt-1 relative">
-                    <input
-                      id="reset-email"
-                      name="email"
-                      type="email"
-                      required
-                      value={resetData.email}
-                      onChange={handleResetChange}
-                      className="appearance-none relative block w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
-                      placeholder="Enter your email"
-                    />
-                    <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  </div>
-                </div>
-              )}
-
-              {resetStep === 'code' && (
-                <div>
-                  <label htmlFor="reset-code" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Reset Code
-                  </label>
-                  <div className="mt-1 relative">
-                    <input
-                      id="reset-code"
-                      name="resetCode"
-                      type="text"
-                      required
-                      value={resetData.resetCode}
-                      onChange={handleResetChange}
-                      className="appearance-none relative block w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
-                      placeholder="Enter reset code"
-                    />
-                    <Key className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  </div>
-                </div>
-              )}
-
-              {resetStep === 'password' && (
-                <div>
-                  <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    New Password
-                  </label>
-                  <div className="mt-1 relative">
-                    <input
-                      id="new-password"
-                      name="newPassword"
-                      type="password"
-                      required
-                      value={resetData.newPassword}
-                      onChange={handleResetChange}
-                      className="appearance-none relative block w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
-                      placeholder="Enter new password"
-                    />
-                    <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="flex space-x-4">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowResetPassword(false);
-                  setResetStep('email');
-                  setResetData({ email: '', resetCode: '', newPassword: '' });
-                  setError('');
-                }}
-                className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Cancel
-              </button>
               <button
                 type="submit"
                 disabled={isLoading}
-                className="flex-1 group relative flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-blue-600 dark:hover:bg-blue-700"
+                className="group relative w-full flex justify-center py-4 px-6 border border-transparent text-lg font-bold rounded-2xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl"
               >
                 {isLoading ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="flex items-center space-x-3">
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                    <span>Processing...</span>
+                  </div>
                 ) : (
-                  resetStep === 'password' ? 'Reset Password' : 'Continue'
+                  <span>
+                    {resetStep === 'email' && 'Send Reset Code'}
+                    {resetStep === 'code' && 'Verify Code'}
+                    {resetStep === 'password' && 'Update Password'}
+                  </span>
                 )}
               </button>
-            </div>
-          </form>
+            </form>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <div className="flex justify-center">
-            <div className="flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg">
-              {loginType === 'phone' ? (
-                <Phone className="w-8 h-8 text-white" />
-              ) : (
-                <Mail className="w-6 h-6 text-white" />
-              )}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-pink-400 to-red-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full mix-blend-multiply filter blur-xl opacity-10 animate-pulse delay-500"></div>
+      </div>
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <div className="text-center">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <div className="flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl shadow-2xl">
+                {loginType === 'phone' ? (
+                  <Phone className="w-10 h-10 text-white" />
+                ) : (
+                  <Mail className="w-8 h-8 text-white" />
+                )}
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-2xl blur opacity-50 animate-ping"></div>
             </div>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+          
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-blue-600 dark:from-white dark:to-blue-400 bg-clip-text text-transparent mb-3">
             {getStepTitle()}
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            {getStepDescription()}{' '}
-            {loginStep !== 'identifier' && (
-              <button
-                type="button"
-                onClick={resetForm}
-                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-              >
-                Start over
-              </button>
-            )}
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-2">
+            {getStepDescription()}
           </p>
+          {loginStep !== 'identifier' && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="inline-flex items-center space-x-1 text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>Start over</span>
+            </button>
+          )}
         </div>
+      </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-              <div className="flex">
-                <AlertCircle className="h-5 w-5 text-red-400 dark:text-red-300" />
-                <div className="ml-3">
-                  <p className="text-sm text-red-800 dark:text-red-300">{error}</p>
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10">
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg py-12 px-8 shadow-2xl sm:rounded-3xl border border-white/20 dark:border-gray-700/20">
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="rounded-2xl bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800">
+                <div className="flex items-center">
+                  <AlertCircle className="h-6 w-6 text-red-500 dark:text-red-400 mr-3 flex-shrink-0" />
+                  <p className="text-red-800 dark:text-red-300 font-medium">{error}</p>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {otpSent && loginStep === 'otp' && (
-            <div className="rounded-md bg-green-50 dark:bg-green-900/20 p-4">
-              <div className="flex">
-                <Phone className="h-5 w-5 text-green-400 dark:text-green-300" />
-                <div className="ml-3">
-                  <p className="text-sm text-green-800 dark:text-green-300">
+            {otpSent && loginStep === 'otp' && (
+              <div className="rounded-2xl bg-green-50 dark:bg-green-900/20 p-4 border border-green-200 dark:border-green-800">
+                <div className="flex items-center">
+                  <Phone className="h-6 w-6 text-green-500 dark:text-green-400 mr-3 flex-shrink-0" />
+                  <p className="text-green-800 dark:text-green-300 font-medium">
                     OTP sent to {formData.identifier}. Use 123456 for testing.
                   </p>
                 </div>
               </div>
-            </div>
-          )}
-
-          <div className="space-y-4">
-            {loginStep === 'identifier' && (
-              <div>
-                <label htmlFor="identifier" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Email address or Mobile number
-                </label>
-                <div className="mt-1 relative">
-                  <input
-                    id="identifier"
-                    name="identifier"
-                    type="text"
-                    required
-                    value={formData.identifier}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
-                    placeholder="Enter email or mobile number"
-                  />
-                  <Mail className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                </div>
-              </div>
             )}
+
+            <div className="space-y-6">
+              {loginStep === 'identifier' && (
+                <div>
+                  <label htmlFor="identifier" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                    Email or Phone Number
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="identifier"
+                      name="identifier"
+                      type="text"
+                      required
+                      value={formData.identifier}
+                      onChange={handleChange}
+                      className="appearance-none relative block w-full px-4 py-4 pl-12 border-2 border-gray-200 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-lg bg-white dark:bg-gray-700 transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-500"
+                      placeholder="your@email.com or phone number"
+                    />
+                    <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
+                  </div>
+                </div>
+              )}
+
+              {loginType === 'email' && loginStep === 'password' && (
+                <div>
+                  <label htmlFor="password" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPassword ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      required
+                      value={formData.password}
+                      onChange={handleChange}
+                      className="appearance-none relative block w-full px-4 py-4 pl-12 pr-12 border-2 border-gray-200 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-lg bg-white dark:bg-gray-700 transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-500"
+                      placeholder="Enter your password"
+                    />
+                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
+                    <button
+                      type="button"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-6 w-6" /> : <Eye className="h-6 w-6" />}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {loginType === 'phone' && loginStep === 'otp' && (
+                <div>
+                  <label htmlFor="otp" className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+                    Enter OTP Code
+                  </label>
+                  <div className="relative">
+                    <input
+                      id="otp"
+                      name="otp"
+                      type="text"
+                      required
+                      maxLength="6"
+                      value={formData.otp}
+                      onChange={handleChange}
+                      className="appearance-none relative block w-full px-4 py-4 pl-12 border-2 border-gray-200 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-lg bg-white dark:bg-gray-700 text-center text-2xl tracking-widest font-bold transition-all duration-200 hover:border-blue-300 dark:hover:border-blue-500"
+                      placeholder="123456"
+                    />
+                    <Key className="absolute left-4 top-1/2 transform -translate-y-1/2 h-6 w-6 text-gray-400" />
+                  </div>
+                  <div className="mt-4 text-center">
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Didn't receive the code?{' '}
+                      <button
+                        type="button"
+                        onClick={() => sendOTP(formData.identifier)}
+                        className="font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                      >
+                        Resend OTP
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {loginType === 'email' && loginStep === 'password' && (
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Password
-                </label>
-                <div className="mt-1 relative">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
                   <input
-                    id="password"
-                    name="password"
-                    type={showPassword ? 'text' : 'password'}
-                    autoComplete="current-password"
-                    required
-                    value={formData.password}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-2 pl-10 pr-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800"
-                    placeholder="Enter your password"
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <Lock className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+                  <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700 dark:text-gray-300 font-medium">
+                    Keep me signed in
+                  </label>
+                </div>
+
+                <div className="text-sm">
                   <button
                     type="button"
-                    className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setShowResetPassword(true)}
+                    className="font-semibold text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
                   >
-                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                    Forgot password?
                   </button>
                 </div>
               </div>
             )}
 
-            {loginType === 'phone' && loginStep === 'otp' && (
-              <div>
-                <label htmlFor="otp" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Enter OTP
-                </label>
-                <div className="mt-1 relative">
-                  <input
-                    id="otp"
-                    name="otp"
-                    type="text"
-                    required
-                    maxLength="6"
-                    value={formData.otp}
-                    onChange={handleChange}
-                    className="appearance-none relative block w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm bg-white dark:bg-gray-800 text-center text-2xl tracking-widest"
-                    placeholder="123456"
-                  />
-                  <Key className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                </div>
-                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 text-center">
-                  Didn't receive OTP?{' '}
-                  <button
-                    type="button"
-                    onClick={() => sendOTP(formData.identifier)}
-                    className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-                  >
-                    Resend
-                  </button>
-                </p>
-              </div>
-            )}
-          </div>
-
-          {loginType === 'email' && loginStep === 'password' && (
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <button
-                  type="button"
-                  onClick={() => setShowResetPassword(true)}
-                  className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-                >
-                  Forgot your password?
-                </button>
-              </div>
-            </div>
-          )}
-
-          <div>
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed dark:bg-blue-600 dark:hover:bg-blue-700"
+              className="group relative w-full flex justify-center py-4 px-6 border border-transparent text-lg font-bold rounded-2xl text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-xl hover:shadow-2xl"
             >
               {isLoading ? (
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                <div className="flex items-center space-x-3">
+                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent"></div>
+                  <span>Signing you in...</span>
+                </div>
               ) : (
-                <>
-                  {loginStep === 'identifier' && 'Continue'}
-                  {loginStep === 'password' && 'Sign in'}
-                  {loginStep === 'otp' && 'Verify & Sign in'}
-                </>
+                <div className="flex items-center space-x-3">
+                  <Sparkles className="w-6 h-6" />
+                  <span>
+                    {loginStep === 'identifier' && 'Continue'}
+                    {loginStep === 'password' && 'Sign In'}
+                    {loginStep === 'otp' && 'Verify & Sign In'}
+                  </span>
+                </div>
               )}
             </button>
-          </div>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?{' '}
-              <Link
-                to="/register"
-                className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300"
-              >
-                Sign up now
-              </Link>
-            </p>
+            {/* Features */}
+            <div className="mt-8 grid grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Secure</p>
+              </div>
+              <div className="text-center">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <Zap className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Fast</p>
+              </div>
+              <div className="text-center">
+                <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                  <Heart className="w-5 h-5 text-white" />
+                </div>
+                <p className="text-xs text-gray-600 dark:text-gray-400 font-medium">Trusted</p>
+              </div>
+            </div>
+
+            <div className="text-center mt-6">
+              <p className="text-base text-gray-600 dark:text-gray-400">
+                Don't have an account?{' '}
+                <Link
+                  to="/register"
+                  className="font-bold text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 transition-colors"
+                >
+                  Create one now
+                </Link>
+              </p>
+            </div>
+          </form>
+        </div>
+
+        {/* Trust Indicators */}
+        <div className="mt-6 text-center">
+          <div className="flex items-center justify-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              <span>SSL Protected</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse delay-300"></div>
+              <span>256-bit Encryption</span>
+            </div>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
