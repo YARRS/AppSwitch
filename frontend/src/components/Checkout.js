@@ -5,7 +5,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { 
   ShoppingCart, User, MapPin, CreditCard, Check, 
   AlertCircle, ArrowLeft, Package, Shield, Truck,
-  Phone, Mail, Edit3, Loader, CheckCircle2, Clock, Sparkles, Zap, Gift
+  Phone, Mail, Edit3, Loader, CheckCircle2, Clock, Sparkles, Zap, Gift,
+  Plus, Star, Home, Building
 } from 'lucide-react';
 import { validatePhoneNumber, formatPhoneNumber } from '../utils/phoneValidation';
 
