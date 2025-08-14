@@ -1037,104 +1037,109 @@ const ShippingForm = ({
       </div>
     )}
 
-    <div className="mt-8">
-      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-        Address Line 1 *
-      </label>
-      <input
-        type="text"
-        value={formData.shipping_address.address_line1}
-        onChange={(e) => handleInputChange('shipping_address', 'address_line1', e.target.value)}
-        className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-          errors.shipping_address_address_line1 ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
-        }`}
-        placeholder="Street address, apartment, suite, etc."
-      />
-      {errors.shipping_address_address_line1 && (
-        <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
-          <AlertCircle className="w-4 h-4" />
-          <span>{errors.shipping_address_address_line1}</span>
-        </p>
-      )}
-    </div>
+    {/* Show additional address fields for New Address or Guest Users */}
+    {(!isAuthenticated || useNewAddress) && (
+      <>
+        <div className="mt-8">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            Address Line 1 *
+          </label>
+          <input
+            type="text"
+            value={formData.shipping_address.address_line1}
+            onChange={(e) => handleInputChange('shipping_address', 'address_line1', e.target.value)}
+            className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+              errors.shipping_address_address_line1 ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
+            }`}
+            placeholder="Street address, apartment, suite, etc."
+          />
+          {errors.shipping_address_address_line1 && (
+            <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+              <AlertCircle className="w-4 h-4" />
+              <span>{errors.shipping_address_address_line1}</span>
+            </p>
+          )}
+        </div>
 
-    <div className="mt-6">
-      <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-        Address Line 2
-      </label>
-      <input
-        type="text"
-        value={formData.shipping_address.address_line2}
-        onChange={(e) => handleInputChange('shipping_address', 'address_line2', e.target.value)}
-        className="w-full px-4 py-4 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:text-white hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200"
-        placeholder="Additional address information (optional)"
-      />
-    </div>
+        <div className="mt-6">
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            Address Line 2
+          </label>
+          <input
+            type="text"
+            value={formData.shipping_address.address_line2}
+            onChange={(e) => handleInputChange('shipping_address', 'address_line2', e.target.value)}
+            className="w-full px-4 py-4 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:text-white hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-200"
+            placeholder="Additional address information (optional)"
+          />
+        </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-          City *
-        </label>
-        <input
-          type="text"
-          value={formData.shipping_address.city}
-          onChange={(e) => handleInputChange('shipping_address', 'city', e.target.value)}
-          className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-            errors.shipping_address_city ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
-          }`}
-          placeholder="City"
-        />
-        {errors.shipping_address_city && (
-          <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
-            <AlertCircle className="w-4 h-4" />
-            <span>{errors.shipping_address_city}</span>
-          </p>
-        )}
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              City *
+            </label>
+            <input
+              type="text"
+              value={formData.shipping_address.city}
+              onChange={(e) => handleInputChange('shipping_address', 'city', e.target.value)}
+              className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                errors.shipping_address_city ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
+              }`}
+              placeholder="City"
+            />
+            {errors.shipping_address_city && (
+              <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+                <AlertCircle className="w-4 h-4" />
+                <span>{errors.shipping_address_city}</span>
+              </p>
+            )}
+          </div>
 
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-          State *
-        </label>
-        <input
-          type="text"
-          value={formData.shipping_address.state}
-          onChange={(e) => handleInputChange('shipping_address', 'state', e.target.value)}
-          className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-            errors.shipping_address_state ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
-          }`}
-          placeholder="State"
-        />
-        {errors.shipping_address_state && (
-          <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
-            <AlertCircle className="w-4 h-4" />
-            <span>{errors.shipping_address_state}</span>
-          </p>
-        )}
-      </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              State *
+            </label>
+            <input
+              type="text"
+              value={formData.shipping_address.state}
+              onChange={(e) => handleInputChange('shipping_address', 'state', e.target.value)}
+              className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                errors.shipping_address_state ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
+              }`}
+              placeholder="State"
+            />
+            {errors.shipping_address_state && (
+              <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+                <AlertCircle className="w-4 h-4" />
+                <span>{errors.shipping_address_state}</span>
+              </p>
+            )}
+          </div>
 
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-          ZIP Code *
-        </label>
-        <input
-          type="text"
-          value={formData.shipping_address.zip_code}
-          onChange={(e) => handleInputChange('shipping_address', 'zip_code', e.target.value)}
-          className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-            errors.shipping_address_zip_code ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
-          }`}
-          placeholder="ZIP Code"
-        />
-        {errors.shipping_address_zip_code && (
-          <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
-            <AlertCircle className="w-4 h-4" />
-            <span>{errors.shipping_address_zip_code}</span>
-          </p>
-        )}
-      </div>
-    </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              ZIP Code *
+            </label>
+            <input
+              type="text"
+              value={formData.shipping_address.zip_code}
+              onChange={(e) => handleInputChange('shipping_address', 'zip_code', e.target.value)}
+              className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                errors.shipping_address_zip_code ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
+              }`}
+              placeholder="ZIP Code"
+            />
+            {errors.shipping_address_zip_code && (
+              <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+                <AlertCircle className="w-4 h-4" />
+                <span>{errors.shipping_address_zip_code}</span>
+              </p>
+            )}
+          </div>
+        </div>
+      </>
+    )}
 
     <div className="mt-10 flex justify-end">
       <button
