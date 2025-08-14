@@ -31,7 +31,8 @@ const Checkout = () => {
       city: '',
       state: '',
       zip_code: '',
-      country: 'India'
+      country: 'India',
+      tag_name: '' // For guest users to label their address
     },
     payment_method: 'COD',
     notes: '',
