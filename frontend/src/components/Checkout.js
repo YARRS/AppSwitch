@@ -379,7 +379,6 @@ const Checkout = () => {
           price: item.price,
           total_price: item.price * item.quantity
         })),
-        shipping_address: formData.shipping_address,
         total_amount: subtotal,
         tax_amount: taxAmount,
         shipping_cost: shippingCost,
@@ -389,6 +388,20 @@ const Checkout = () => {
         notes: formData.notes,
         customer_email: formData.customer_email
       };
+
+      // Handle address for authenticated users
+      if (isAuthenticated) {
+        if (selectedAddressId && !useNewAddress) {
+          // Use selected saved address
+          orderData.selected_address_id = selectedAddressId;
+        } else {
+          // Use new address provided in form
+          orderData.shipping_address = formData.shipping_address;
+        }
+      } else {
+        // For guest users, always use the shipping address from form
+        orderData.shipping_address = formData.shipping_address;
+      }
 
       // Choose endpoint based on authentication
       const endpoint = isAuthenticated ? '/api/orders/' : '/api/orders/guest';
