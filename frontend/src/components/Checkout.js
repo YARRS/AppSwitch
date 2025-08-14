@@ -735,7 +735,114 @@ const ShippingForm = ({
       <p className="text-gray-600 dark:text-gray-400 mt-2">Enter your delivery details</p>
     </div>
 
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {/* Address Selection for Authenticated Users */}
+    {isAuthenticated && (
+      <div className="mb-8 p-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-2xl shadow-lg">
+        <h3 className="text-lg font-bold text-purple-800 dark:text-purple-300 mb-4 flex items-center space-x-3">
+          <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center">
+            <Home className="w-4 h-4 text-white" />
+          </div>
+          <span>Select Delivery Address</span>
+        </h3>
+
+        {loadingAddresses ? (
+          <div className="text-center py-4">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600 mx-auto"></div>
+            <p className="text-purple-600 dark:text-purple-400 mt-2 text-sm">Loading your addresses...</p>
+          </div>
+        ) : addresses.length > 0 ? (
+          <div className="space-y-3">
+            {addresses.map((address) => (
+              <div
+                key={address.id}
+                className={`p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 ${
+                  selectedAddressId === address.id
+                    ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/30'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600'
+                }`}
+                onClick={() => handleAddressSelection(address.id)}
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      selectedAddressId === address.id
+                        ? 'border-purple-500 bg-purple-500'
+                        : 'border-gray-300 dark:border-gray-600'
+                    }`}>
+                      {selectedAddressId === address.id && (
+                        <div className="w-2 h-2 bg-white rounded-full"></div>
+                      )}
+                    </div>
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-semibold text-gray-900 dark:text-white">{address.tag_name}</span>
+                        {address.is_default && (
+                          <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Default</span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{address.full_name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-500">
+                        {address.address_line1}, {address.city}, {address.state} {address.zip_code}
+                      </p>
+                      <p className="text-sm text-gray-500 dark:text-gray-500">{address.phone}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {/* Add New Address Option */}
+            <div
+              className={`p-4 border-2 border-dashed rounded-xl cursor-pointer transition-all duration-200 ${
+                useNewAddress
+                  ? 'border-purple-500 bg-purple-100 dark:bg-purple-900/30'
+                  : 'border-gray-300 dark:border-gray-600 hover:border-purple-400 dark:hover:border-purple-500'
+              }`}
+              onClick={handleNewAddressToggle}
+            >
+              <div className="flex items-center space-x-3">
+                <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                  useNewAddress
+                    ? 'border-purple-500 bg-purple-500'
+                    : 'border-gray-300 dark:border-gray-600'
+                }`}>
+                  {useNewAddress && (
+                    <div className="w-2 h-2 bg-white rounded-full"></div>
+                  )}
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Plus className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  <span className="font-semibold text-purple-600 dark:text-purple-400">Add New Address</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="text-center py-6">
+            <MapPin className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+            <p className="text-gray-600 dark:text-gray-400 mb-4">No saved addresses found</p>
+            <button
+              type="button"
+              onClick={handleNewAddressToggle}
+              className="bg-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-purple-700 transition-colors inline-flex items-center space-x-2"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Add Your First Address</span>
+            </button>
+          </div>
+        )}
+
+        {errors.address_selection && (
+          <p className="text-red-500 text-sm mt-3 flex items-center space-x-1">
+            <AlertCircle className="w-4 h-4" />
+            <span>{errors.address_selection}</span>
+          </p>
+        )}
+      </div>
+    )}
+
+    {/* Show Address Form for New Address or Guest Users */}
+    {(!isAuthenticated || useNewAddress) && (
       <div>
         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
           Full Name *
