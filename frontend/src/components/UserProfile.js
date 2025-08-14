@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLocation } from 'react-router-dom';
-import { User, Mail, Phone, Shield, Calendar, AlertCircle, CheckCircle, Package, ShoppingCart, Clock, DollarSign, Eye, ArrowRight, Sparkles, Star, Gift, Zap, Settings } from 'lucide-react';
+import { User, Mail, Phone, Shield, Calendar, AlertCircle, CheckCircle, Package, ShoppingCart, Clock, DollarSign, Eye, ArrowRight, Sparkles, Star, Gift, Zap, Settings, MapPin } from 'lucide-react';
 import { decryptPhoneNumber } from '../utils/phoneDecryption';
+import AddressManagement from './AddressManagement';
 
 const UserProfile = () => {
   const { user, updateProfile, logout, getAuthenticatedAxios } = useAuth();
