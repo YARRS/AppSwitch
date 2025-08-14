@@ -120,11 +120,17 @@ const Checkout = () => {
     if (!shipping_address.full_name || !shipping_address.full_name.trim()) {
       newErrors.shipping_address_full_name = 'Full name is required';
     }
+    
+    // Use consistent phone validation
     if (!shipping_address.phone || !shipping_address.phone.trim()) {
       newErrors.shipping_address_phone = 'Phone number is required';
-    } else if (!/^\d{10}$/.test(shipping_address.phone.replace(/\D/g, ''))) {
-      newErrors.shipping_address_phone = 'Valid 10-digit phone number is required';
+    } else {
+      const phoneValidation = validatePhoneNumber(shipping_address.phone);
+      if (!phoneValidation.isValid) {
+        newErrors.shipping_address_phone = phoneValidation.error;
+      }
     }
+    
     if (!shipping_address.address_line1 || !shipping_address.address_line1.trim()) {
       newErrors.shipping_address_address_line1 = 'Address is required';
     }
@@ -137,7 +143,7 @@ const Checkout = () => {
     if (!shipping_address.zip_code || !shipping_address.zip_code.trim()) {
       newErrors.shipping_address_zip_code = 'ZIP code is required';
     } else if (!/^\d{6}$/.test(shipping_address.zip_code.replace(/\D/g, ''))) {
-      newErrors.shipping_address_zip_code = 'Valid 6-digit ZIP code is required(e.g., 380001)'
+      newErrors.shipping_address_zip_code = 'Valid 6-digit ZIP code is required (e.g., 380001)';
     }
 
     // Guest user validation
