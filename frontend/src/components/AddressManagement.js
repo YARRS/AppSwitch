@@ -453,9 +453,30 @@ const AddressManagement = () => {
                                 </button>
                             </div>
                         </div>
+                    </form>
+                </div>
+
+                {/* Modal Footer - Fixed */}
+                <div className="border-t border-gray-200 dark:border-gray-700 p-6">
+                    <div className="flex justify-end space-x-4">
+                        <button
+                            type="button"
+                            onClick={resetForm}
+                            className="px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            onClick={handleSubmit}
+                            disabled={loading}
+                            className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                        >
+                            {loading ? 'Saving...' : (editingAddress ? 'Update Address' : 'Add Address')}
+                        </button>
                     </div>
                 </div>
-            )}
+            </Modal>
 
             {/* Addresses List */}
             <div className="space-y-4">
