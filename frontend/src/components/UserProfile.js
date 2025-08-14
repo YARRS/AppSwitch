@@ -298,6 +298,10 @@ const UserProfile = () => {
                 formatDate={formatDate}
               />
             )}
+
+            {activeTab === 'addresses' && (
+              <AddressManagement />
+            )}
           </div>
         </div>
       </div>
