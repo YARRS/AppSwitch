@@ -8,6 +8,28 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 
+// Modal Component using Portal
+const Modal = ({ isOpen, onClose, children }) => {
+    if (!isOpen) return null;
+
+    const modalContent = (
+        <div 
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" 
+            style={{ zIndex: 10000 }}
+            onClick={onClose}
+        >
+            <div 
+                className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+            >
+                {children}
+            </div>
+        </div>
+    );
+
+    return ReactDOM.createPortal(modalContent, document.body);
+};
+
 const AddressManagement = () => {
     const { getAuthenticatedAxios } = useAuth();
     const [addresses, setAddresses] = useState([]);
