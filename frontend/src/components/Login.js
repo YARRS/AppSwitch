@@ -130,9 +130,16 @@ const Login = () => {
           setError(result.error);
         }
       } else if (loginType === 'phone') {
-        // Mobile OTP login
+        // Mobile OTP login - ensure consistent formatting
+        let formattedPhone = formData.identifier;
+        try {
+          formattedPhone = formatPhoneNumber(formData.identifier);
+        } catch (error) {
+          console.warn('Phone formatting error during login:', error.message);
+        }
+        
         const response = await axios.post(`${API_BASE_URL}/api/auth/login/mobile`, {
-          phone_number: formData.identifier,
+          phone_number: formattedPhone,
           otp: formData.otp
         });
 
