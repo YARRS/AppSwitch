@@ -52,6 +52,7 @@ from routes.dashboard import router as dashboard_router
 from routes.inquiries import router as inquiries_router
 from routes.uploads import router as uploads_router
 from routes.otp import router as otp_router
+from routes.addresses import router as addresses_router
 
 # Make db available globally for imports
 import sys
