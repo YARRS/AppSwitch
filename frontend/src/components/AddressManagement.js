@@ -230,8 +230,9 @@ const AddressManagement = () => {
             {/* Address Form Modal */}
             {showForm && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-                        <div className="flex justify-between items-center mb-6">
+                    <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+                        {/* Modal Header - Fixed */}
+                        <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
                             <h3 className="text-xl font-bold text-gray-900 dark:text-white">
                                 {editingAddress ? 'Edit Address' : 'Add New Address'}
                             </h3>
@@ -243,172 +244,177 @@ const AddressManagement = () => {
                             </button>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                {/* Tag Name */}
+                        {/* Modal Body - Scrollable */}
+                        <div className="flex-1 overflow-y-auto p-6">
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Tag Name */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Address Label *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="tag_name"
+                                            value={formData.tag_name}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                            placeholder="e.g., Home, Office, Mom's Place"
+                                            required
+                                        />
+                                    </div>
+
+                                    {/* Full Name */}
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            Full Name *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="full_name"
+                                            value={formData.full_name}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                            placeholder="Enter full name"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Phone */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Address Label *
+                                        Phone Number *
                                     </label>
                                     <input
-                                        type="text"
-                                        name="tag_name"
-                                        value={formData.tag_name}
+                                        type="tel"
+                                        name="phone"
+                                        value={formData.phone}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                        placeholder="e.g., Home, Office, Mom's Place"
+                                        placeholder="Enter phone number"
                                         required
                                     />
                                 </div>
 
-                                {/* Full Name */}
+                                {/* Address Lines */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        Full Name *
+                                        Address Line 1 *
                                     </label>
                                     <input
                                         type="text"
-                                        name="full_name"
-                                        value={formData.full_name}
+                                        name="address_line1"
+                                        value={formData.address_line1}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                        placeholder="Enter full name"
-                                        required
-                                    />
-                                </div>
-                            </div>
-
-                            {/* Phone */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Phone Number *
-                                </label>
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    value={formData.phone}
-                                    onChange={handleInputChange}
-                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                    placeholder="Enter phone number"
-                                    required
-                                />
-                            </div>
-
-                            {/* Address Lines */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Address Line 1 *
-                                </label>
-                                <input
-                                    type="text"
-                                    name="address_line1"
-                                    value={formData.address_line1}
-                                    onChange={handleInputChange}
-                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                    placeholder="Street address, apartment, suite, etc."
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Address Line 2
-                                </label>
-                                <input
-                                    type="text"
-                                    name="address_line2"
-                                    value={formData.address_line2}
-                                    onChange={handleInputChange}
-                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                    placeholder="Additional address information (optional)"
-                                />
-                            </div>
-
-                            {/* City, State, ZIP */}
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        City *
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="city"
-                                        value={formData.city}
-                                        onChange={handleInputChange}
-                                        className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                        placeholder="City"
+                                        placeholder="Street address, apartment, suite, etc."
                                         required
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        State *
+                                        Address Line 2
                                     </label>
                                     <input
                                         type="text"
-                                        name="state"
-                                        value={formData.state}
+                                        name="address_line2"
+                                        value={formData.address_line2}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                        placeholder="State"
-                                        required
+                                        placeholder="Additional address information (optional)"
                                     />
                                 </div>
 
+                                {/* City, State, ZIP */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            City *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="city"
+                                            value={formData.city}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                            placeholder="City"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            State *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="state"
+                                            value={formData.state}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                            placeholder="State"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            ZIP Code *
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="zip_code"
+                                            value={formData.zip_code}
+                                            onChange={handleInputChange}
+                                            className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+                                            placeholder="ZIP Code"
+                                            required
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Country */}
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                        ZIP Code *
+                                        Country *
                                     </label>
-                                    <input
-                                        type="text"
-                                        name="zip_code"
-                                        value={formData.zip_code}
+                                    <select
+                                        name="country"
+                                        value={formData.country}
                                         onChange={handleInputChange}
                                         className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                        placeholder="ZIP Code"
                                         required
-                                    />
+                                    >
+                                        <option value="India">India</option>
+                                        <option value="USA">USA</option>
+                                        <option value="UK">UK</option>
+                                        <option value="Canada">Canada</option>
+                                        <option value="Australia">Australia</option>
+                                    </select>
                                 </div>
-                            </div>
 
-                            {/* Country */}
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                    Country *
-                                </label>
-                                <select
-                                    name="country"
-                                    value={formData.country}
-                                    onChange={handleInputChange}
-                                    className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                                    required
-                                >
-                                    <option value="India">India</option>
-                                    <option value="USA">USA</option>
-                                    <option value="UK">UK</option>
-                                    <option value="Canada">Canada</option>
-                                    <option value="Australia">Australia</option>
-                                </select>
-                            </div>
+                                {/* Default Address Checkbox */}
+                                <div className="flex items-center space-x-3">
+                                    <input
+                                        type="checkbox"
+                                        name="is_default"
+                                        id="is_default"
+                                        checked={formData.is_default}
+                                        onChange={handleInputChange}
+                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                    />
+                                    <label htmlFor="is_default" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Set as default address
+                                    </label>
+                                </div>
+                            </form>
+                        </div>
 
-                            {/* Default Address Checkbox */}
-                            <div className="flex items-center space-x-3">
-                                <input
-                                    type="checkbox"
-                                    name="is_default"
-                                    id="is_default"
-                                    checked={formData.is_default}
-                                    onChange={handleInputChange}
-                                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                                />
-                                <label htmlFor="is_default" className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Set as default address
-                                </label>
-                            </div>
-
-                            {/* Form Actions */}
-                            <div className="flex justify-end space-x-4 pt-4">
+                        {/* Modal Footer - Fixed */}
+                        <div className="border-t border-gray-200 dark:border-gray-700 p-6">
+                            <div className="flex justify-end space-x-4">
                                 <button
                                     type="button"
                                     onClick={resetForm}
@@ -418,13 +424,14 @@ const AddressManagement = () => {
                                 </button>
                                 <button
                                     type="submit"
+                                    onClick={handleSubmit}
                                     disabled={loading}
                                     className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     {loading ? 'Saving...' : (editingAddress ? 'Update Address' : 'Add Address')}
                                 </button>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             )}
