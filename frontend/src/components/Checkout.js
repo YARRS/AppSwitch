@@ -88,8 +88,64 @@ const Checkout = () => {
         customer_email: user.email || '',
         customer_phone: user.phone || ''
       }));
+      
+      // Fetch user's saved addresses
+      fetchUserAddresses();
     }
   }, [isAuthenticated, user]);
+
+  // Fetch user's saved addresses
+  const fetchUserAddresses = async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      setLoadingAddresses(true);
+      const axios = getAuthenticatedAxios();
+      const response = await axios.get('/api/addresses/');
+      
+      if (response.data.success) {
+        const userAddresses = response.data.data || [];
+        setAddresses(userAddresses);
+        
+        // Auto-select default address if available
+        const defaultAddress = userAddresses.find(addr => addr.is_default);
+        if (defaultAddress && !selectedAddressId) {
+          setSelectedAddressId(defaultAddress.id);
+          setUseNewAddress(false);
+        } else if (userAddresses.length === 0) {
+          // If no addresses, show new address form
+          setUseNewAddress(true);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch addresses:', error);
+    } finally {
+      setLoadingAddresses(false);
+    }
+  };
+
+  // Handle address selection
+  const handleAddressSelection = (addressId) => {
+    setSelectedAddressId(addressId);
+    setUseNewAddress(false);
+    
+    // Clear any address-related errors
+    setErrors(prev => {
+      const newErrors = { ...prev };
+      Object.keys(newErrors).forEach(key => {
+        if (key.startsWith('shipping_address_')) {
+          delete newErrors[key];
+        }
+      });
+      return newErrors;
+    });
+  };
+
+  // Handle new address toggle
+  const handleNewAddressToggle = () => {
+    setUseNewAddress(true);
+    setSelectedAddressId(null);
+  };
 
   // Handle input changes
   const handleInputChange = (section, field, value) => {
