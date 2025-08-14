@@ -221,6 +221,23 @@ const UserProfile = () => {
                   <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white rounded-full"></div>
                 )}
               </button>
+
+              <button
+                onClick={() => setActiveTab('addresses')}
+                className={`group relative py-4 px-6 font-semibold text-lg transition-all duration-300 rounded-xl ${
+                  activeTab === 'addresses'
+                    ? 'text-white bg-gradient-to-r from-purple-600 to-pink-600 shadow-lg transform scale-105'
+                    : 'text-gray-500 hover:text-purple-600 dark:text-gray-400 dark:hover:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20'
+                }`}
+              >
+                <div className="flex items-center space-x-3">
+                  <MapPin className="w-6 h-6" />
+                  <span>My Addresses</span>
+                </div>
+                {activeTab === 'addresses' && (
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-8 h-1 bg-white rounded-full"></div>
+                )}
+              </button>
             </nav>
           </div>
 
