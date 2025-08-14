@@ -61,17 +61,16 @@ class OrderService:
             
             if existing_user:
                 # Update the full_name if provided and different
-                if full_name and full_name != existing_user.get("full_name"):
-                    await self.users_collection.update_one(
-                        {"id": existing_user["id"]},
-                        {"$set": {"full_name": full_name, "updated_at": datetime.utcnow()}}
+                if full_name and full_name != existing_user.full_name:
+                    await user_service.update_user(
+                        existing_user.id,
+                        {"full_name": full_name}
                     )
-                    existing_user["full_name"] = full_name
+                    existing_user.full_name = full_name
                 
-                return UserInDB(**existing_user)
+                return existing_user
             
             # Create new user using UserService for consistency
-            from auth import UserService
             
             # Generate username based on full_name or phone
             if full_name:
