@@ -238,7 +238,7 @@ const Checkout = () => {
       if (!shipping_address.city || !shipping_address.city.trim()) {
         newErrors.shipping_address_city = 'City is required';
       }
-      if (!shipping_address.state || !shipping_address.state.trip()) {
+      if (!shipping_address.state || !shipping_address.state.trim()) {
         newErrors.shipping_address_state = 'State is required';
       }
       if (!shipping_address.zip_code || !shipping_address.zip_code.trim()) {
