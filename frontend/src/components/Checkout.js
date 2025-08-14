@@ -189,6 +189,13 @@ const Checkout = () => {
       return;
     }
 
+    // Validate and format phone number before sending OTP
+    const phoneValidation = validatePhoneNumber(phoneNumber);
+    if (!phoneValidation.isValid) {
+      setErrors(prev => ({ ...prev, shipping_address_phone: phoneValidation.error }));
+      return;
+    }
+
     setOtpState(prev => ({ ...prev, sendingOtp: true, otpError: '' }));
 
     try {
@@ -196,12 +203,15 @@ const Checkout = () => {
       const response = await fetch(`${API_BASE_URL}/api/otp/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone_number: phoneNumber })
+        body: JSON.stringify({ phone_number: phoneValidation.formatted }) // Use formatted phone
       });
 
       const result = await response.json();
 
       if (response.ok && result.success) {
+        // Update form data with properly formatted phone
+        handleInputChange('shipping_address', 'phone', phoneValidation.formatted);
+        
         setOtpState(prev => ({
           ...prev,
           otpSent: true,
