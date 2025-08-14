@@ -218,6 +218,12 @@ const Checkout = () => {
       }
     } else {
       // For guest users, always validate shipping address
+      
+      // Address tag validation for guest users
+      if (!shipping_address.tag_name || !shipping_address.tag_name.trim()) {
+        newErrors.shipping_address_tag_name = 'Address label is required';
+      }
+      
       if (!shipping_address.full_name || !shipping_address.full_name.trim()) {
         newErrors.shipping_address_full_name = 'Full name is required';
       }
