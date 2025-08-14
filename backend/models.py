@@ -654,3 +654,37 @@ class BulkProductReassignment(BaseModel):
     new_assignee: str
     reason: ReallocationReason
     notes: Optional[str] = None
+
+# Address Management Models
+class AddressBase(BaseModel):
+    tag_name: str  # e.g., "Home", "Office", "Mom's Place"
+    full_name: str
+    phone: str
+    address_line1: str
+    address_line2: Optional[str] = None
+    city: str
+    state: str
+    zip_code: str
+    country: str = "India"
+    is_default: Optional[bool] = False
+
+class AddressCreate(AddressBase):
+    pass
+
+class AddressUpdate(BaseModel):
+    tag_name: Optional[str] = None
+    full_name: Optional[str] = None
+    phone: Optional[str] = None
+    address_line1: Optional[str] = None
+    address_line2: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip_code: Optional[str] = None
+    country: Optional[str] = None
+    is_default: Optional[bool] = None
+
+class AddressInDB(AddressBase, BaseDocument):
+    user_id: str
+
+class AddressResponse(AddressBase, BaseDocument):
+    user_id: str
