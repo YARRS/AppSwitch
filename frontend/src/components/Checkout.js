@@ -714,7 +714,14 @@ const ShippingForm = ({
   setOtpState, 
   sendOtp, 
   verifyOtp, 
-  onNext 
+  onNext,
+  // Address selection props
+  addresses,
+  selectedAddressId,
+  useNewAddress,
+  loadingAddresses,
+  handleAddressSelection,
+  handleNewAddressToggle
 }) => (
   <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-2xl p-8 border border-white/20 dark:border-gray-700/20">
     {/* Header */}
