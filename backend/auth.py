@@ -252,21 +252,24 @@ class UserService:
     async def get_user_by_phone(self, phone: str) -> Optional[UserInDB]:
         """Get user by phone number (handles both encrypted and plain phone numbers)"""
         try:
-            # Clean and format the phone number
+            # Clean and format the phone number consistently
             clean_phone = AuthService.format_phone_number(phone)
+            print(f"Looking for user with formatted phone: {clean_phone} (original: {phone})")
             
             # Strategy 1: Try to find by exact encrypted match (unlikely to work with Fernet)
             try:
                 encrypted_phone = AuthService.encrypt_sensitive_data(clean_phone)
                 user_doc = await self.users_collection.find_one({"phone": encrypted_phone})
                 if user_doc:
+                    print(f"Found user by encrypted phone match: {user_doc.get('username', 'N/A')}")
                     return UserInDB(**user_doc)
-            except:
-                pass
+            except Exception as e:
+                print(f"Encrypted phone lookup failed: {e}")
             
             # Strategy 2: Try to find by plain phone (for legacy/unencrypted data)
             user_doc = await self.users_collection.find_one({"phone": clean_phone})
             if user_doc:
+                print(f"Found user by plain phone match: {user_doc.get('username', 'N/A')}")
                 # Update to encrypted phone for consistency
                 try:
                     encrypted_phone = AuthService.encrypt_sensitive_data(clean_phone)
@@ -275,11 +278,13 @@ class UserService:
                         {"$set": {"phone": encrypted_phone, "updated_at": datetime.utcnow()}}
                     )
                     user_doc["phone"] = encrypted_phone
-                except:
-                    pass
+                    print(f"Updated user {user_doc.get('username', 'N/A')} phone to encrypted format")
+                except Exception as e:
+                    print(f"Failed to encrypt phone for user {user_doc.get('username', 'N/A')}: {e}")
                 return UserInDB(**user_doc)
             
             # Strategy 3: Decrypt all phone numbers and compare (required for Fernet encryption)
+            print(f"Attempting comprehensive phone search by decrypting all stored phones...")
             users_cursor = self.users_collection.find({}, {"id": 1, "email": 1, "phone": 1, "username": 1, "full_name": 1, "role": 1, "is_active": 1, "hashed_password": 1, "email_verified": 1, "last_login": 1, "created_at": 1, "updated_at": 1, "store_owner_id": 1, "needs_password_setup": 1})
             users = await users_cursor.to_list(length=1000)  # Reasonable limit
             
@@ -291,12 +296,23 @@ class UserService:
                 try:
                     # Try to decrypt the stored phone
                     decrypted_phone = AuthService.decrypt_sensitive_data(stored_phone)
-                    if decrypted_phone == clean_phone:
+                    # Format the decrypted phone to ensure consistent comparison
+                    formatted_decrypted = AuthService.format_phone_number(decrypted_phone)
+                    if formatted_decrypted == clean_phone:
+                        print(f"Found user by decrypted phone match: {user_doc.get('username', 'N/A')} (stored: {decrypted_phone} → formatted: {formatted_decrypted})")
                         return UserInDB(**user_doc)
-                except:
+                except Exception as e:
                     # If decryption fails, maybe it's plain text
-                    if stored_phone == clean_phone:
-                        return UserInDB(**user_doc)
+                    try:
+                        formatted_stored = AuthService.format_phone_number(stored_phone)
+                        if formatted_stored == clean_phone:
+                            print(f"Found user by plain phone format match: {user_doc.get('username', 'N/A')} (stored: {stored_phone} → formatted: {formatted_stored})")
+                            return UserInDB(**user_doc)
+                    except:
+                        # Last resort: direct comparison
+                        if stored_phone == clean_phone:
+                            print(f"Found user by direct phone match: {user_doc.get('username', 'N/A')} (stored: {stored_phone})")
+                            return UserInDB(**user_doc)
             
             # Strategy 4: Try some variations if not found
             # This handles cases where phone might be stored in different formats
