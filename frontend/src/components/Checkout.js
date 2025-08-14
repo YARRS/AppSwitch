@@ -7,6 +7,7 @@ import {
   AlertCircle, ArrowLeft, Package, Shield, Truck,
   Phone, Mail, Edit3, Loader, CheckCircle2, Clock, Sparkles, Zap, Gift
 } from 'lucide-react';
+import { validatePhoneNumber, formatPhoneNumber } from '../utils/phoneValidation';
 
 const Checkout = () => {
   const navigate = useNavigate();
