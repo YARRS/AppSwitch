@@ -455,6 +455,47 @@ async def create_guest_order(
             full_name=order_data.shipping_address.full_name  # Use the name from shipping address
         )
         
+        # Save shipping address as user address if it's a new user or doesn't have this address
+        from routes.addresses import AddressService
+        address_service = AddressService()
+        
+        # Check if user already has this address
+        existing_addresses = order_service.addresses_collection.find({"user_id": user.id})
+        address_exists = False
+        async for addr in existing_addresses:
+            if (addr.get("address_line1") == order_data.shipping_address.address_line1 and
+                addr.get("city") == order_data.shipping_address.city and
+                addr.get("state") == order_data.shipping_address.state and
+                addr.get("zip_code") == order_data.shipping_address.zip_code):
+                address_exists = True
+                break
+        
+        # Save address if it doesn't exist
+        if not address_exists:
+            # Determine if this should be the default address (first address for user)
+            user_address_count = await order_service.addresses_collection.count_documents({"user_id": user.id})
+            is_default = user_address_count == 0
+            
+            # Create address document
+            address_data = {
+                "id": str(uuid.uuid4()),
+                "user_id": user.id,
+                "tag_name": "Home",  # Default tag for guest orders
+                "full_name": order_data.shipping_address.full_name,
+                "phone": order_data.shipping_address.phone,
+                "address_line1": order_data.shipping_address.address_line1,
+                "address_line2": order_data.shipping_address.address_line2 or "",
+                "city": order_data.shipping_address.city,
+                "state": order_data.shipping_address.state,
+                "zip_code": order_data.shipping_address.zip_code,
+                "country": getattr(order_data.shipping_address, 'country', 'India'),
+                "is_default": is_default,
+                "created_at": datetime.utcnow(),
+                "updated_at": datetime.utcnow()
+            }
+            
+            await order_service.addresses_collection.insert_one(address_data)
+        
         # Create order data
         order_dict = order_data.dict()
         order_dict["user_id"] = user.id
