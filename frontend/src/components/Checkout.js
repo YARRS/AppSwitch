@@ -13,7 +13,13 @@ import { validatePhoneNumber, formatPhoneNumber } from '../utils/phoneValidation
 const Checkout = () => {
   const navigate = useNavigate();
   const { cart, loading: cartLoading, clearCart } = useCart();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, getAuthenticatedAxios } = useAuth();
+  
+  // Address management state
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [useNewAddress, setUseNewAddress] = useState(false);
+  const [loadingAddresses, setLoadingAddresses] = useState(false);
   
   // Form state
   const [formData, setFormData] = useState({
