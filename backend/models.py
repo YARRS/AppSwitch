@@ -416,7 +416,8 @@ class OrderCreate(OrderBase):
 class AuthenticatedOrderCreate(BaseModel):
     """Order creation model for authenticated users (user_id extracted from JWT)"""
     items: List[OrderItem]
-    shipping_address: ShippingAddress
+    shipping_address: Optional[ShippingAddress] = None  # Optional if using saved address
+    selected_address_id: Optional[str] = None  # ID of saved address to use
     total_amount: float
     tax_amount: float = 0.0
     shipping_cost: float = 0.0
