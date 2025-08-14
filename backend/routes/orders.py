@@ -362,9 +362,50 @@ async def create_order(
         # Validate order items
         await order_service.validate_order_items(order_data.items)
         
-        # Add user_id to order data (extracted from JWT token)
+        # Prepare order data
         order_dict = order_data.dict()
         order_dict["user_id"] = current_user.id
+        
+        # Handle address selection - either use saved address or provided address
+        if order_data.selected_address_id:
+            # Get saved address
+            from routes.addresses import AddressService
+            address_service = AddressService(db)
+            saved_address = await address_service.get_address_by_id(
+                order_data.selected_address_id, 
+                current_user.id
+            )
+            
+            if not saved_address:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Selected address not found"
+                )
+            
+            # Convert saved address to ShippingAddress format
+            shipping_address = ShippingAddress(
+                full_name=saved_address.full_name,
+                phone=saved_address.phone,
+                address_line1=saved_address.address_line1,
+                address_line2=saved_address.address_line2,
+                city=saved_address.city,
+                state=saved_address.state,
+                zip_code=saved_address.zip_code,
+                country=saved_address.country
+            )
+            order_dict["shipping_address"] = shipping_address.dict()
+            
+        elif order_data.shipping_address:
+            # Use provided shipping address
+            order_dict["shipping_address"] = order_data.shipping_address.dict()
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Either shipping_address or selected_address_id must be provided"
+            )
+        
+        # Remove selected_address_id from order dict as it's not part of OrderInDB
+        order_dict.pop("selected_address_id", None)
         
         # Create order
         order = await order_service.create_order(current_user.id, order_dict)
