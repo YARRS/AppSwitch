@@ -843,72 +843,74 @@ const ShippingForm = ({
 
     {/* Show Address Form for New Address or Guest Users */}
     {(!isAuthenticated || useNewAddress) && (
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-          Full Name *
-        </label>
-        <input
-          type="text"
-          value={formData.shipping_address.full_name}
-          onChange={(e) => handleInputChange('shipping_address', 'full_name', e.target.value)}
-          className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-            errors.shipping_address_full_name ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
-          }`}
-          placeholder="Enter your full name"
-        />
-        {errors.shipping_address_full_name && (
-          <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
-            <AlertCircle className="w-4 h-4" />
-            <span>{errors.shipping_address_full_name}</span>
-          </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+            Full Name *
+          </label>
+          <input
+            type="text"
+            value={formData.shipping_address.full_name}
+            onChange={(e) => handleInputChange('shipping_address', 'full_name', e.target.value)}
+            className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+              errors.shipping_address_full_name ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
+            }`}
+            placeholder="Enter your full name"
+          />
+          {errors.shipping_address_full_name && (
+            <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+              <AlertCircle className="w-4 h-4" />
+              <span>{errors.shipping_address_full_name}</span>
+            </p>
+          )}
+        </div>
+
+        {/* Contact Information Section - Combined Email and Phone */}
+        {!isAuthenticated ? (
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Email Address *
+            </label>
+            <input
+              type="email"
+              value={formData.customer_email}
+              onChange={(e) => handleInputChange(null, 'customer_email', e.target.value)}
+              className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                errors.customer_email ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
+              }`}
+              placeholder="Email for order updates"
+            />
+            {errors.customer_email && (
+              <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+                <AlertCircle className="w-4 h-4" />
+                <span>{errors.customer_email}</span>
+              </p>
+            )}
+          </div>
+        ) : (
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Phone Number *
+            </label>
+            <input
+              type="tel"
+              value={formData.shipping_address.phone}
+              onChange={(e) => handleInputChange('shipping_address', 'phone', e.target.value)}
+              className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                errors.shipping_address_phone ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
+              }`}
+              placeholder="Enter phone number"
+            />
+            {errors.shipping_address_phone && (
+              <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+                <AlertCircle className="w-4 h-4" />
+                <span>{errors.shipping_address_phone}</span>
+              </p>
+            )}
+          </div>
         )}
       </div>
-
-      {/* Contact Information Section - Combined Email and Phone */}
-      {!isAuthenticated ? (
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-            Email Address *
-          </label>
-          <input
-            type="email"
-            value={formData.customer_email}
-            onChange={(e) => handleInputChange(null, 'customer_email', e.target.value)}
-            className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-              errors.customer_email ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
-            }`}
-            placeholder="Email for order updates"
-          />
-          {errors.customer_email && (
-            <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
-              <AlertCircle className="w-4 h-4" />
-              <span>{errors.customer_email}</span>
-            </p>
-          )}
-        </div>
-      ) : (
-        <div>
-          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
-            Phone Number *
-          </label>
-          <input
-            type="tel"
-            value={formData.shipping_address.phone}
-            onChange={(e) => handleInputChange('shipping_address', 'phone', e.target.value)}
-            className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
-              errors.shipping_address_phone ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
-            }`}
-            placeholder="Enter phone number"
-          />
-          {errors.shipping_address_phone && (
-            <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
-              <AlertCircle className="w-4 h-4" />
-              <span>{errors.shipping_address_phone}</span>
-            </p>
-          )}
-        </div>
-      )}
-    </div>
+    )}
 
     {/* Phone Number Section for Guest Users with OTP */}
     {!isAuthenticated && (
