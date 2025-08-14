@@ -42,29 +42,22 @@ class OrderService:
     async def find_or_create_user_by_phone(self, phone_number: str, customer_email: Optional[str] = None, full_name: Optional[str] = None) -> UserInDB:
         """Find existing user by phone or create new one"""
         try:
-            # Clean phone number
-            clean_phone = re.sub(r'\D', '', phone_number)
-            if len(clean_phone) >= 10:
-                clean_phone = clean_phone[-10:]  # Take last 10 digits
+            # Use consistent phone formatting from AuthService
+            from auth import AuthService, UserService
             
-            # Try to find existing user by phone (check both encrypted and plain phone numbers)
-            from auth import AuthService
-            encrypted_phone = AuthService.encrypt_sensitive_data(clean_phone)
+            # Format phone number using the same logic as the login system
+            try:
+                clean_phone = AuthService.format_phone_number(phone_number)
+            except ValueError as e:
+                # If formatting fails, fall back to simple cleaning but log the issue
+                print(f"Phone formatting failed for '{phone_number}': {e}")
+                clean_phone = re.sub(r'\D', '', phone_number)
+                if len(clean_phone) >= 10:
+                    clean_phone = clean_phone[-10:]  # Take last 10 digits
             
-            # First try to find by encrypted phone (normal users)
-            existing_user = await self.users_collection.find_one({"phone": encrypted_phone})
-            
-            # If not found, try to find by plain phone (for existing guest users)
-            if not existing_user:
-                existing_user = await self.users_collection.find_one({"phone": clean_phone})
-                
-                # If found with plain phone, encrypt it for consistency
-                if existing_user:
-                    await self.users_collection.update_one(
-                        {"id": existing_user["id"]},
-                        {"$set": {"phone": encrypted_phone, "updated_at": datetime.utcnow()}}
-                    )
-                    existing_user["phone"] = encrypted_phone
+            # Try to find existing user by phone using UserService (which handles format variations)
+            user_service = UserService(self.db)
+            existing_user = await user_service.get_user_by_phone(clean_phone)
             
             if existing_user:
                 # Update the full_name if provided and different
