@@ -83,15 +83,24 @@ const Login = () => {
 
   const sendOTP = async (phoneNumber) => {
     try {
+      // Ensure consistent phone formatting
+      let formattedPhone = phoneNumber;
+      try {
+        formattedPhone = formatPhoneNumber(phoneNumber);
+      } catch (error) {
+        console.warn('Phone formatting error in login:', error.message);
+        // Continue with original phone number if formatting fails
+      }
+      
       const response = await axios.post(`${API_BASE_URL}/api/otp/send`, {
-        phone_number: phoneNumber
+        phone_number: formattedPhone
       });
 
       if (response.data.success) {
         setOtpSent(true);
         setError(''); // Clear any previous errors
         // Show success message temporarily
-        const successMsg = `OTP sent to ${phoneNumber}. Use 123456 for testing.`;
+        const successMsg = `OTP sent to ${formattedPhone}. Use 123456 for testing.`;
         setError(''); // We'll show success in a different way
       }
     } catch (err) {
