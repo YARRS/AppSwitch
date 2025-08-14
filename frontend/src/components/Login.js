@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Eye, EyeOff, Mail, Lock, AlertCircle, Phone, Key, ArrowLeft, Sparkles, Zap, Heart, Shield } from 'lucide-react';
+import { formatPhoneNumber, validatePhoneNumber } from '../utils/phoneValidation';
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
