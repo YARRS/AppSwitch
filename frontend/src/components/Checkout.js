@@ -250,6 +250,14 @@ const Checkout = () => {
       return;
     }
 
+    // Ensure phone number is properly formatted
+    let formattedPhone = phoneNumber;
+    try {
+      formattedPhone = formatPhoneNumber(phoneNumber);
+    } catch (error) {
+      console.warn('Phone formatting error:', error.message);
+    }
+
     setOtpState(prev => ({ ...prev, verifyingOtp: true, otpError: '' }));
 
     try {
@@ -257,7 +265,7 @@ const Checkout = () => {
       const response = await fetch(`${API_BASE_URL}/api/otp/verify`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone_number: phoneNumber, otp })
+        body: JSON.stringify({ phone_number: formattedPhone, otp })
       });
 
       const result = await response.json();
