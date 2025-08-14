@@ -381,9 +381,11 @@ class UserService:
             
         except ValueError as e:
             # Invalid phone format
+            print(f"Invalid phone format '{phone}': {e}")
             return None
         except Exception as e:
             # Other errors in processing
+            print(f"Error in phone lookup for '{phone}': {e}")
             return None
     
     async def create_user(self, user_data: dict) -> UserInDB:
