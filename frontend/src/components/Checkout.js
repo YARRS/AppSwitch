@@ -179,38 +179,75 @@ const Checkout = () => {
     const newErrors = {};
     const { shipping_address } = formData;
 
-    // Shipping address validation
-    if (!shipping_address.full_name || !shipping_address.full_name.trim()) {
-      newErrors.shipping_address_full_name = 'Full name is required';
-    }
-    
-    // Use consistent phone validation
-    if (!shipping_address.phone || !shipping_address.phone.trim()) {
-      newErrors.shipping_address_phone = 'Phone number is required';
-    } else {
-      const phoneValidation = validatePhoneNumber(shipping_address.phone);
-      if (!phoneValidation.isValid) {
-        newErrors.shipping_address_phone = phoneValidation.error;
+    // For authenticated users, check address selection
+    if (isAuthenticated) {
+      if (!selectedAddressId && !useNewAddress) {
+        newErrors.address_selection = 'Please select an address or choose to add a new one';
       }
-    }
-    
-    if (!shipping_address.address_line1 || !shipping_address.address_line1.trim()) {
-      newErrors.shipping_address_address_line1 = 'Address is required';
-    }
-    if (!shipping_address.city || !shipping_address.city.trim()) {
-      newErrors.shipping_address_city = 'City is required';
-    }
-    if (!shipping_address.state || !shipping_address.state.trim()) {
-      newErrors.shipping_address_state = 'State is required';
-    }
-    if (!shipping_address.zip_code || !shipping_address.zip_code.trim()) {
-      newErrors.shipping_address_zip_code = 'ZIP code is required';
-    } else if (!/^\d{6}$/.test(shipping_address.zip_code.replace(/\D/g, ''))) {
-      newErrors.shipping_address_zip_code = 'Valid 6-digit ZIP code is required (e.g., 380001)';
-    }
+      
+      // If using new address, validate the form fields
+      if (useNewAddress) {
+        if (!shipping_address.full_name || !shipping_address.full_name.trim()) {
+          newErrors.shipping_address_full_name = 'Full name is required';
+        }
+        
+        // Use consistent phone validation
+        if (!shipping_address.phone || !shipping_address.phone.trim()) {
+          newErrors.shipping_address_phone = 'Phone number is required';
+        } else {
+          const phoneValidation = validatePhoneNumber(shipping_address.phone);
+          if (!phoneValidation.isValid) {
+            newErrors.shipping_address_phone = phoneValidation.error;
+          }
+        }
+        
+        if (!shipping_address.address_line1 || !shipping_address.address_line1.trim()) {
+          newErrors.shipping_address_address_line1 = 'Address is required';
+        }
+        if (!shipping_address.city || !shipping_address.city.trim()) {
+          newErrors.shipping_address_city = 'City is required';
+        }
+        if (!shipping_address.state || !shipping_address.state.trim()) {
+          newErrors.shipping_address_state = 'State is required';
+        }
+        if (!shipping_address.zip_code || !shipping_address.zip_code.trim()) {
+          newErrors.shipping_address_zip_code = 'ZIP code is required';
+        } else if (!/^\d{6}$/.test(shipping_address.zip_code.replace(/\D/g, ''))) {
+          newErrors.shipping_address_zip_code = 'Valid 6-digit ZIP code is required (e.g., 380001)';
+        }
+      }
+    } else {
+      // For guest users, always validate shipping address
+      if (!shipping_address.full_name || !shipping_address.full_name.trim()) {
+        newErrors.shipping_address_full_name = 'Full name is required';
+      }
+      
+      // Use consistent phone validation
+      if (!shipping_address.phone || !shipping_address.phone.trim()) {
+        newErrors.shipping_address_phone = 'Phone number is required';
+      } else {
+        const phoneValidation = validatePhoneNumber(shipping_address.phone);
+        if (!phoneValidation.isValid) {
+          newErrors.shipping_address_phone = phoneValidation.error;
+        }
+      }
+      
+      if (!shipping_address.address_line1 || !shipping_address.address_line1.trim()) {
+        newErrors.shipping_address_address_line1 = 'Address is required';
+      }
+      if (!shipping_address.city || !shipping_address.city.trim()) {
+        newErrors.shipping_address_city = 'City is required';
+      }
+      if (!shipping_address.state || !shipping_address.state.trip()) {
+        newErrors.shipping_address_state = 'State is required';
+      }
+      if (!shipping_address.zip_code || !shipping_address.zip_code.trim()) {
+        newErrors.shipping_address_zip_code = 'ZIP code is required';
+      } else if (!/^\d{6}$/.test(shipping_address.zip_code.replace(/\D/g, ''))) {
+        newErrors.shipping_address_zip_code = 'Valid 6-digit ZIP code is required (e.g., 380001)';
+      }
 
-    // Guest user validation
-    if (!isAuthenticated) {
+      // Guest user validation
       if (!formData.customer_email || !formData.customer_email.trim()) {
         newErrors.customer_email = 'Email is required for order updates';
       } else if (!/\S+@\S+\.\S+/.test(formData.customer_email)) {
