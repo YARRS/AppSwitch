@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { 
     MapPin, Plus, Edit, Trash2, Home, Building, Heart, 
