@@ -314,27 +314,43 @@ class UserService:
                             print(f"Found user by direct phone match: {user_doc.get('username', 'N/A')} (stored: {stored_phone})")
                             return UserInDB(**user_doc)
             
-            # Strategy 4: Try some variations if not found
-            # This handles cases where phone might be stored in different formats
+            # Strategy 4: Try format variations if not found
+            print(f"No direct match found, trying format variations...")
             possible_formats = set()
             
-            # For 10-digit numbers, try with +1 prefix (US format)
+            # For 10-digit numbers, try with +1 prefix (US format) and +91 (Indian format)
             if len(clean_phone) == 10 and not clean_phone.startswith('+'):
                 possible_formats.add(f"+1{clean_phone}")
+                possible_formats.add(f"+91{clean_phone}")
+                possible_formats.add(f"91{clean_phone}")
+                possible_formats.add(f"0{clean_phone}")
                 
             # For 11-digit numbers starting with 1, try without the 1
             elif len(clean_phone) == 11 and clean_phone.startswith('1'):
                 possible_formats.add(clean_phone[1:])
                 
+            # For 12-digit numbers starting with 91, try without 91 
+            elif len(clean_phone) == 12 and clean_phone.startswith('91'):
+                possible_formats.add(clean_phone[2:])
+                
             # For +1 format, try without +
             elif clean_phone.startswith('+1'):
                 possible_formats.add(clean_phone[2:])  # Remove +1
                 possible_formats.add(clean_phone[1:])   # Remove just +
+                
+            # For +91 format, try without +91
+            elif clean_phone.startswith('+91'):
+                possible_formats.add(clean_phone[3:])  # Remove +91
+                possible_formats.add(clean_phone[1:])   # Remove just +
+            
+            print(f"Trying variations: {possible_formats}")
             
             # Try to find with these alternate formats using the same decrypt-all approach
             for alt_phone in possible_formats:
                 if alt_phone == clean_phone:
                     continue  # Already tried this
+                
+                print(f"Searching for variation: {alt_phone}")
                     
                 # Use the same decrypt-all approach for variations
                 for user_doc in users:
@@ -344,12 +360,23 @@ class UserService:
                     
                     try:
                         decrypted_phone = AuthService.decrypt_sensitive_data(stored_phone)
-                        if decrypted_phone == alt_phone:
-                            return UserInDB(**user_doc)
+                        # Also try formatting the decrypted phone to match
+                        try:
+                            formatted_decrypted = AuthService.format_phone_number(decrypted_phone)
+                            if formatted_decrypted == alt_phone or decrypted_phone == alt_phone:
+                                print(f"Found user by variation match: {user_doc.get('username', 'N/A')} (stored: {decrypted_phone}, looking for: {alt_phone})")
+                                return UserInDB(**user_doc)
+                        except:
+                            if decrypted_phone == alt_phone:
+                                print(f"Found user by direct variation match: {user_doc.get('username', 'N/A')}")
+                                return UserInDB(**user_doc)
                     except:
+                        # If decryption fails, try direct comparison
                         if stored_phone == alt_phone:
+                            print(f"Found user by stored variation match: {user_doc.get('username', 'N/A')}")
                             return UserInDB(**user_doc)
                 
+            print(f"No user found for phone: {phone} (formatted: {clean_phone})")
             return None
             
         except ValueError as e:
