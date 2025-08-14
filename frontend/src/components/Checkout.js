@@ -1040,6 +1040,33 @@ const ShippingForm = ({
     {/* Show additional address fields for New Address or Guest Users */}
     {(!isAuthenticated || useNewAddress) && (
       <>
+        {/* Address Label/Tag for Guest Users */}
+        {!isAuthenticated && (
+          <div className="mt-8">
+            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
+              Address Label *
+            </label>
+            <input
+              type="text"
+              value={formData.shipping_address.tag_name || ''}
+              onChange={(e) => handleInputChange('shipping_address', 'tag_name', e.target.value)}
+              className={`w-full px-4 py-4 border-2 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 dark:bg-gray-700/80 dark:border-gray-600 dark:text-white transition-all duration-200 ${
+                errors.shipping_address_tag_name ? 'border-red-500 bg-red-50 dark:bg-red-900/20' : 'border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-600'
+              }`}
+              placeholder="e.g., Home, Office, Mom's Place, Friend's House"
+            />
+            {errors.shipping_address_tag_name && (
+              <p className="text-red-500 text-sm mt-2 flex items-center space-x-1">
+                <AlertCircle className="w-4 h-4" />
+                <span>{errors.shipping_address_tag_name}</span>
+              </p>
+            )}
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+              Give this address a memorable name for future reference
+            </p>
+          </div>
+        )}
+
         <div className="mt-8">
           <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
             Address Line 1 *
