@@ -649,6 +649,13 @@ const Checkout = () => {
                 sendOtp={sendOtp}
                 verifyOtp={verifyOtp}
                 onNext={handleStep1Next}
+                // Address selection props
+                addresses={addresses}
+                selectedAddressId={selectedAddressId}
+                useNewAddress={useNewAddress}
+                loadingAddresses={loadingAddresses}
+                handleAddressSelection={handleAddressSelection}
+                handleNewAddressToggle={handleNewAddressToggle}
               />
             )}
 
