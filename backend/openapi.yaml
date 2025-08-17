@@ -1,0 +1,2821 @@
+openapi: 3.0.3
+info:
+  title: Vallmark Gift Articles API
+  version: 1.0.0
+  description: "Consolidated OpenAPI (Swagger) specification generated from FastAPI\
+    \ route modules under backend/routes.\nNotes:\n  - Schemas mirror pydantic models\
+    \ in models.py (some descriptive text abbreviated for brevity).\n  - Generic envelope\
+    \ responses use APIResponse / PaginatedResponse.\n  - Authorization: OAuth2 password\
+    \ flow (token endpoint /api/auth/login) returning bearer JWT.\n"
+servers:
+- url: /
+tags:
+- name: Authentication
+- name: Products
+- name: Categories
+- name: Shopping Cart
+- name: Orders
+- name: Campaigns
+- name: Commissions
+- name: Inventory
+- name: Dashboard
+- name: Inquiries
+- name: Uploads
+- name: OTP
+- name: System
+security:
+- bearerAuth: []
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    OAuth2Password:
+      type: oauth2
+      flows:
+        password:
+          tokenUrl: /api/auth/login
+          scopes: {}
+    OAuth2PasswordBearer:
+      type: oauth2
+      flows:
+        password:
+          scopes: {}
+          tokenUrl: api/auth/login
+  schemas:
+    APIResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: object
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+    PaginatedResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+        total:
+          type: integer
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total_pages:
+          type: integer
+    UserRole:
+      type: string
+      enum:
+      - customer
+      - admin
+      - super_admin
+      - salesperson
+      - store_admin
+      - sales_manager
+      - store_owner
+      - support_executive
+      - marketing_manager
+    UserBase:
+      type: object
+      required:
+      - email
+      - username
+      properties:
+        email:
+          type: string
+          format: email
+        username:
+          type: string
+        full_name:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        role:
+          $ref: '#/components/schemas/UserRole'
+        is_active:
+          type: boolean
+    UserCreate:
+      allOf:
+      - $ref: '#/components/schemas/UserBase'
+      - type: object
+        required:
+        - password
+        properties:
+          password:
+            type: string
+            format: password
+    UserUpdate:
+      type: object
+      properties:
+        full_name:
+          type: string
+        phone:
+          type: string
+        is_active:
+          type: boolean
+    UserResponse:
+      allOf:
+      - $ref: '#/components/schemas/UserBase'
+      - type: object
+        properties:
+          id:
+            type: string
+          email_verified:
+            type: boolean
+          last_login:
+            type: string
+            format: date-time
+            nullable: true
+          created_at:
+            type: string
+            format: date-time
+          updated_at:
+            type: string
+            format: date-time
+    Token:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+        expires_in:
+          type: integer
+        user:
+          $ref: '#/components/schemas/UserResponse'
+    LoginDetectRequest:
+      type: object
+      required:
+      - identifier
+      properties:
+        identifier:
+          type: string
+    MobileLoginRequest:
+      type: object
+      required:
+      - phone_number
+      - otp
+      properties:
+        phone_number:
+          type: string
+        otp:
+          type: string
+    PasswordResetRequest:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          format: email
+    PasswordResetConfirm:
+      type: object
+      required:
+      - email
+      - reset_code
+      - new_password
+      properties:
+        email:
+          type: string
+          format: email
+        reset_code:
+          type: string
+        new_password:
+          type: string
+    EmailUpdateRequest:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          nullable: true
+    PasswordSetupRequest:
+      type: object
+      required:
+      - password
+      - confirm_password
+      properties:
+        password:
+          type: string
+        confirm_password:
+          type: string
+    DecryptRequest:
+      type: object
+      required:
+      - encrypted_data
+      properties:
+        encrypted_data:
+          type: string
+    ProductBase:
+      type: object
+      required:
+      - name
+      - description
+      - categories
+      - price
+      - sku
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
+        price:
+          type: number
+        discount_price:
+          type: number
+          nullable: true
+        sku:
+          type: string
+        brand:
+          type: string
+        specifications:
+          type: object
+          additionalProperties: true
+        features:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        videos:
+          type: array
+          items:
+            type: string
+        is_active:
+          type: boolean
+        stock_quantity:
+          type: integer
+        min_stock_level:
+          type: integer
+    ProductCreate:
+      allOf:
+      - $ref: '#/components/schemas/ProductBase'
+      - type: object
+        properties:
+          uploaded_by:
+            type: string
+            nullable: true
+          assigned_to:
+            type: string
+            nullable: true
+    ProductUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        categories:
+          type: array
+          items:
+            type: string
+        price:
+          type: number
+        discount_price:
+          type: number
+        specifications:
+          type: object
+        features:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        videos:
+          type: array
+          items:
+            type: string
+        is_active:
+          type: boolean
+        stock_quantity:
+          type: integer
+        min_stock_level:
+          type: integer
+        assigned_to:
+          type: string
+    ProductResponse:
+      allOf:
+      - $ref: '#/components/schemas/ProductBase'
+      - type: object
+        properties:
+          views:
+            type: integer
+          sales_count:
+            type: integer
+          rating:
+            type: number
+          review_count:
+            type: integer
+          is_in_stock:
+            type: boolean
+          uploaded_by:
+            type: string
+            nullable: true
+          assigned_to:
+            type: string
+            nullable: true
+          assigned_by:
+            type: string
+            nullable: true
+          total_earnings:
+            type: number
+          last_sale_date:
+            type: string
+            format: date-time
+            nullable: true
+    CategoryCreate:
+      type: object
+      required:
+      - name
+      - description
+      - slug
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        slug:
+          type: string
+        image:
+          type: string
+          nullable: true
+        is_active:
+          type: boolean
+        is_hidden:
+          type: boolean
+        is_seasonal:
+          type: boolean
+        seasonal_months:
+          type: array
+          items:
+            type: integer
+        sort_order:
+          type: integer
+    CategoryUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        image:
+          type: string
+        is_active:
+          type: boolean
+        is_hidden:
+          type: boolean
+        is_seasonal:
+          type: boolean
+        seasonal_months:
+          type: array
+          items:
+            type: integer
+        sort_order:
+          type: integer
+    CategoryResponse:
+      allOf:
+      - $ref: '#/components/schemas/CategoryCreate'
+      - type: object
+        properties:
+          id:
+            type: string
+          product_count:
+            type: integer
+          created_at:
+            type: string
+            format: date-time
+          updated_at:
+            type: string
+            format: date-time
+    CartItem:
+      type: object
+      required:
+      - product_id
+      - quantity
+      - price
+      - product_name
+      properties:
+        product_id:
+          type: string
+        quantity:
+          type: integer
+        price:
+          type: number
+        product_name:
+          type: string
+        product_image:
+          type: string
+          nullable: true
+    CartResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          nullable: true
+        user_id:
+          type: string
+          nullable: true
+        session_id:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+        total_amount:
+          type: number
+        total_items:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+    CartMergeRequest:
+      type: object
+      required:
+      - guest_session_id
+      properties:
+        guest_session_id:
+          type: string
+    ShippingAddress:
+      type: object
+      required:
+      - full_name
+      - phone
+      - address_line1
+      - city
+      - state
+      - zip_code
+      properties:
+        full_name:
+          type: string
+        phone:
+          type: string
+        address_line1:
+          type: string
+        address_line2:
+          type: string
+          nullable: true
+        city:
+          type: string
+        state:
+          type: string
+        zip_code:
+          type: string
+        country:
+          type: string
+    OrderItem:
+      type: object
+      required:
+      - product_id
+      - product_name
+      - quantity
+      - price
+      - total_price
+      properties:
+        product_id:
+          type: string
+        product_name:
+          type: string
+        product_image:
+          type: string
+          nullable: true
+        quantity:
+          type: integer
+        price:
+          type: number
+        total_price:
+          type: number
+    AuthenticatedOrderCreate:
+      type: object
+      required:
+      - items
+      - shipping_address
+      - total_amount
+      - final_amount
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        shipping_address:
+          $ref: '#/components/schemas/ShippingAddress'
+        total_amount:
+          type: number
+        tax_amount:
+          type: number
+        shipping_cost:
+          type: number
+        discount_amount:
+          type: number
+        final_amount:
+          type: number
+        status:
+          type: string
+        payment_method:
+          type: string
+        notes:
+          type: string
+          nullable: true
+    OrderUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+        tracking_number:
+          type: string
+        notes:
+          type: string
+    OrderResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        order_number:
+          type: string
+        user_id:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        shipping_address:
+          $ref: '#/components/schemas/ShippingAddress'
+        total_amount:
+          type: number
+        tax_amount:
+          type: number
+        shipping_cost:
+          type: number
+        discount_amount:
+          type: number
+        final_amount:
+          type: number
+        status:
+          type: string
+        payment_method:
+          type: string
+        tracking_number:
+          type: string
+          nullable: true
+        shipped_at:
+          type: string
+          format: date-time
+          nullable: true
+        delivered_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    InquiryCreate:
+      type: object
+      required:
+      - name
+      - email
+      - subject
+      - message
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        subject:
+          type: string
+        message:
+          type: string
+    InquiryUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+        admin_notes:
+          type: string
+    CampaignCreate:
+      type: object
+      required:
+      - name
+      - description
+      - discount_type
+      - discount_value
+      - start_date
+      - end_date
+      - created_by
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        discount_type:
+          type: string
+        discount_value:
+          type: number
+        min_order_amount:
+          type: number
+          nullable: true
+        max_discount_amount:
+          type: number
+          nullable: true
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+        status:
+          type: string
+        product_ids:
+          type: array
+          items:
+            type: string
+        category_ids:
+          type: array
+          items:
+            type: string
+        category_slugs:
+          type: array
+          items:
+            type: string
+        target_seasonal_categories:
+          type: boolean
+        user_roles:
+          type: array
+          items:
+            type: string
+        usage_limit:
+          type: integer
+          nullable: true
+        created_by:
+          type: string
+    CampaignUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        discount_type:
+          type: string
+        discount_value:
+          type: number
+        start_date:
+          type: string
+          format: date-time
+        end_date:
+          type: string
+          format: date-time
+        status:
+          type: string
+        product_ids:
+          type: array
+          items:
+            type: string
+        category_ids:
+          type: array
+          items:
+            type: string
+        category_slugs:
+          type: array
+          items:
+            type: string
+        target_seasonal_categories:
+          type: boolean
+        user_roles:
+          type: array
+          items:
+            type: string
+        usage_limit:
+          type: integer
+    CommissionRuleCreate:
+      type: object
+      required:
+      - rule_name
+      - commission_type
+      - commission_value
+      properties:
+        rule_name:
+          type: string
+        user_id:
+          type: string
+          nullable: true
+        user_role:
+          type: string
+          nullable: true
+        product_id:
+          type: string
+          nullable: true
+        product_category:
+          type: string
+          nullable: true
+        commission_type:
+          type: string
+        commission_value:
+          type: number
+        min_order_amount:
+          type: number
+          nullable: true
+        max_commission_amount:
+          type: number
+          nullable: true
+        priority:
+          type: integer
+        is_active:
+          type: boolean
+        effective_from:
+          type: string
+          format: date-time
+          nullable: true
+        effective_until:
+          type: string
+          format: date-time
+          nullable: true
+    CommissionRuleUpdate:
+      type: object
+      properties:
+        rule_name:
+          type: string
+        commission_type:
+          type: string
+        commission_value:
+          type: number
+        min_order_amount:
+          type: number
+        max_commission_amount:
+          type: number
+        priority:
+          type: integer
+        is_active:
+          type: boolean
+        effective_from:
+          type: string
+          format: date-time
+        effective_until:
+          type: string
+          format: date-time
+    CommissionEarningUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+        approved_by:
+          type: string
+        notes:
+          type: string
+    BulkCommissionRuleUpdate:
+      type: object
+      required:
+      - rule_ids
+      - updates
+      properties:
+        rule_ids:
+          type: array
+          items:
+            type: string
+        updates:
+          $ref: '#/components/schemas/CommissionRuleUpdate'
+    BulkProductReassignment:
+      type: object
+      required:
+      - product_ids
+      - new_assignee
+      - reason
+      properties:
+        product_ids:
+          type: array
+          items:
+            type: string
+        new_assignee:
+          type: string
+        reason:
+          type: string
+        notes:
+          type: string
+    AddressCreate:
+      properties:
+        tag_name:
+          type: string
+          title: Tag Name
+        full_name:
+          type: string
+          title: Full Name
+        phone:
+          type: string
+          title: Phone
+        address_line1:
+          type: string
+          title: Address Line1
+        address_line2:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Address Line2
+        city:
+          type: string
+          title: City
+        state:
+          type: string
+          title: State
+        zip_code:
+          type: string
+          title: Zip Code
+        country:
+          type: string
+          title: Country
+          default: India
+        is_default:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Default
+          default: false
+      type: object
+      required:
+      - tag_name
+      - full_name
+      - phone
+      - address_line1
+      - city
+      - state
+      - zip_code
+      title: AddressCreate
+    AddressUpdate:
+      properties:
+        tag_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Tag Name
+        full_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Full Name
+        phone:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Phone
+        address_line1:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Address Line1
+        address_line2:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Address Line2
+        city:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: City
+        state:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: State
+        zip_code:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Zip Code
+        country:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Country
+        is_default:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Default
+      type: object
+      title: AddressUpdate
+    Body_login_api_auth_login_post:
+      properties:
+        grant_type:
+          anyOf:
+          - type: string
+            pattern: password
+          - type: 'null'
+          title: Grant Type
+        username:
+          type: string
+          title: Username
+        password:
+          type: string
+          title: Password
+        scope:
+          type: string
+          title: Scope
+          default: ''
+        client_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Id
+        client_secret:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Client Secret
+      type: object
+      required:
+      - username
+      - password
+      title: Body_login_api_auth_login_post
+    Body_upload_image_api_uploads_image_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+      - file
+      title: Body_upload_image_api_uploads_image_post
+    Body_upload_images_api_uploads_images_post:
+      properties:
+        files:
+          items:
+            type: string
+            format: binary
+          type: array
+          title: Files
+      type: object
+      required:
+      - files
+      title: Body_upload_images_api_uploads_images_post
+    Body_upload_video_api_uploads_video_post:
+      properties:
+        file:
+          type: string
+          format: binary
+          title: File
+      type: object
+      required:
+      - file
+      title: Body_upload_video_api_uploads_video_post
+    Body_upload_videos_api_uploads_videos_post:
+      properties:
+        files:
+          items:
+            type: string
+            format: binary
+          type: array
+          title: Files
+      type: object
+      required:
+      - files
+      title: Body_upload_videos_api_uploads_videos_post
+    CampaignStatus:
+      type: string
+      enum:
+      - active
+      - inactive
+      - scheduled
+      - expired
+      title: CampaignStatus
+    CommissionStatus:
+      type: string
+      enum:
+      - pending
+      - approved
+      - paid
+      - cancelled
+      title: CommissionStatus
+    GuestOrderCreate:
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          type: array
+          title: Items
+        shipping_address:
+          $ref: '#/components/schemas/ShippingAddress'
+        total_amount:
+          type: number
+          title: Total Amount
+        tax_amount:
+          type: number
+          title: Tax Amount
+          default: 0.0
+        shipping_cost:
+          type: number
+          title: Shipping Cost
+          default: 0.0
+        discount_amount:
+          type: number
+          title: Discount Amount
+          default: 0.0
+        final_amount:
+          type: number
+          title: Final Amount
+        payment_method:
+          type: string
+          title: Payment Method
+          default: COD
+        notes:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Notes
+        customer_email:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Customer Email
+        customer_phone:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Customer Phone
+      type: object
+      required:
+      - items
+      - shipping_address
+      - total_amount
+      - final_amount
+      title: GuestOrderCreate
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    InquiryStatus:
+      type: string
+      enum:
+      - pending
+      - in_progress
+      - responded
+      - resolved
+      - closed
+      title: InquiryStatus
+    OTPSendRequest:
+      properties:
+        phone_number:
+          type: string
+          title: Phone Number
+      type: object
+      required:
+      - phone_number
+      title: OTPSendRequest
+    OTPVerifyRequest:
+      properties:
+        phone_number:
+          type: string
+          title: Phone Number
+        otp:
+          type: string
+          title: Otp
+      type: object
+      required:
+      - phone_number
+      - otp
+      title: OTPVerifyRequest
+    OrderStatus:
+      type: string
+      enum:
+      - pending
+      - processing
+      - shipped
+      - delivered
+      - cancelled
+      - refund_requested
+      - refund_initiated
+      - refund_processed
+      title: OrderStatus
+    ProductAssignmentCreate:
+      properties:
+        product_id:
+          type: string
+          title: Product Id
+        assigned_to:
+          type: string
+          title: Assigned To
+        assigned_by:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Assigned By
+        reason:
+          $ref: '#/components/schemas/ReallocationReason'
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ProductAssignmentStatus'
+          default: active
+        notes:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Notes
+      type: object
+      required:
+      - product_id
+      - assigned_to
+      - reason
+      title: ProductAssignmentCreate
+    ProductAssignmentStatus:
+      type: string
+      enum:
+      - active
+      - reassigned
+      - revoked
+      - pending
+      title: ProductAssignmentStatus
+    ProductCategory:
+      type: string
+      enum:
+      - home_decor
+      - personalized_gifts
+      - jewelry
+      - keepsakes
+      - special_occasions
+      - accessories
+      title: ProductCategory
+    ReallocationReason:
+      type: string
+      enum:
+      - time_based
+      - performance_based
+      - manual_admin
+      - inventory_issues
+      - high_performer_rotation
+      title: ReallocationReason
+    RefundRequestCreate:
+      properties:
+        order_id:
+          type: string
+          title: Order Id
+        user_id:
+          type: string
+          title: User Id
+        reason:
+          type: string
+          title: Reason
+        requested_amount:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Requested Amount
+        additional_info:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Additional Info
+      type: object
+      required:
+      - order_id
+      - user_id
+      - reason
+      title: RefundRequestCreate
+    SuperAdminUserCreate:
+      properties:
+        username:
+          type: string
+          title: Username
+        email:
+          type: string
+          title: Email
+        full_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Full Name
+        phone:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Phone
+        role:
+          allOf:
+          - $ref: '#/components/schemas/UserRole'
+          default: customer
+        is_active:
+          type: boolean
+          title: Is Active
+          default: true
+        password:
+          type: string
+          title: Password
+      type: object
+      required:
+      - username
+      - email
+      - password
+      title: SuperAdminUserCreate
+      description: Enhanced user creation model for super admin
+    SuperAdminUserUpdate:
+      properties:
+        username:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Username
+        email:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Email
+        full_name:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Full Name
+        phone:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Phone
+        role:
+          anyOf:
+          - $ref: '#/components/schemas/UserRole'
+          - type: 'null'
+        is_active:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Active
+        password:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Password
+      type: object
+      title: SuperAdminUserUpdate
+      description: Enhanced user update model for super admin with all fields editable
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+paths:
+  /api/health:
+    get:
+      tags:
+      - System
+      summary: Health check
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIResponse'
+  /api/:
+    get:
+      tags:
+      - System
+      summary: Root API info
+      responses:
+        '200':
+          description: OK
+  /api/test:
+    get:
+      tags:
+      - System
+      summary: Test connection
+      responses:
+        '200':
+          description: OK
+  /api/auth/login/detect:
+    post:
+      tags:
+      - Authentication
+      summary: Detect login type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDetectRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIResponse'
+  /api/auth/login/mobile:
+    post:
+      tags:
+      - Authentication
+      summary: Mobile OTP login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileLoginRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+  /api/auth/password/reset-request:
+    post:
+      tags:
+      - Authentication
+      summary: Request password reset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '200':
+          description: OK
+  /api/auth/password/reset-confirm:
+    post:
+      tags:
+      - Authentication
+      summary: Confirm password reset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirm'
+      responses:
+        '200':
+          description: OK
+  /api/auth/register:
+    post:
+      tags:
+      - Authentication
+      summary: Register user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '200':
+          description: Created
+  /api/auth/login:
+    post:
+      tags:
+      - Authentication
+      summary: OAuth2 password login
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+              - username
+              - password
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+  /api/auth/me:
+    get:
+      tags:
+      - Authentication
+      summary: Current user
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+    put:
+      tags:
+      - Authentication
+      summary: Update current user
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: OK
+  /api/auth/logout:
+    post:
+      tags:
+      - Authentication
+      summary: Logout (client discard token)
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/auth/users:
+    get:
+      tags:
+      - Authentication
+      summary: List users (admin)
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: per_page
+        schema:
+          type: integer
+      - in: query
+        name: role
+        schema:
+          type: string
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+      - Authentication
+      summary: Create user (super admin)
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '200':
+          description: OK
+  /api/auth/users/decrypted:
+    get:
+      tags:
+      - Authentication
+      summary: List users with decrypted phones (admin)
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/auth/users/{user_id}:
+    get:
+      tags:
+      - Authentication
+      summary: Get user (admin)
+      parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema:
+          type: string
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+      - Authentication
+      summary: Update user (super admin)
+      parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema:
+          type: string
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags:
+      - Authentication
+      summary: Delete user (super admin)
+      parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema:
+          type: string
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/auth/users/{user_id}/role:
+    put:
+      tags:
+      - Authentication
+      summary: Update user role (admin)
+      parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema:
+          type: string
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - new_role
+              properties:
+                new_role:
+                  $ref: '#/components/schemas/UserRole'
+      responses:
+        '200':
+          description: OK
+  /api/auth/profile/email:
+    put:
+      tags:
+      - Authentication
+      summary: Update email
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailUpdateRequest'
+      responses:
+        '200':
+          description: OK
+  /api/auth/profile/setup-password:
+    post:
+      tags:
+      - Authentication
+      summary: Setup password
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordSetupRequest'
+      responses:
+        '200':
+          description: OK
+  /api/auth/profile/password:
+    put:
+      tags:
+      - Authentication
+      summary: Change password
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - current_password
+              - new_password
+              - confirm_password
+              properties:
+                current_password:
+                  type: string
+                new_password:
+                  type: string
+                confirm_password:
+                  type: string
+      responses:
+        '200':
+          description: OK
+  /api/auth/decrypt-phone:
+    post:
+      tags:
+      - Authentication
+      summary: Decrypt phone number
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DecryptRequest'
+      responses:
+        '200':
+          description: OK
+  /api/products/:
+    post:
+      tags:
+      - Products
+      summary: Create product
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreate'
+      responses:
+        '200':
+          description: OK
+    get:
+      tags:
+      - Products
+      summary: List products
+      parameters:
+      - in: query
+        name: page
+        schema:
+          type: integer
+      - in: query
+        name: per_page
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+  /api/products/my-products:
+    get:
+      tags:
+      - Products
+      summary: My products
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/products/{product_id}:
+    get:
+      tags:
+      - Products
+      summary: Get product
+      parameters:
+      - in: path
+        name: product_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+      - Products
+      summary: Update product
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: product_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdate'
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags:
+      - Products
+      summary: Delete product
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: product_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+  /api/products/{product_id}/reassign:
+    put:
+      tags:
+      - Products
+      summary: Reassign product
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: product_id
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: new_assignee
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+  /api/products/categories/available:
+    get:
+      tags:
+      - Products
+      summary: Available categories
+      responses:
+        '200':
+          description: OK
+  /api/products/analytics/performance:
+    get:
+      tags:
+      - Products
+      summary: Product performance analytics
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: query
+        name: assigned_to
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+  /api/categories/:
+    post:
+      tags:
+      - Categories
+      summary: Create category
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryCreate'
+      responses:
+        '200':
+          description: OK
+    get:
+      tags:
+      - Categories
+      summary: List categories
+      responses:
+        '200':
+          description: OK
+  /api/categories/with-products:
+    get:
+      tags:
+      - Categories
+      summary: Categories with product counts
+      responses:
+        '200':
+          description: OK
+  /api/categories/{category_id}:
+    get:
+      tags:
+      - Categories
+      summary: Get category
+      parameters:
+      - in: path
+        name: category_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+      - Categories
+      summary: Update category
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: category_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdate'
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags:
+      - Categories
+      summary: Delete category
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: category_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+  /api/cart/:
+    get:
+      tags:
+      - Shopping Cart
+      summary: Get cart (user/guest)
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags:
+      - Shopping Cart
+      summary: Clear cart
+      responses:
+        '200':
+          description: OK
+  /api/cart/items/{product_id}:
+    post:
+      tags:
+      - Shopping Cart
+      summary: Add item
+      parameters:
+      - in: path
+        name: product_id
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: quantity
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+      - Shopping Cart
+      summary: Update item quantity
+      parameters:
+      - in: path
+        name: product_id
+        required: true
+        schema:
+          type: string
+      - in: query
+        name: quantity
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags:
+      - Shopping Cart
+      summary: Remove item
+      parameters:
+      - in: path
+        name: product_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+  /api/cart/merge:
+    post:
+      tags:
+      - Shopping Cart
+      summary: Merge guest cart
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CartMergeRequest'
+      responses:
+        '200':
+          description: OK
+  /api/orders/:
+    post:
+      tags:
+      - Orders
+      summary: Create order (auth)
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticatedOrderCreate'
+      responses:
+        '200':
+          description: OK
+    get:
+      tags:
+      - Orders
+      summary: List my orders
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/orders/guest:
+    post:
+      tags:
+      - Orders
+      summary: Create guest order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              allOf:
+              - $ref: '#/components/schemas/AuthenticatedOrderCreate'
+      responses:
+        '200':
+          description: OK
+  /api/orders/{order_id}:
+    get:
+      tags:
+      - Orders
+      summary: Get order by ID
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: order_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+      - Orders
+      summary: Update order (admin)
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: order_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderUpdate'
+      responses:
+        '200':
+          description: OK
+  /api/orders/admin/all:
+    get:
+      tags:
+      - Orders
+      summary: List all orders (admin)
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/orders/number/{order_number}:
+    get:
+      tags:
+      - Orders
+      summary: Get order by number
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: order_number
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+  /api/campaigns/:
+    post:
+      tags:
+      - Campaigns
+      summary: Create campaign
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignCreate'
+      responses:
+        '200':
+          description: OK
+    get:
+      tags:
+      - Campaigns
+      summary: List campaigns
+      responses:
+        '200':
+          description: OK
+  /api/campaigns/{campaign_id}:
+    get:
+      tags:
+      - Campaigns
+      summary: Get campaign
+      parameters:
+      - in: path
+        name: campaign_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+      - Campaigns
+      summary: Update campaign
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: campaign_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CampaignUpdate'
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags:
+      - Campaigns
+      summary: Delete campaign
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: campaign_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+  /api/campaigns/active/list:
+    get:
+      tags:
+      - Campaigns
+      summary: Active campaigns list
+      responses:
+        '200':
+          description: OK
+  /api/campaigns/{campaign_id}/calculate-discount:
+    post:
+      tags:
+      - Campaigns
+      summary: Calculate discount
+      parameters:
+      - in: path
+        name: campaign_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+  /api/commissions/rules:
+    post:
+      tags:
+      - Commissions
+      summary: Create commission rule
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommissionRuleCreate'
+      responses:
+        '200':
+          description: OK
+    get:
+      tags:
+      - Commissions
+      summary: List commission rules
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/commissions/rules/{rule_id}:
+    put:
+      tags:
+      - Commissions
+      summary: Update commission rule
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: rule_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommissionRuleUpdate'
+      responses:
+        '200':
+          description: OK
+    delete:
+      tags:
+      - Commissions
+      summary: Delete commission rule
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: rule_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+  /api/commissions/earnings:
+    get:
+      tags:
+      - Commissions
+      summary: List commission earnings
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/commissions/earnings/{earning_id}:
+    put:
+      tags:
+      - Commissions
+      summary: Update earning
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: earning_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommissionEarningUpdate'
+      responses:
+        '200':
+          description: OK
+  /api/commissions/summary:
+    get:
+      tags:
+      - Commissions
+      summary: Commission summary
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/commissions/calculate/{order_id}:
+    post:
+      tags:
+      - Commissions
+      summary: Calculate commission for order
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: order_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+  /api/commissions/assignments:
+    post:
+      tags:
+      - Commissions
+      summary: Create product assignment
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+    get:
+      tags:
+      - Commissions
+      summary: List assignments
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/commissions/reallocation/recommendations:
+    get:
+      tags:
+      - Commissions
+      summary: Reallocation recommendations
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/commissions/reallocation/bulk:
+    post:
+      tags:
+      - Commissions
+      summary: Bulk reassign products
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkProductReassignment'
+      responses:
+        '200':
+          description: OK
+  /api/commissions/rules/bulk:
+    put:
+      tags:
+      - Commissions
+      summary: Bulk update rules
+      security:
+      - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkCommissionRuleUpdate'
+      responses:
+        '200':
+          description: OK
+  /api/inventory/stock-in:
+    post:
+      tags:
+      - Inventory
+      summary: Stock in
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/inventory/stock-out:
+    post:
+      tags:
+      - Inventory
+      summary: Stock out
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/inventory/adjust:
+    post:
+      tags:
+      - Inventory
+      summary: Adjust stock
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/inventory/logs:
+    get:
+      tags:
+      - Inventory
+      summary: Inventory logs
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/inventory/low-stock:
+    get:
+      tags:
+      - Inventory
+      summary: Low stock products
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/inventory/reassign:
+    post:
+      tags:
+      - Inventory
+      summary: Reassign product inventory
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/dashboard/:
+    get:
+      tags:
+      - Dashboard
+      summary: Dashboard overview
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/dashboard/stats:
+    get:
+      tags:
+      - Dashboard
+      summary: General stats
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/dashboard/salesperson/{user_id}:
+    get:
+      tags:
+      - Dashboard
+      summary: Salesperson dashboard
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+  /api/dashboard/analytics:
+    get:
+      tags:
+      - Dashboard
+      summary: Analytics
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/inquiries/:
+    post:
+      tags:
+      - Inquiries
+      summary: Submit inquiry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InquiryCreate'
+      responses:
+        '200':
+          description: OK
+    get:
+      tags:
+      - Inquiries
+      summary: List inquiries (admin)
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/inquiries/{inquiry_id}:
+    get:
+      tags:
+      - Inquiries
+      summary: Get inquiry
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: inquiry_id
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+    put:
+      tags:
+      - Inquiries
+      summary: Update inquiry
+      security:
+      - bearerAuth: []
+      parameters:
+      - in: path
+        name: inquiry_id
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InquiryUpdate'
+      responses:
+        '200':
+          description: OK
+  /api/uploads/limits:
+    get:
+      tags:
+      - Uploads
+      summary: Upload limits
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/uploads/image:
+    post:
+      tags:
+      - Uploads
+      summary: Upload single image
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/uploads/images:
+    post:
+      tags:
+      - Uploads
+      summary: Upload multiple images
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/uploads/video:
+    post:
+      tags:
+      - Uploads
+      summary: Upload single video
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/uploads/videos:
+    post:
+      tags:
+      - Uploads
+      summary: Upload multiple videos
+      security:
+      - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+  /api/otp/send:
+    post:
+      tags:
+      - OTP
+      summary: Send OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - phone_number
+              properties:
+                phone_number:
+                  type: string
+      responses:
+        '200':
+          description: OK
+  /api/otp/verify:
+    post:
+      tags:
+      - OTP
+      summary: Verify OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - phone_number
+              - otp
+              properties:
+                phone_number:
+                  type: string
+                otp:
+                  type: string
+      responses:
+        '200':
+          description: OK
+  /api/orders/{order_id}/refund:
+    post:
+      tags:
+      - Orders
+      summary: Request Refund
+      description: Request refund for an order
+      operationId: request_refund_api_orders__order_id__refund_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: order_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Order Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefundRequestCreate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/addresses/:
+    get:
+      tags:
+      - Addresses
+      summary: Get User Addresses
+      description: Get all addresses for current user
+      operationId: get_user_addresses_api_addresses__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIResponse'
+      security:
+      - OAuth2PasswordBearer: []
+    post:
+      tags:
+      - Addresses
+      summary: Create Address
+      description: Create new address for current user
+      operationId: create_address_api_addresses__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressCreate'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+      - OAuth2PasswordBearer: []
+  /api/addresses/{address_id}:
+    get:
+      tags:
+      - Addresses
+      summary: Get Address
+      description: Get address by ID
+      operationId: get_address_api_addresses__address_id__get
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: address_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Address Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    put:
+      tags:
+      - Addresses
+      summary: Update Address
+      description: Update address
+      operationId: update_address_api_addresses__address_id__put
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: address_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Address Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressUpdate'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Addresses
+      summary: Delete Address
+      description: Delete address
+      operationId: delete_address_api_addresses__address_id__delete
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: address_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Address Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /api/addresses/{address_id}/set-default:
+    post:
+      tags:
+      - Addresses
+      summary: Set Default Address
+      description: Set address as default
+      operationId: set_default_address_api_addresses__address_id__set_default_post
+      security:
+      - OAuth2PasswordBearer: []
+      parameters:
+      - name: address_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Address Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/APIResponse'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
