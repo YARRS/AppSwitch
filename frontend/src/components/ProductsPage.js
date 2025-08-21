@@ -648,12 +648,17 @@ const ProductCard = ({ product, isAuthenticated, index }) => {
           {product.images && product.images.length > 0 ? (
             <>
               <img
-                src={product.images[0]}
+                src={product.images[0].startsWith('data:') ? product.images[0] : product.images[0].startsWith('http') ? product.images[0] : `data:image/jpeg;base64,${product.images[0]}`}
                 alt={product.name}
                 className={`w-full h-full object-cover transition-all duration-700 group-hover:scale-110 ${
                   imageLoaded ? 'opacity-100' : 'opacity-0'
                 }`}
                 onLoad={() => setImageLoaded(true)}
+                onError={(e) => {
+                  console.warn(`Failed to load image for product: ${product.name}`);
+                  setImageLoaded(true);
+                  e.target.style.display = 'none';
+                }}
                 loading="lazy"
               />
               {!imageLoaded && (
