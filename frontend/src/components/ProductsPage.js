@@ -992,10 +992,13 @@ const FeaturedCategoriesCarousel = ({ categories, products, onCategorySelect, se
                       <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-600 dark:to-gray-700 relative overflow-hidden">
                         {product.images && product.images.length > 0 ? (
                           <img
-                            src={product.images[0]}
+                            src={product.images[0].startsWith('data:') ? product.images[0] : product.images[0].startsWith('http') ? product.images[0] : `data:image/jpeg;base64,${product.images[0]}`}
                             alt={product.name}
                             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             loading="lazy"
+                            onError={(e) => {
+                              e.target.style.display = 'none';
+                            }}
                           />
                         ) : (
                           <div className="flex items-center justify-center h-full">
