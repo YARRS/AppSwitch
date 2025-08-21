@@ -21,7 +21,7 @@ import uuid
 import time
 
 # Backend URL from frontend .env
-BACKEND_URL = "https://category-fix-2.preview.emergentagent.com"
+BACKEND_URL = "https://card-shop-repair.preview.emergentagent.com"
 API_BASE = f"{BACKEND_URL}/api"
 
 # Auto-seeded user credentials for testing (from seed_database.py)
