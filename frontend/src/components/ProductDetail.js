@@ -321,9 +321,14 @@ const ProductDetail = () => {
               <div className="aspect-square bg-gradient-to-br from-white to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-2xl overflow-hidden shadow-2xl border border-white/20">
                 {product?.images && product.images.length > 0 ? (
                   <img
-                    src={product.images[selectedImage]}
+                    src={product.images[selectedImage].startsWith('data:') ? product.images[selectedImage] : product.images[selectedImage].startsWith('http') ? product.images[selectedImage] : `data:image/jpeg;base64,${product.images[selectedImage]}`}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      console.warn(`Failed to load image for product: ${product.name}`);
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = `<div class="w-full h-full flex items-center justify-center"><div class="text-center"><div class="w-32 h-32 mx-auto mb-6 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg"><span class="text-6xl font-bold text-white">${product?.name?.charAt(0)}</span></div><p class="text-gray-600 dark:text-gray-400 text-lg font-medium">Product Image</p></div></div>`;
+                    }}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
