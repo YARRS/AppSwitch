@@ -1,4 +1,4 @@
-# SmartSwitch IoT E-commerce Website - Development Progress
+# Vallmark Cards & Gift E-commerce Website - Development Progress
 
 ## Original User Problem Statement
 User wants to build a website for a new IoT product that can convert physical wall mounted switches into smart home switches. The product works with Google Home and smartphones to control all home appliances. Requirements include:
