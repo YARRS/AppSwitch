@@ -364,7 +364,7 @@ const ProductDetail = () => {
                           : 'border-gray-200 dark:border-gray-700 hover:scale-105 hover:shadow-md'
                       }`}
                     >
-                      <img src={image} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
+                      <img src={image.startsWith('data:') ? image : image.startsWith('http') ? image : `data:image/jpeg;base64,${image}`} alt={`${product.name} ${index + 1}`} className="w-full h-full object-cover" />
                     </button>
                   ))}
                 </div>
