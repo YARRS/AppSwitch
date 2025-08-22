@@ -63,42 +63,45 @@ class AuthService:
         
         # Handle different input formats based on original input and length
         
-        # US phone number with +1 prefix: +1234567890 (11 chars original, 10 digits cleaned)
-        if original_phone.startswith('+1') and len(phone) == 10:
-            return original_phone  # Keep +1234567890 format
+        # Handle different Indian mobile number formats
         
-        # US phone number with 1 prefix: 12345678901 (11 digits cleaned)
-        elif len(phone) == 11 and phone.startswith('1') and not original_phone.startswith('+'):
-            return phone  # Keep 12345678901 format
-        
-        # Indian phone number with +91 prefix
-        elif original_phone.startswith('+91'):
+        # Indian phone number with +91 prefix: +919876543210
+        if original_phone.startswith('+91'):
             if len(phone) == 12 and phone.startswith('91'):
-                # +919876543210 -> 9876543210
-                return phone[2:]
-            elif len(phone) == 11:
-                # +91987654321 -> 987654321 (only 9 digits, invalid)
-                raise ValueError(f"Invalid Indian phone format. Expected +91 followed by 10 digits, got {len(phone) - 2} digits after +91")
-            elif len(phone) == 10:
-                # +91987654321 where input was malformed, but we got 10 digits somehow
-                return phone
+                # Extract 10 digits after 91
+                mobile_digits = phone[2:]
+                if len(mobile_digits) == 10 and mobile_digits[0] in '6789':
+                    return mobile_digits
+                else:
+                    raise ValueError(f"Invalid Indian mobile number. Must start with 6, 7, 8, or 9 after +91. Got: {mobile_digits}")
             else:
-                raise ValueError(f"Invalid Indian phone format with +91 prefix. Expected 12 total digits, got {len(phone)}")
+                raise ValueError(f"Invalid +91 format. Expected +91 followed by 10 digits, got {len(phone)} total digits")
         
         # Indian phone number with 91 prefix: 919876543210 (12 digits cleaned)
         elif len(phone) == 12 and phone.startswith('91') and not original_phone.startswith('+'):
-            return phone[2:]  # Return 9876543210
+            mobile_digits = phone[2:]  # Extract 10 digits after 91
+            if len(mobile_digits) == 10 and mobile_digits[0] in '6789':
+                return mobile_digits
+            else:
+                raise ValueError(f"Invalid Indian mobile number. Must start with 6, 7, 8, or 9 after 91. Got: {mobile_digits}")
         
         # Indian phone number with 0 prefix: 09876543210 (11 digits cleaned)
         elif len(phone) == 11 and phone.startswith('0'):
-            return phone[1:]  # Return 9876543210
+            mobile_digits = phone[1:]  # Extract 10 digits after 0
+            if len(mobile_digits) == 10 and mobile_digits[0] in '6789':
+                return mobile_digits
+            else:
+                raise ValueError(f"Invalid Indian mobile number. Must start with 6, 7, 8, or 9 after 0. Got: {mobile_digits}")
         
-        # 10-digit number (could be Indian mobile or US without country code)
+        # 10-digit Indian mobile number
         elif len(phone) == 10:
-            return phone  # Return as-is
+            if phone[0] in '6789':
+                return phone  # Valid Indian mobile number
+            else:
+                raise ValueError(f"Invalid Indian mobile number. Must start with 6, 7, 8, or 9. Got: {phone}")
         
         else:
-            raise ValueError(f"Invalid phone number format. Input: '{original_phone}', Cleaned: '{phone}' ({len(phone)} digits)")
+            raise ValueError(f"Invalid phone number format. Input: '{original_phone}', Cleaned: '{phone}' ({len(phone)} digits). Expected Indian mobile number format.")
         
         return phone
     
@@ -127,6 +130,7 @@ class AuthService:
             r'^1[0-9]{10}$',       # 12345678901 (US with country code)
             r'^\+1[0-9]{10}$',     # +12345678901 (US with +)
             r'^\+[0-9]{10,12}$',   # Generic international format
+
         ]
         
         for pattern in phone_patterns:
