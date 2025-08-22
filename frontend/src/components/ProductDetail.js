@@ -321,7 +321,7 @@ const ProductDetail = () => {
               <div className="aspect-square bg-gradient-to-br from-white to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-2xl overflow-hidden shadow-2xl border border-white/20">
                 {product?.images && product.images.length > 0 ? (
                   <img
-                    src={product.images[selectedImage]}
+                    src={product.images[selectedImage].startsWith('data:') ? product.images[selectedImage] : product.images[selectedImage].startsWith('http') ? product.images[selectedImage] : `data:image/jpeg;base64,${product.images[selectedImage]}`}}
                     alt={product.name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { Eye, EyeOff, Mail, Lock, AlertCircle, Phone, Key, ArrowLeft, Sparkles, Zap, Heart, Shield } from 'lucide-react';
-import { formatPhoneNumber, validatePhoneNumber } from '../utils/phoneValidation';
+import { formatPhoneNumber, validatePhoneNumber, isEmail, isPhoneNumber } from '../utils/phoneValidation';
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
@@ -53,6 +53,48 @@ const Login = () => {
   };
 
   const detectLoginType = async () => {
+    // Quick client-side detection first to avoid network round-trips and provide
+    // a better UX when the backend is unreachable.
+    if (!formData.identifier || !formData.identifier.trim()) {
+      setError('Please enter an email or phone number');
+      return;
+    }
+
+    // Client-side email detection
+    if (isEmail(formData.identifier)) {
+      setLoginType('email');
+      setLoginStep('password');
+      setError('');
+      return;
+    }
+
+    // Client-side phone detection + format
+    if (isPhoneNumber(formData.identifier)) {
+      let formatted = formData.identifier;
+      try {
+        formatted = formatPhoneNumber(formData.identifier);
+      } catch (e) {
+        // If formatting fails, continue with the original value
+        console.warn('Phone formatting failed locally:', e.message);
+      }
+      setLoginType('phone');
+      setFormData(prev => ({ ...prev, identifier: formatted }));
+      // Attempt to send OTP but don't block UI if it fails
+      try {
+        setIsLoading(true);
+        await sendOTP(formatted);
+        setLoginStep('otp');
+        setError('');
+      } catch (e) {
+        const serverDetail = e.response?.data?.detail || e.message || 'Failed to send OTP';
+        setError(serverDetail);
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    // Fallback to server-side detection (for any complex rules)
     try {
       setIsLoading(true);
       setError('');
@@ -75,7 +117,16 @@ const Login = () => {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to detect login type');
+      // Show detailed error when available (validation, network, server)
+      const serverDetail = err.response?.data?.detail || err.response?.data?.message || null;
+      const status = err.response?.status;
+      if (serverDetail) {
+        setError(serverDetail + (status ? ` (status ${status})` : ''));
+      } else if (err.message) {
+        setError(err.message);
+      } else {
+        setError('Failed to detect login type');
+      }
     } finally {
       setIsLoading(false);
     }
