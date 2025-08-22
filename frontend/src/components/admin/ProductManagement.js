@@ -268,9 +268,13 @@ const ProductRow = ({ product, onEdit, onDelete }) => {
           <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center mr-4">
             {product.images && product.images.length > 0 ? (
               <img
-                src={`data:image/jpeg;base64,${product.images[0]}`}
+                src={product.images[0].startsWith('data:') ? product.images[0] : `data:image/jpeg;base64,${product.images[0]}`}
                 alt={product.name}
                 className="w-12 h-12 object-cover rounded-lg"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.parentElement.innerHTML = `<div class="w-6 h-6 text-gray-400"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>`;
+                }}
               />
             ) : (
               <Package className="w-6 h-6 text-gray-400" />
@@ -287,9 +291,24 @@ const ProductRow = ({ product, onEdit, onDelete }) => {
         </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-        <span className="capitalize">
-          {product.category ? product.category.replace('_', ' ') : 'Uncategorized'}
-        </span>
+        <div className="flex flex-wrap gap-1">
+          {product.categories && product.categories.length > 0 ? (
+            product.categories.map((category, index) => (
+              <span
+                key={index}
+                className="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 px-2 py-1 rounded-full text-xs font-medium capitalize"
+              >
+                {category.replace('_', ' ')}
+              </span>
+            ))
+          ) : product.category ? (
+            <span className="inline-block bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400 px-2 py-1 rounded-full text-xs font-medium capitalize">
+              {product.category.replace('_', ' ')}
+            </span>
+          ) : (
+            <span className="text-gray-500 dark:text-gray-400 text-xs">Uncategorized</span>
+          )}
+        </div>
       </td>
       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
         <div className="flex flex-col">
@@ -352,9 +371,13 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
           <div className="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
             {product.images && product.images.length > 0 ? (
               <img
-                src={`data:image/jpeg;base64,${product.images[0]}`}
+                src={product.images[0].startsWith('data:') ? product.images[0] : `data:image/jpeg;base64,${product.images[0]}`}
                 alt={product.name}
                 className="w-12 h-12 object-cover rounded-lg"
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.parentElement.innerHTML = `<div class="w-6 h-6 text-gray-400"><svg fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>`;
+                }}
               />
             ) : (
               <Package className="w-6 h-6 text-gray-400" />
