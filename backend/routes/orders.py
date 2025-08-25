@@ -38,6 +38,7 @@ class OrderService:
         self.carts_collection = db.carts
         self.users_collection = db.users
         self.guest_carts_collection = db.guest_carts
+        elf.addresses_collection = db.addresses
     
     async def find_or_create_user_by_phone(self, phone_number: str, customer_email: Optional[str] = None, full_name: Optional[str] = None) -> UserInDB:
         """Find existing user by phone or create new one"""
