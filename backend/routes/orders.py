@@ -38,6 +38,7 @@ class OrderService:
         self.carts_collection = db.carts
         self.users_collection = db.users
         self.guest_carts_collection = db.guest_carts
+        self.addresses_collection = db.addresses 
     
     async def find_or_create_user_by_phone(self, phone_number: str, customer_email: Optional[str] = None, full_name: Optional[str] = None) -> UserInDB:
         """Find existing user by phone or create new one"""
@@ -456,8 +457,8 @@ async def create_guest_order(
         )
         
         # Save shipping address as user address if it's a new user or doesn't have this address
-        from routes.addresses import AddressService
-        address_service = AddressService()
+        # from routes.addresses import AddressService
+        # address_service = AddressService()
         
         # Check if user already has this address
         existing_addresses = order_service.addresses_collection.find({"user_id": user.id})

@@ -477,7 +477,7 @@ const AddressManagement = () => {
                             className="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors inline-flex items-center space-x-2"
                         >
                             <Plus className="w-5 h-5" />
-                            <span>Add Address</span>
+                            <span>Add Your First Address</span>
                         </button>
                     </div>
                 ) : (
