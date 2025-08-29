@@ -24,7 +24,7 @@ class AddressService:
         if address_data.get('is_default', False):
             await self.addresses_collection.update_many(
                 {"user_id": user_id, "is_default": True},
-                {"$set": {"is_default": False, "updated_at": datetime.utcnow()}}
+                {"$set": {"is_default": False, "updated_at": now_ist()}}
             )
         
         # If this is the user's first address, make it default
@@ -36,8 +36,8 @@ class AddressService:
         complete_address_data = {
             "id": str(uuid.uuid4()),
             "user_id": user_id,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
+            "created_at": now_ist(),
+            "updated_at": now_ist(),
             **address_data
         }
         
@@ -73,10 +73,10 @@ class AddressService:
         if update_data.get('is_default', False):
             await self.addresses_collection.update_many(
                 {"user_id": user_id, "is_default": True, "id": {"$ne": address_id}},
-                {"$set": {"is_default": False, "updated_at": datetime.utcnow()}}
+                {"$set": {"is_default": False, "updated_at": now_ist()}}
             )
         
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = now_ist()
         
         result = await self.addresses_collection.update_one(
             {"id": address_id, "user_id": user_id},
@@ -103,7 +103,7 @@ class AddressService:
         if result.deleted_count > 0 and address.is_default:
             await self.addresses_collection.update_one(
                 {"user_id": user_id},
-                {"$set": {"is_default": True, "updated_at": datetime.utcnow()}}
+                {"$set": {"is_default": True, "updated_at": now_ist()}}
             )
         
         return result.deleted_count > 0
@@ -113,13 +113,13 @@ class AddressService:
         # Unset all default addresses for the user
         await self.addresses_collection.update_many(
             {"user_id": user_id, "is_default": True},
-            {"$set": {"is_default": False, "updated_at": datetime.utcnow()}}
+            {"$set": {"is_default": False, "updated_at": now_ist()}}
         )
         
         # Set the specified address as default
         result = await self.addresses_collection.update_one(
             {"id": address_id, "user_id": user_id},
-            {"$set": {"is_default": True, "updated_at": datetime.utcnow()}}
+            {"$set": {"is_default": True, "updated_at": now_ist()}}
         )
         
         return result.modified_count > 0

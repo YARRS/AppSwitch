@@ -38,7 +38,7 @@ class InquiryService:
     
     async def update_inquiry(self, inquiry_id: str, update_data: dict) -> Optional[InquiryInDB]:
         """Update inquiry"""
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = now_ist()
         
         result = await self.inquiries_collection.update_one(
             {"id": inquiry_id},
@@ -226,7 +226,7 @@ async def update_inquiry(
         # Update inquiry
         update_dict = update_data.dict(exclude_unset=True)
         if update_dict.get("status") == "responded":
-            update_dict["responded_at"] = datetime.utcnow()
+            update_dict["responded_at"] = now_ist()
         
         updated_inquiry = await inquiry_service.update_inquiry(inquiry_id, update_dict)
         

@@ -40,7 +40,7 @@ class CampaignService:
     
     async def update_campaign(self, campaign_id: str, update_data: dict) -> Optional[CampaignInDB]:
         """Update campaign"""
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = now_ist()
         
         result = await self.campaigns_collection.update_one(
             {"id": campaign_id},
@@ -93,7 +93,7 @@ class CampaignService:
     
     async def get_active_campaigns(self, user_role: str = None) -> List[CampaignInDB]:
         """Get active campaigns"""
-        current_time = datetime.utcnow()
+        current_time = now_ist()
         
         query = {
             "status": CampaignStatus.ACTIVE.value,
@@ -123,7 +123,7 @@ class CampaignService:
             )
         
         # Check if campaign is active
-        current_time = datetime.utcnow()
+        current_time = now_ist()
         if campaign.status != CampaignStatus.ACTIVE or campaign.start_date > current_time or campaign.end_date < current_time:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -179,7 +179,7 @@ class CampaignService:
     
     async def update_campaign_status(self):
         """Update campaign status based on dates"""
-        current_time = datetime.utcnow()
+        current_time = now_ist()
         
         # Activate scheduled campaigns
         await self.campaigns_collection.update_many(

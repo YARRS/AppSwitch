@@ -62,8 +62,8 @@ class ProductSeeder:
                 "sales_count": 0,
                 "rating": 0.0,
                 "review_count": 0,
-                "created_at": datetime.utcnow() - timedelta(days=2),  # 2 days ago
-                "updated_at": datetime.utcnow() - timedelta(days=2)
+                "created_at": now_ist() - timedelta(days=2),  # 2 days ago
+                "updated_at": now_ist() - timedelta(days=2)
             },
             {
                 "name": "Personalized Photo Frame Premium",
@@ -88,8 +88,8 @@ class ProductSeeder:
                 "sales_count": 0,
                 "rating": 0.0,
                 "review_count": 0,
-                "created_at": datetime.utcnow() - timedelta(days=5),  # 5 days ago
-                "updated_at": datetime.utcnow() - timedelta(days=5)
+                "created_at": now_ist() - timedelta(days=5),  # 5 days ago
+                "updated_at": now_ist() - timedelta(days=5)
             },
             {
                 "name": "Sterling Silver Heart Pendant",
@@ -115,8 +115,8 @@ class ProductSeeder:
                 "sales_count": 0,
                 "rating": 0.0,
                 "review_count": 0,
-                "created_at": datetime.utcnow() - timedelta(days=1),  # 1 day ago - NEW
-                "updated_at": datetime.utcnow() - timedelta(days=1)
+                "created_at": now_ist() - timedelta(days=1),  # 1 day ago - NEW
+                "updated_at": now_ist() - timedelta(days=1)
             },
             
             # Older products (more than 7 days) - normal appearance
@@ -143,8 +143,8 @@ class ProductSeeder:
                 "sales_count": 0,
                 "rating": 0.0,
                 "review_count": 0,
-                "created_at": datetime.utcnow() - timedelta(days=15),  # 15 days ago
-                "updated_at": datetime.utcnow() - timedelta(days=15)
+                "created_at": now_ist() - timedelta(days=15),  # 15 days ago
+                "updated_at": now_ist() - timedelta(days=15)
             },
             {
                 "name": "Anniversary Wine Glass Set",
@@ -170,8 +170,8 @@ class ProductSeeder:
                 "sales_count": 0,
                 "rating": 0.0,
                 "review_count": 0,
-                "created_at": datetime.utcnow() - timedelta(days=22),  # 22 days ago
-                "updated_at": datetime.utcnow() - timedelta(days=22)
+                "created_at": now_ist() - timedelta(days=22),  # 22 days ago
+                "updated_at": now_ist() - timedelta(days=22)
             },
             {
                 "name": "Luxury Scented Candle Collection",
@@ -196,8 +196,8 @@ class ProductSeeder:
                 "sales_count": 0,
                 "rating": 0.0,
                 "review_count": 0,
-                "created_at": datetime.utcnow() - timedelta(days=10),  # 10 days ago
-                "updated_at": datetime.utcnow() - timedelta(days=10)
+                "created_at": now_ist() - timedelta(days=10),  # 10 days ago
+                "updated_at": now_ist() - timedelta(days=10)
             },
             
             # More new products for testing
@@ -224,8 +224,8 @@ class ProductSeeder:
                 "sales_count": 0,
                 "rating": 0.0,
                 "review_count": 0,
-                "created_at": datetime.utcnow() - timedelta(days=3),  # 3 days ago - NEW
-                "updated_at": datetime.utcnow() - timedelta(days=3)
+                "created_at": now_ist() - timedelta(days=3),  # 3 days ago - NEW
+                "updated_at": now_ist() - timedelta(days=3)
             },
             {
                 "name": "Rose Gold Watch Gift Set",
@@ -251,8 +251,8 @@ class ProductSeeder:
                 "sales_count": 0,
                 "rating": 0.0,
                 "review_count": 0,
-                "created_at": datetime.utcnow() - timedelta(hours=6),  # 6 hours ago - NEW
-                "updated_at": datetime.utcnow() - timedelta(hours=6)
+                "created_at": now_ist() - timedelta(hours=6),  # 6 hours ago - NEW
+                "updated_at": now_ist() - timedelta(hours=6)
             }
         ]
         
@@ -268,7 +268,7 @@ class ProductSeeder:
         total_products = await self.db.products.count_documents({})
         active_products = await self.db.products.count_documents({"is_active": True})
         new_products = await self.db.products.count_documents({
-            "created_at": {"$gte": datetime.utcnow() - timedelta(days=7)}
+            "created_at": {"$gte": now_ist() - timedelta(days=7)}
         })
         
         print(f"📊 Database Summary:")

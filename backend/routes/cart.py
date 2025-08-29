@@ -59,7 +59,7 @@ class CartService:
         # Recalculate totals
         cart.total_amount = sum(item.price * item.quantity for item in cart.items)
         cart.total_items = sum(item.quantity for item in cart.items)
-        cart.updated_at = datetime.utcnow()
+        cart.updated_at = now_ist()
         
         await self.carts_collection.update_one(
             {"user_id": cart.user_id},
@@ -73,7 +73,7 @@ class CartService:
         # Recalculate totals
         cart.total_amount = sum(item.price * item.quantity for item in cart.items)
         cart.total_items = sum(item.quantity for item in cart.items)
-        cart.updated_at = datetime.utcnow()
+        cart.updated_at = now_ist()
         
         await self.guest_carts_collection.update_one(
             {"session_id": cart.session_id},

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, EmailStr, validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+from timezone_utils import now_ist
 from enum import Enum
 import uuid
 
@@ -88,9 +89,9 @@ class BaseDocument(BaseModel):
         if not data.get('id'):
             data['id'] = str(uuid.uuid4())
         if not data.get('created_at'):
-            data['created_at'] = datetime.utcnow()
+            data['created_at'] = now_ist()
         if not data.get('updated_at'):
-            data['updated_at'] = datetime.utcnow()
+            data['updated_at'] = now_ist()
         super().__init__(**data)
 
 # User models
@@ -239,7 +240,7 @@ class ProductAssignmentInDB(ProductAssignmentBase, BaseDocument):
     
     def __init__(self, **data):
         if not data.get('start_date'):
-            data['start_date'] = datetime.utcnow()
+            data['start_date'] = now_ist()
         super().__init__(**data)
 
 class ProductAssignmentResponse(ProductAssignmentBase, BaseDocument):
@@ -287,7 +288,7 @@ class CommissionRuleInDB(CommissionRuleBase, BaseDocument):
     
     def __init__(self, **data):
         if not data.get('effective_from'):
-            data['effective_from'] = datetime.utcnow()
+            data['effective_from'] = now_ist()
         super().__init__(**data)
 
 class CommissionRuleResponse(CommissionRuleBase, BaseDocument):
@@ -370,9 +371,9 @@ class GuestCart(BaseModel):
     
     def __init__(self, **data):
         if not data.get('created_at'):
-            data['created_at'] = datetime.utcnow()
+            data['created_at'] = now_ist()
         if not data.get('updated_at'):
-            data['updated_at'] = datetime.utcnow()
+            data['updated_at'] = now_ist()
         super().__init__(**data)
 
 class CartMergeRequest(BaseModel):

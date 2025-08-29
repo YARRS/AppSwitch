@@ -100,7 +100,7 @@ class InventoryService:
         # Update product stock
         await self.products_collection.update_one(
             {"id": product_id},
-            {"$set": {"stock_quantity": new_quantity, "updated_at": datetime.utcnow()}}
+            {"$set": {"stock_quantity": new_quantity, "updated_at": now_ist()}}
         )
         
         # Create inventory log

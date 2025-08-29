@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from timezone_utils import now_ist
 from typing import Optional
 import jwt
 from passlib.context import CryptContext
@@ -187,9 +188,9 @@ class AuthService:
         """Create JWT access token"""
         to_encode = data.copy()
         if expires_delta:
-            expire = datetime.utcnow() + expires_delta
+            expire = now_ist() + expires_delta
         else:
-            expire = datetime.utcnow() + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
+            expire = now_ist() + timedelta(hours=ACCESS_TOKEN_EXPIRE_HOURS)
         
         to_encode.update({"exp": expire})
         encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
@@ -279,7 +280,7 @@ class UserService:
                     encrypted_phone = AuthService.encrypt_sensitive_data(clean_phone)
                     await self.users_collection.update_one(
                         {"id": user_doc["id"]},
-                        {"$set": {"phone": encrypted_phone, "updated_at": datetime.utcnow()}}
+                        {"$set": {"phone": encrypted_phone, "updated_at": now_ist()}}
                     )
                     user_doc["phone"] = encrypted_phone
                     print(f"Updated user {user_doc.get('username', 'N/A')} phone to encrypted format")
@@ -415,13 +416,13 @@ class UserService:
         if update_data.get("phone"):
             update_data["phone"] = AuthService.encrypt_sensitive_data(update_data["phone"])
         
-        update_data["updated_at"] = datetime.utcnow()
-        
+        update_data["updated_at"] = now_ist()
+
         result = await self.users_collection.update_one(
             {"id": user_id},
             {"$set": update_data}
         )
-        
+
         if result.modified_count > 0:
             return await self.get_user_by_id(user_id)
         return None
@@ -430,7 +431,7 @@ class UserService:
         """Update user's last login time"""
         await self.users_collection.update_one(
             {"id": user_id},
-            {"$set": {"last_login": datetime.utcnow()}}
+            {"$set": {"last_login": now_ist()}}
         )
     
     async def verify_password(self, plain_password: str, hashed_password: str) -> bool:

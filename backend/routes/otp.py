@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import Optional
 from datetime import datetime, timedelta
+from timezone_utils import now_ist
 import re
 from pydantic import BaseModel, validator
 
@@ -65,8 +66,8 @@ class OTPService:
             session_data = {
                 "phone_number": phone_number,
                 "otp": self.default_otp,
-                "created_at": datetime.utcnow(),
-                "expires_at": datetime.utcnow() + timedelta(minutes=10),
+                "created_at": now_ist(),
+                "expires_at": now_ist() + timedelta(minutes=10),
                 "attempts": 0,
                 "is_verified": False
             }
@@ -102,7 +103,7 @@ class OTPService:
                 return False
             
             # Check if OTP has expired
-            if datetime.utcnow() > otp_session["expires_at"]:
+            if now_ist() > otp_session["expires_at"]:
                 # Clean up expired OTP
                 await self.otp_collection.delete_one({"_id": otp_session["_id"]})
                 return False
@@ -117,7 +118,7 @@ class OTPService:
                 # Mark as verified and clean up
                 await self.otp_collection.update_one(
                     {"_id": otp_session["_id"]},
-                    {"$set": {"is_verified": True, "verified_at": datetime.utcnow()}}
+                    {"$set": {"is_verified": True, "verified_at": now_ist()}}
                 )
                 return True
             else:
@@ -138,7 +139,7 @@ class OTPService:
         """Clean up expired OTP sessions"""
         try:
             await self.otp_collection.delete_many({
-                "expires_at": {"$lt": datetime.utcnow()}
+                "expires_at": {"$lt": now_ist()}
             })
         except Exception:
             pass  # Ignore cleanup errors

@@ -197,8 +197,8 @@ async def request_password_reset(request: PasswordResetRequest, db: AsyncIOMotor
         reset_data = {
             "email": request.email,
             "reset_code": reset_code,
-            "created_at": datetime.utcnow(),
-            "expires_at": datetime.utcnow() + timedelta(hours=1),
+            "created_at": now_ist(),
+            "expires_at": now_ist() + timedelta(hours=1),
             "used": False
         }
         
@@ -243,7 +243,7 @@ async def confirm_password_reset(request: PasswordResetConfirm, db: AsyncIOMotor
             )
         
         # Check if reset code has expired
-        if datetime.utcnow() > reset_doc["expires_at"]:
+        if now_ist() > reset_doc["expires_at"]:
             await db.password_resets.delete_one({"_id": reset_doc["_id"]})
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -275,7 +275,7 @@ async def confirm_password_reset(request: PasswordResetConfirm, db: AsyncIOMotor
         # Mark reset code as used
         await db.password_resets.update_one(
             {"_id": reset_doc["_id"]},
-            {"$set": {"used": True, "used_at": datetime.utcnow()}}
+            {"$set": {"used": True, "used_at": now_ist()}}
         )
         
         return APIResponse(
