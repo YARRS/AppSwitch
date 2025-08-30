@@ -63,9 +63,7 @@ class AuthService:
         phone = re.sub(r'\D', '', original_phone)
         
         # Handle different input formats based on original input and length
-        
         # Handle different Indian mobile number formats
-        
         # Indian phone number with +91 prefix: +919876543210
         if original_phone.startswith('+91'):
             if len(phone) == 12 and phone.startswith('91'):

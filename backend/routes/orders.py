@@ -47,15 +47,16 @@ class OrderService:
             # Use consistent phone formatting from AuthService
             from auth import AuthService, UserService
             
-            # Format phone number using the same logic as the login system
+            # Format phone number using the same logic as the login system - NO FALLBACK
             try:
                 clean_phone = AuthService.format_phone_number(phone_number)
+                print(f"[ORDER DEBUG] Phone formatted successfully: '{phone_number}' -> '{clean_phone}'")
             except ValueError as e:
-                # If formatting fails, fall back to simple cleaning but log the issue
-                print(f"Phone formatting failed for '{phone_number}': {e}")
-                clean_phone = re.sub(r'\D', '', phone_number)
-                if len(clean_phone) >= 10:
-                    clean_phone = clean_phone[-10:]  # Take last 10 digits
+                print(f"[ORDER DEBUG] Phone formatting failed for '{phone_number}': {e}")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid phone number format: {str(e)}"
+                )
             
             # ENHANCED USER LOOKUP: Try multiple strategies to find existing user
             user_service = UserService(self.db)
@@ -221,22 +222,18 @@ class OrderService:
             user = await user_service.create_user(user_create_data)
             
             return user
-            
+        
+        except HTTPException:
+            # Re-raise HTTP exceptions (like invalid phone format)
+            raise
+
         except Exception as e:
-            # If user creation fails, return a temporary user object
-            clean_phone = re.sub(r'\D', '', phone_number)[-10:]
-            return UserInDB(
-                id=f"temp_{clean_phone}",
-                username=f"guest_{clean_phone}",
-                email=customer_email or f"guest_{clean_phone}@temp.com",
-                phone=clean_phone,
-                full_name=full_name or f"Guest {clean_phone}",
-                role=UserRole.CUSTOMER.value,
-                is_active=True,
-                email_verified=False,
-                created_at=now_ist(),
-                updated_at=now_ist(),
-                hashed_password=""  # Empty password hash
+            # For other errors during user creation, we should not create a temp user with invalid phone
+            # Instead, we should fail the order creation
+            print(f"[ORDER DEBUG] User creation failed: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to create user account for order" 
             )
     
     async def create_order(self, user_id: str, order_data: dict) -> OrderInDB:

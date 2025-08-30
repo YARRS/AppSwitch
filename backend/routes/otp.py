@@ -21,18 +21,13 @@ class OTPSendRequest(BaseModel):
     
     @validator('phone_number')
     def validate_phone(cls, v):
-        # Remove any non-digit characters
-        phone = re.sub(r'\D', '', v)
-        
-        # Check if it's a valid 10-digit Indian mobile number
-        if len(phone) == 10 and phone.startswith(('6', '7', '8', '9')):
-            return phone
-        elif len(phone) == 12 and phone.startswith('91'):
-            return phone[2:]  # Remove country code
-        elif len(phone) == 13 and phone.startswith('+91'):
-            return phone[3:]  # Remove country code with +
-        
-        raise ValueError('Invalid phone number format. Please provide a valid 10-digit mobile number.')
+        # Use consistent AuthService formatting
+        from auth import AuthService
+        try:
+            formatted_phone = AuthService.format_phone_number(v)
+            return formatted_phone
+        except ValueError as e:
+            raise ValueError(f'Invalid phone number format: {str(e)}')
 
 class OTPVerifyRequest(BaseModel):
     phone_number: str
