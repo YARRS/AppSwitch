@@ -330,7 +330,7 @@ class MobileLoginTester:
                         if data.get("success"):
                             # Store OTP session info for later verification
                             self.otp_sessions[phone] = {
-                                "test_otp": data.get("data", {}).get("test_otp", "079254"),
+                                "test_otp": data.get("data", {}).get("test_otp", "123456"),
                                 "expires_in": data.get("data", {}).get("expires_in", 600)
                             }
                             passed_count += 1
@@ -382,7 +382,7 @@ class MobileLoginTester:
                 {"phone": "1234567891", "role": "admin"}
             ]
             
-            test_otps = ["123456", "079254"]  # Both testing OTPs mentioned in review
+            test_otps = ["123456", "123456"]  # Both testing OTPs mentioned in review
             
             passed_count = 0
             for user in test_users:

@@ -144,7 +144,7 @@ const AdminDashboard = () => {
               <select
                 value={activeTab}
                 onChange={(e) => setActiveTab(e.target.value)}
-                className="w-full p-4 border-2 border-purple-200 dark:border-purple-600 rounded-xl bg-gradient-to-r from-white to-purple-50 dark:from-gray-700 dark:to-purple-900 text-gray-900 dark:text-white text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 focus:ring-4 focus:ring-purple-500 focus:border-purple-500 cursor-pointer"
+                className="w-full p-4 border-2 border-purple-200 dark:border-purple-600 rounded-xl bg-gradient-to-r from-white to-purple-50 dark:text-white dark:from-gray-700 dark:to-purple-900 text-gray-900 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 focus:ring-4 focus:ring-purple-500 focus:border-purple-500 cursor-pointer"
                 style={{
                   backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
                   backgroundPosition: 'right 16px center',

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import Optional
 from datetime import datetime, timedelta
-from timezone_utils import now_ist
+from timezone_utils import now_ist, to_ist
 import re
 from pydantic import BaseModel, validator
 
@@ -57,7 +57,7 @@ class OTPService:
     def __init__(self, db: AsyncIOMotorDatabase):
         self.db = db
         self.otp_collection = db.otp_sessions
-        self.default_otp = "079254"  # Default OTP for testing
+        self.default_otp = "123456"  # Default OTP for testing
     
     async def send_otp(self, phone_number: str) -> dict:
         """Send OTP to phone number (mock implementation for testing)"""
@@ -102,19 +102,34 @@ class OTPService:
             if not otp_session:
                 return False
             
+            # Normalize expires_at to timezone-aware IST datetime for safe comparison
+            expires_at = otp_session.get("expires_at")
+            try:
+                if isinstance(expires_at, str):
+                    # Handle ISO string stored in DB
+                    expires_dt = to_ist(datetime.fromisoformat(expires_at))
+                elif isinstance(expires_at, datetime):
+                    expires_dt = to_ist(expires_at)
+                else:
+                    expires_dt = None
+            except Exception:
+                expires_dt = None
+
             # Check if OTP has expired
-            if now_ist() > otp_session["expires_at"]:
+            if expires_dt is not None and now_ist() > expires_dt:
                 # Clean up expired OTP
                 await self.otp_collection.delete_one({"_id": otp_session["_id"]})
                 return False
             
             # Check attempts limit (max 3 attempts)
-            if otp_session["attempts"] >= 3:
+            attempts = int(otp_session.get("attempts", 0) or 0)
+            if attempts >= 3:
                 await self.otp_collection.delete_one({"_id": otp_session["_id"]})
                 return False
             
             # Verify OTP
-            if otp_session["otp"] == otp:
+            # Compare OTPs as strings to avoid type issues
+            if str(otp_session.get("otp")) == str(otp):
                 # Mark as verified and clean up
                 await self.otp_collection.update_one(
                     {"_id": otp_session["_id"]},

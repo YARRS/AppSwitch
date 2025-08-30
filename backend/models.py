@@ -84,7 +84,6 @@ class BaseDocument(BaseModel):
     id: str = None
     created_at: datetime = None
     updated_at: datetime = None
-    
     def __init__(self, **data):
         if not data.get('id'):
             data['id'] = str(uuid.uuid4())

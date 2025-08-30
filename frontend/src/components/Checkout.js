@@ -516,7 +516,7 @@ const Checkout = () => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(price);
   };
 
@@ -994,7 +994,7 @@ const ShippingForm = ({
             <p className="text-yellow-700 dark:text-yellow-400 text-sm mb-4">
               We've sent a 6-digit OTP to your phone number. Please enter it below to verify your number.
               <br />
-              <strong>For testing: Use OTP 079254</strong>
+              <strong>For testing: Use OTP 123456</strong>
             </p>
             
             <div className="flex space-x-3">
@@ -1557,7 +1557,7 @@ const OrderSuccess = ({ orderData }) => {
                 <span className="font-bold text-xl text-green-600 dark:text-green-400">
                   {new Intl.NumberFormat('en-US', {
                     style: 'currency',
-                    currency: 'USD'
+                    currency: 'INR'
                   }).format(orderData.final_amount)}
                 </span>
               </div>

@@ -145,7 +145,7 @@ const UserProfile = () => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(price);
   };
 
@@ -210,7 +210,7 @@ const UserProfile = () => {
               >
                 <div className="flex items-center space-x-3">
                   <Package className="w-6 h-6" />
-                  <span>My Orders ({orders.length})</span>
+                  <span>My Orders </span>
                   {orders.length > 0 && (
                     <span className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
                       {orders.length}

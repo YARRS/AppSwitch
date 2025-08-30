@@ -266,7 +266,7 @@ Based on user requirements, implement:
    - Multi-step progress indicator (Shipping → Payment → Review)
    - Real-time form validation with helpful error messages
    - Guest cart handling with session management
-   - OTP verification for guest users using test code "079254"
+   - OTP verification for guest users using test code "123456"
 
 3. **Mobile-Responsive Design**:
    - Fully responsive layout for all screen sizes
@@ -278,7 +278,7 @@ Based on user requirements, implement:
 **For Guest Users**:
 1. Add items to cart → Proceed to checkout
 2. Fill shipping and contact information  
-3. Verify phone number with OTP (079254)
+3. Verify phone number with OTP (123456)
 4. Complete payment selection and review order
 5. Place order successfully  
 6. **🎉 Beautiful success notification appears**

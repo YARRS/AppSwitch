@@ -547,7 +547,7 @@ class DatabaseSeeder:
         print(f"   - All products have stock available for testing")
         print(f"   - Products range from $27.99 to $125.00")
         print(f"   - Multiple categories available for filtering")
-        print(f"   - OTP for testing: 079254")
+        print(f"   - OTP for testing: 123456")
         print()
     
     async def create_indexes(self):

@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 import uuid
 from motor.motor_asyncio import AsyncIOMotorClient
 from dotenv import load_dotenv
+from timezone_utils import now_ist
 
 # Load environment variables
 load_dotenv()
