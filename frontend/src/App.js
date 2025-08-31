@@ -19,6 +19,7 @@ import Cart from './components/Cart';
 import Checkout from './components/Checkout';
 import Logo from './components/Logo';
 import OrderTracking from './components/OrderTracking';
+import ScrollToTop from './components/ScrollToTop';
 
 // Theme context
 export const ThemeContext = React.createContext();
@@ -67,9 +68,10 @@ function App() {
       <CartProvider>
         <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
           <Router>
-            <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
+            <ScrollToTop />
+            <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300 flex flex-col">
               <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-              <main className="relative">
+              <main className="relative flex-1">
                 <Routes>
                   <Route path="/" element={<ProductsPage />} />
                   <Route path="/products/:id" element={<ProductDetail />} />
