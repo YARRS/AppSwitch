@@ -69,7 +69,7 @@ function App() {
         <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
           <Router>
             <ScrollToTop />
-            <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300 flex flex-col">
+            <div className="min-h-full bg-gradient-to-br from-pink-50 via-white to-rose-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300 flex flex-col">
               <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
               <main className="relative flex-1">
                 <Routes>

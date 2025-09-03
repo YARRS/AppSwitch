@@ -1189,7 +1189,7 @@ const ShippingForm = ({
 
 // Payment Form Component
 const PaymentForm = ({ formData, handleInputChange, onNext, onBack }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 " >
     <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center space-x-2">
       <CreditCard className="w-6 h-6" />
       <span>Payment Method</span>
@@ -1505,7 +1505,7 @@ const OrderSuccess = ({ orderData }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-full bg-gradient-to-br from-green-50 via-white to-emerald-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-3xl animate-pulse"></div>
