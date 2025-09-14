@@ -66,7 +66,7 @@ class ProductService:
     
     async def update_product(self, product_id: str, update_data: dict, user_id: str) -> Optional[ProductInDB]:
         """Update product"""
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = now_ist()
         update_data["last_updated_by"] = user_id
         
         result = await self.products_collection.update_one(
@@ -214,7 +214,7 @@ class ProductService:
                     "total_earnings": revenue
                 },
                 "$set": {
-                    "last_sale_date": datetime.utcnow()
+                    "last_sale_date": now_ist()
                 }
             }
         )
@@ -227,7 +227,7 @@ class ProductService:
                 "$set": {
                     "assigned_to": new_assignee,
                     "last_updated_by": assigned_by,
-                    "updated_at": datetime.utcnow()
+                    "updated_at": now_ist()
                 }
             }
         )
@@ -760,7 +760,7 @@ async def get_product_performance_analytics(
         if assigned_to:
             match_query["assigned_to"] = assigned_to
         
-        start_date = datetime.utcnow() - timedelta(days=days_back)
+        start_date = now_ist() - timedelta(days=days_back)
         
         # Analytics pipeline
         pipeline = [
@@ -835,7 +835,7 @@ async def get_product_performance_analytics(
                 "days_analyzed": days_back
             },
             "products": results[:50],  # Top 50 products
-            "generated_at": datetime.utcnow()
+            "generated_at": now_ist()
         }
         
         return APIResponse(

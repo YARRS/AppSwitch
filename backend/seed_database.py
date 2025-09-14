@@ -176,7 +176,7 @@ DEFAULT_PRODUCTS = [
     {
         "name": "Elegant Crystal Vase",
         "description": "A beautiful handcrafted crystal vase perfect for displaying flowers or as a decorative piece.",
-        "categories": ["home_decor"],
+        "categories": ["home_decor"],  # Changed to list
         "price": 89.99,
         "discount_price": 74.99,
         "sku": "VL-CV001",
@@ -190,12 +190,14 @@ DEFAULT_PRODUCTS = [
         "features": ["Handcrafted", "Lead Crystal", "Gift Box Included", "Care Instructions Provided"],
         "is_active": True,
         "stock_quantity": 25,
-        "min_stock_level": 5
+        "min_stock_level": 5,
+        "images": [],  # Added empty images list
+        "videos": []   # Added empty videos list
     },
     {
         "name": "Personalized Photo Frame",
         "description": "Custom engraved wooden photo frame with your personal message or name.",
-        "categories": ["personalized_gifts", "keepsakes"],
+        "categories": ["personalized_gifts", "keepsakes"],  # Multiple categories
         "price": 34.99,
         "discount_price": 27.99,
         "sku": "VL-PF002",
@@ -209,12 +211,14 @@ DEFAULT_PRODUCTS = [
         "features": ["Laser Engraving", "Custom Text", "Multiple Font Options", "Protective Glass"],
         "is_active": True,
         "stock_quantity": 50,
-        "min_stock_level": 10
+        "min_stock_level": 10,
+        "images": [],
+        "videos": []
     },
     {
         "name": "Sterling Silver Necklace",
         "description": "Delicate sterling silver necklace with a beautiful pendant, perfect for everyday wear.",
-        "categories": ["jewelry", "accessories"],
+        "categories": ["jewelry", "accessories"],  # Multiple categories
         "price": 125.00,
         "discount_price": 99.99,
         "sku": "VL-SN003",
@@ -228,7 +232,9 @@ DEFAULT_PRODUCTS = [
         "features": ["Hypoallergenic", "Tarnish Resistant", "Gift Box Included", "Certificate of Authenticity"],
         "is_active": True,
         "stock_quantity": 15,
-        "min_stock_level": 3
+        "min_stock_level": 3,
+        "images": [],
+        "videos": []
     },
     {
         "name": "Luxury Scented Candle Set",
@@ -247,7 +253,9 @@ DEFAULT_PRODUCTS = [
         "features": ["Natural Soy Wax", "Lead-Free Wicks", "Reusable Containers", "Gift Ready"],
         "is_active": True,
         "stock_quantity": 30,
-        "min_stock_level": 8
+        "min_stock_level": 8,
+        "images": [],
+        "videos": []
     },
     {
         "name": "Handcrafted Wooden Music Box",
@@ -267,6 +275,8 @@ DEFAULT_PRODUCTS = [
         "is_active": True,
         "stock_quantity": 20,
         "min_stock_level": 5
+        "images": [],
+        "videos": []
     },
     {
         "name": "Designer Silk Scarf",
@@ -285,7 +295,9 @@ DEFAULT_PRODUCTS = [
         "features": ["Pure Silk", "Exclusive Design", "Hand-rolled Edges", "Premium Gift Box"],
         "is_active": True,
         "stock_quantity": 12,
-        "min_stock_level": 3
+        "min_stock_level": 3,
+        "images": [],
+        "videos": []
     },
     {
         "name": "Ceramic Coffee Mug Set",
@@ -304,7 +316,9 @@ DEFAULT_PRODUCTS = [
         "features": ["Lead-Free Ceramic", "Heat Resistant", "Elegant Design", "Matching Saucers"],
         "is_active": True,
         "stock_quantity": 40,
-        "min_stock_level": 10
+        "min_stock_level": 10,
+        "images": [],
+        "videos": []
     },
     {
         "name": "Memory Album",
@@ -323,7 +337,9 @@ DEFAULT_PRODUCTS = [
         "features": ["Acid-Free Pages", "Photo Corners Included", "Personalization Available", "Protective Sleeve"],
         "is_active": True,
         "stock_quantity": 28,
-        "min_stock_level": 7
+        "min_stock_level": 7,
+        "images": [],
+        "videos": []
     }
 ]
 
@@ -547,7 +563,7 @@ class DatabaseSeeder:
         print(f"   - All products have stock available for testing")
         print(f"   - Products range from $27.99 to $125.00")
         print(f"   - Multiple categories available for filtering")
-        print(f"   - OTP for testing: 079254")
+        print(f"   - OTP for testing: 123456")
         print()
     
     async def create_indexes(self):

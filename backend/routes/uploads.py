@@ -182,7 +182,7 @@ async def upload_image(
             'file_size': file_info['file_size'],
             'base64_data': base64_data,
             'user_id': current_user.id,
-            'created_at': datetime.utcnow()
+            'created_at': now_ist()
         }
         
         file_id = await file_service.save_file_record(file_data)
@@ -242,7 +242,7 @@ async def upload_images(
                     'file_size': file_info['file_size'],
                     'base64_data': base64_data,
                     'user_id': current_user.id,
-                    'created_at': datetime.utcnow()
+                    'created_at': now_ist()
                 }
                 
                 file_id = await file_service.save_file_record(file_data)
@@ -305,7 +305,7 @@ async def upload_video(
             'file_size': file_info['file_size'],
             'base64_data': base64_data,
             'user_id': current_user.id,
-            'created_at': datetime.utcnow()
+            'created_at': now_ist()
         }
         
         file_id = await file_service.save_file_record(file_data)
@@ -365,7 +365,7 @@ async def upload_videos(
                     'file_size': file_info['file_size'],
                     'base64_data': base64_data,
                     'user_id': current_user.id,
-                    'created_at': datetime.utcnow()
+                    'created_at': now_ist()
                 }
                 
                 file_id = await file_service.save_file_record(file_data)

@@ -124,14 +124,14 @@ class DashboardService:
         
         # Get recent stock movements as alerts
         recent_movements = await self.inventory_logs_collection.count_documents({
-            "created_at": {"$gte": datetime.utcnow() - timedelta(days=1)}
+            "created_at": {"$gte": now_ist() - timedelta(days=1)}
         })
         inventory_alerts += recent_movements
         
         # Get reassignment requests (you might need to implement this in your system)
         reassignment_requests = await self.inventory_logs_collection.count_documents({
             "action": "reassignment",
-            "created_at": {"$gte": datetime.utcnow() - timedelta(days=7)}
+            "created_at": {"$gte": now_ist() - timedelta(days=7)}
         })
         
         return StoreAdminDashboard(
@@ -229,7 +229,7 @@ class DashboardService:
         
         # Get customer inquiries (recent)
         customer_inquiries = await self.inquiries_collection.count_documents({
-            "created_at": {"$gte": datetime.utcnow() - timedelta(days=7)}
+            "created_at": {"$gte": now_ist() - timedelta(days=7)}
         })
         
         return SupportExecutiveDashboard(
@@ -250,7 +250,7 @@ class DashboardService:
         # Get customer acquisition (new customers in last 30 days)
         customer_acquisition = await self.users_collection.count_documents({
             "role": "customer",
-            "created_at": {"$gte": datetime.utcnow() - timedelta(days=30)}
+            "created_at": {"$gte": now_ist() - timedelta(days=30)}
         })
         
         # Get email campaigns (active campaigns)
@@ -377,7 +377,7 @@ async def get_analytics_data(
         dashboard_service = DashboardService(db)
         
         # Get sales data for last 30 days
-        start_date = datetime.utcnow() - timedelta(days=30)
+        start_date = now_ist() - timedelta(days=30)
         sales_pipeline = [
             {"$match": {"created_at": {"$gte": start_date}}},
             {"$group": {
@@ -414,7 +414,7 @@ async def get_analytics_data(
         analytics_data = {
             "daily_sales": sales_data,
             "category_sales": category_data,
-            "generated_at": datetime.utcnow()
+            "generated_at": now_ist()
         }
         
         return APIResponse(

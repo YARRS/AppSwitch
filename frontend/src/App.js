@@ -19,6 +19,8 @@ import Cart from './components/Cart';
 import Checkout from './components/Checkout';
 import Logo from './components/Logo';
 import OrderTracking from './components/OrderTracking';
+import ScrollToTop from './components/ScrollToTop';
+import DebugInfo from './components/DebugInfo';
 
 // Theme context
 export const ThemeContext = React.createContext();
@@ -67,9 +69,10 @@ function App() {
       <CartProvider>
         <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
           <Router>
-            <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-rose-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300">
+            <ScrollToTop />
+            <div className="min-h-full bg-gradient-to-br from-pink-50 via-white to-rose-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 transition-all duration-300 flex flex-col">
               <Header darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-              <main className="relative">
+              <main className="relative flex-1">
                 <Routes>
                   <Route path="/" element={<ProductsPage />} />
                   <Route path="/products/:id" element={<ProductDetail />} />
@@ -114,6 +117,9 @@ function App() {
                 </Routes>
               </main>
               <Footer />
+              
+              {/* Debug component for development */}
+              <DebugInfo />
             </div>
           </Router>
         </ThemeContext.Provider>
@@ -209,8 +215,9 @@ function Header({ darkMode, toggleDarkMode }) {
                     </a>
                     <hr className="my-2 border-gray-200 dark:border-gray-600" />
                     <button
+                      style={{ width: '92%' }}
                       onClick={handleLogout}
-                      className="group flex items-center w-full px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300 transition-all duration-200 mx-2 rounded-lg"
+                      className="group flex items-center w-full px-4 py-3 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-300 transition-all duration-200 mx-2 rounded-lg"
                     >
                       <svg className="w-4 h-4 mr-3 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -438,94 +445,94 @@ function Header({ darkMode, toggleDarkMode }) {
   );
 }
 
-// Home Page Component
-function HomePage({ backendStatus }) {
-  return (
-    <div className="relative">
-      {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
-              Transform Your Home Into a{' '}
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Smart Home
-              </span>
-            </h1>
-            <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
-              Convert your physical wall switches into smart home switches that work with Google Home, 
-              Alexa, and your smartphone. Control all your appliances from anywhere.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a
-                href="/products"
-                className="btn-primary text-lg px-8 py-3 text-center inline-block"
-              >
-                Shop Now
-              </a>
-              <a
-                href="/about"
-                className="btn-secondary text-lg px-8 py-3 text-center inline-block"
-              >
-                Learn More
-              </a>
-            </div>
-          </div>
+// // Home Page Component
+// function HomePage({ backendStatus }) {
+//   return (
+//     <div className="relative">
+//       {/* Hero Section */}
+//       <section className="relative py-20 overflow-hidden">
+//         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+//           <div className="text-center">
+//             <h1 className="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+//               Transform Your Home Into a{' '}
+//               <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+//                 Smart Home
+//               </span>
+//             </h1>
+//             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
+//               Convert your physical wall switches into smart home switches that work with Google Home, 
+//               Alexa, and your smartphone. Control all your appliances from anywhere.
+//             </p>
+//             <div className="flex flex-col sm:flex-row gap-4 justify-center">
+//               <a
+//                 href="/products"
+//                 className="btn-primary text-lg px-8 py-3 text-center inline-block"
+//               >
+//                 Shop Now
+//               </a>
+//               <a
+//                 href="/about"
+//                 className="btn-secondary text-lg px-8 py-3 text-center inline-block"
+//               >
+//                 Learn More
+//               </a>
+//             </div>
+//           </div>
           
-          {/* Status Indicator */}
-          <div className="mt-12 text-center">
-            <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full text-sm ${
-              backendStatus === 'connected' 
-                ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
-                : backendStatus === 'disconnected'
-                ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
-                : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
-            }`}>
-              <div className={`w-2 h-2 rounded-full ${
-                backendStatus === 'connected' ? 'bg-green-500 animate-pulse' : 
-                backendStatus === 'disconnected' ? 'bg-red-500' : 'bg-yellow-500'
-              }`} />
-              <span>System Status: {backendStatus === 'connected' ? 'Online' : 
-                                   backendStatus === 'disconnected' ? 'Offline' : 'Checking...'}</span>
-            </div>
-          </div>
-        </div>
-      </section>
+//           {/* Status Indicator */}
+//           <div className="mt-12 text-center">
+//             <div className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full text-sm ${
+//               backendStatus === 'connected' 
+//                 ? 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400'
+//                 : backendStatus === 'disconnected'
+//                 ? 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400'
+//                 : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400'
+//             }`}>
+//               <div className={`w-2 h-2 rounded-full ${
+//                 backendStatus === 'connected' ? 'bg-green-500 animate-pulse' : 
+//                 backendStatus === 'disconnected' ? 'bg-red-500' : 'bg-yellow-500'
+//               }`} />
+//               <span>System Status: {backendStatus === 'connected' ? 'Online' : 
+//                                    backendStatus === 'disconnected' ? 'Offline' : 'Checking...'}</span>
+//             </div>
+//           </div>
+//         </div>
+//       </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-gray-50 dark:bg-gray-800/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-              Why Choose SmartSwitch?
-            </h2>
-            <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Our IoT solutions make your home smarter, safer, and more efficient.
-            </p>
-          </div>
+//       {/* Features Section */}
+//       <section className="py-20 bg-gray-50 dark:bg-gray-800/50">
+//         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+//           <div className="text-center mb-16">
+//             <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+//               Why Choose SmartSwitch?
+//             </h2>
+//             <p className="text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
+//               Our IoT solutions make your home smarter, safer, and more efficient.
+//             </p>
+//           </div>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            <FeatureCard
-              icon={<Shield className="w-8 h-8 text-blue-600" />}
-              title="Secure & Reliable"
-              description="Bank-grade encryption ensures your smart home is safe and secure."
-            />
-            <FeatureCard
-              icon={<Zap className="w-8 h-8 text-yellow-500" />}
-              title="Easy Installation"
-              description="Replace your existing switches in minutes with our simple installation process."
-            />
-            <FeatureCard
-              icon={<Home className="w-8 h-8 text-green-600" />}
-              title="Universal Compatibility"
-              description="Works with Google Home, Alexa, and all major smart home platforms."
-            />
-          </div>
-        </div>
-      </section>
-    </div>
-  );
-}
+//           <div className="grid md:grid-cols-3 gap-8">
+//             <FeatureCard
+//               icon={<Shield className="w-8 h-8 text-blue-600" />}
+//               title="Secure & Reliable"
+//               description="Bank-grade encryption ensures your smart home is safe and secure."
+//             />
+//             <FeatureCard
+//               icon={<Zap className="w-8 h-8 text-yellow-500" />}
+//               title="Easy Installation"
+//               description="Replace your existing switches in minutes with our simple installation process."
+//             />
+//             <FeatureCard
+//               icon={<Home className="w-8 h-8 text-green-600" />}
+//               title="Universal Compatibility"
+//               description="Works with Google Home, Alexa, and all major smart home platforms."
+//             />
+//           </div>
+//         </div>
+//       </section>
+//     </div>
+//   );
+// }
 
 // Feature Card Component
 function FeatureCard({ icon, title, description }) {

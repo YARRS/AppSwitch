@@ -70,7 +70,7 @@
   .dark .nav-link.active {
     @apply bg-dark-secondary-600 text-white;
   }
-
+  
   /* Mobile-specific enhancements */
   @media (max-width: 768px) {
     .btn-primary,

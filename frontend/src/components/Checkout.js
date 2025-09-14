@@ -516,14 +516,14 @@ const Checkout = () => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(price);
   };
 
   // Show loading state
   if (cartLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 flex items-center justify-center min-h-full">
         <div className="text-center">
           <div className="relative">
             <div className="w-20 h-20 border-4 border-purple-200 dark:border-purple-800 rounded-full animate-spin border-t-purple-600 dark:border-t-purple-400 mx-auto mb-6"></div>
@@ -546,7 +546,7 @@ const Checkout = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+    <div className="bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 min-h-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Modern Header */}
         <div className="mb-8">
@@ -994,7 +994,7 @@ const ShippingForm = ({
             <p className="text-yellow-700 dark:text-yellow-400 text-sm mb-4">
               We've sent a 6-digit OTP to your phone number. Please enter it below to verify your number.
               <br />
-              <strong>For testing: Use OTP 079254</strong>
+              <strong>For testing: Use OTP 123456</strong>
             </p>
             
             <div className="flex space-x-3">
@@ -1189,7 +1189,7 @@ const ShippingForm = ({
 
 // Payment Form Component
 const PaymentForm = ({ formData, handleInputChange, onNext, onBack }) => (
-  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+  <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 " >
     <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center space-x-2">
       <CreditCard className="w-6 h-6" />
       <span>Payment Method</span>
@@ -1505,7 +1505,7 @@ const OrderSuccess = ({ orderData }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center relative overflow-hidden">
+    <div className="min-h-full bg-gradient-to-br from-green-50 via-white to-emerald-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full blur-3xl animate-pulse"></div>
@@ -1557,7 +1557,7 @@ const OrderSuccess = ({ orderData }) => {
                 <span className="font-bold text-xl text-green-600 dark:text-green-400">
                   {new Intl.NumberFormat('en-US', {
                     style: 'currency',
-                    currency: 'USD'
+                    currency: 'INR'
                   }).format(orderData.final_amount)}
                 </span>
               </div>

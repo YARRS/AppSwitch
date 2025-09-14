@@ -60,7 +60,7 @@ class CommissionService:
         
         user_role = user_doc.get("role")
         product_category = product_doc.get("category")
-        current_time = datetime.utcnow()
+        current_time = now_ist()
         
         # Build query for applicable rules
         query = {
@@ -112,7 +112,7 @@ class CommissionService:
     
     async def update_commission_rule(self, rule_id: str, update_data: dict) -> Optional[CommissionRuleInDB]:
         """Update commission rule"""
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = now_ist()
         
         result = await self.commission_rules_collection.update_one(
             {"id": rule_id},
@@ -303,7 +303,7 @@ class CommissionService:
     
     async def update_commission_earning(self, earning_id: str, update_data: dict) -> Optional[CommissionEarningInDB]:
         """Update commission earning"""
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = now_ist()
         
         result = await self.commission_earnings_collection.update_one(
             {"id": earning_id},
@@ -367,8 +367,8 @@ class CommissionService:
             {
                 "$set": {
                     "status": ProductAssignmentStatus.REASSIGNED,
-                    "end_date": datetime.utcnow(),
-                    "updated_at": datetime.utcnow()
+                    "end_date": now_ist(),
+                    "updated_at": now_ist()
                 }
             }
         )
@@ -382,7 +382,7 @@ class CommissionService:
             {
                 "$set": {
                     "assigned_to": assignment_data["assigned_to"],
-                    "updated_at": datetime.utcnow()
+                    "updated_at": now_ist()
                 },
                 "$push": {"assignment_history": assignment.id}
             }
@@ -427,8 +427,8 @@ class CommissionService:
     
     async def analyze_product_performance(self, days_back: int = 30) -> List[ProductPerformanceMetrics]:
         """Analyze product performance for reallocation decisions"""
-        start_date = datetime.utcnow() - timedelta(days=days_back)
-        current_date = datetime.utcnow()
+        start_date = now_ist() - timedelta(days=days_back)
+        current_date = now_ist()
         
         # Get product performance metrics
         pipeline = [
@@ -555,7 +555,7 @@ class CommissionService:
         
         return ReallocationRecommendation(
             candidates=candidates,
-            generated_at=datetime.utcnow(),
+            generated_at=now_ist(),
             criteria=criteria,
             total_candidates=len(candidates)
         )
@@ -805,7 +805,7 @@ async def update_commission_earning(
         if update_dict.get("status") == CommissionStatus.APPROVED:
             update_dict["approved_by"] = current_user.id
         elif update_dict.get("status") == CommissionStatus.PAID:
-            update_dict["paid_at"] = datetime.utcnow()
+            update_dict["paid_at"] = now_ist()
         
         # Update earning
         updated_earning = await commission_service.update_commission_earning(

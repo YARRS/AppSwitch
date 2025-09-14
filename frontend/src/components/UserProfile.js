@@ -145,12 +145,12 @@ const UserProfile = () => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(price);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+    <div className="bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900 min-h-full">
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Hero Header */}
         <div className="text-center mb-12">
@@ -210,7 +210,7 @@ const UserProfile = () => {
               >
                 <div className="flex items-center space-x-3">
                   <Package className="w-6 h-6" />
-                  <span>My Orders ({orders.length})</span>
+                  <span>My Orders </span>
                   {orders.length > 0 && (
                     <span className="bg-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full animate-pulse">
                       {orders.length}

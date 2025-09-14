@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query, Header
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import Optional, List
 from datetime import datetime
+from timezone_utils import now_ist
 import uuid
 from pydantic import BaseModel
 import re
@@ -46,18 +47,21 @@ class OrderService:
             # Use consistent phone formatting from AuthService
             from auth import AuthService, UserService
             
-            # Format phone number using the same logic as the login system
+            # Format phone number using the same logic as the login system - NO FALLBACK
             try:
                 clean_phone = AuthService.format_phone_number(phone_number)
+                print(f"[ORDER DEBUG] Phone formatted successfully: '{phone_number}' -> '{clean_phone}'")
             except ValueError as e:
-                # If formatting fails, fall back to simple cleaning but log the issue
-                print(f"Phone formatting failed for '{phone_number}': {e}")
-                clean_phone = re.sub(r'\D', '', phone_number)
-                if len(clean_phone) >= 10:
-                    clean_phone = clean_phone[-10:]  # Take last 10 digits
+                print(f"[ORDER DEBUG] Phone formatting failed for '{phone_number}': {e}")
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Invalid phone number format: {str(e)}"
+                )
             
-            # Try to find existing user by phone using UserService (which handles format variations)
+            # ENHANCED USER LOOKUP: Try multiple strategies to find existing user
             user_service = UserService(self.db)
+
+            # Strategy 1: Use the enhanced UserService lookup
             existing_user = await user_service.get_user_by_phone(clean_phone)
             
             if existing_user:
@@ -70,7 +74,99 @@ class OrderService:
                     existing_user.full_name = full_name
                 
                 return existing_user
+
+
+            # Strategy 2: Direct search through all users to decrypt and compare phones
+
+            # This is needed because Fernet encryption produces different results each time
+
+            print(f"[ORDER DEBUG] UserService didn't find user, trying direct database search...")
+
+            users_cursor = self.users_collection.find({}, {
+
+                "id": 1, "email": 1, "phone": 1, "username": 1, "full_name": 1, 
+
+                "role": 1, "is_active": 1, "hashed_password": 1, "email_verified": 1, 
+
+                "last_login": 1, "created_at": 1, "updated_at": 1, "store_owner_id": 1, "needs_password_setup": 1
+
+            })
+
+            users = await users_cursor.to_list(length=500)  # Reasonable limit
+
             
+
+            for user_doc in users:
+
+                stored_phone = user_doc.get('phone')
+
+                if not stored_phone:
+
+                    continue
+
+                
+
+                try:
+
+                    # Try to decrypt the stored phone
+
+                    decrypted_phone = AuthService.decrypt_sensitive_data(stored_phone)
+
+                    # Format both phones consistently for comparison
+
+                    formatted_stored = AuthService.format_phone_number(decrypted_phone)
+
+                    
+
+                    if formatted_stored == clean_phone:
+
+                        print(f"[ORDER DEBUG] Found matching user via decryption: {user_doc.get('username', 'N/A')} (phone match: {formatted_stored})")
+
+                        existing_user = UserInDB(**user_doc)
+
+                        
+
+                        # Update the full_name if provided and different
+
+                        if full_name and full_name != existing_user.full_name:
+
+                            await user_service.update_user(
+
+                                existing_user.id,
+
+                                {"full_name": full_name}
+
+                            )
+
+                            existing_user.full_name = full_name
+
+                        
+
+                        return existing_user
+
+                        
+
+                except Exception as decrypt_error:
+
+                    # If decryption fails, try direct comparison for unencrypted phones
+
+                    try:
+
+                        formatted_stored = AuthService.format_phone_number(stored_phone)
+
+                        if formatted_stored == clean_phone:
+
+                            print(f"[ORDER DEBUG] Found matching user via direct comparison: {user_doc.get('username', 'N/A')}")
+
+                            return UserInDB(**user_doc)
+
+                    except:
+
+                        continue
+
+            
+
+            print(f"[ORDER DEBUG] No existing user found for phone {clean_phone}, creating new user...")
             # Create new user using UserService for consistency
             
             # Generate username based on full_name or phone
@@ -115,8 +211,8 @@ class OrderService:
                 "role": UserRole.CUSTOMER.value,
                 "is_active": True,
                 "email_verified": False,
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow(),
+                "created_at": now_ist(),
+                "updated_at": now_ist(),
                 "password": temp_password,  # UserService will hash this correctly
                 "needs_password_setup": False  # User can login with the generated password
             }
@@ -126,22 +222,18 @@ class OrderService:
             user = await user_service.create_user(user_create_data)
             
             return user
-            
+        
+        except HTTPException:
+            # Re-raise HTTP exceptions (like invalid phone format)
+            raise
+
         except Exception as e:
-            # If user creation fails, return a temporary user object
-            clean_phone = re.sub(r'\D', '', phone_number)[-10:]
-            return UserInDB(
-                id=f"temp_{clean_phone}",
-                username=f"guest_{clean_phone}",
-                email=customer_email or f"guest_{clean_phone}@temp.com",
-                phone=clean_phone,
-                full_name=full_name or f"Guest {clean_phone}",
-                role=UserRole.CUSTOMER.value,
-                is_active=True,
-                email_verified=False,
-                created_at=datetime.utcnow(),
-                updated_at=datetime.utcnow(),
-                hashed_password=""  # Empty password hash
+            # For other errors during user creation, we should not create a temp user with invalid phone
+            # Instead, we should fail the order creation
+            print(f"[ORDER DEBUG] User creation failed: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to create user account for order" 
             )
     
     async def create_order(self, user_id: str, order_data: dict) -> OrderInDB:
@@ -154,8 +246,8 @@ class OrderService:
             "id": str(uuid.uuid4()),
             "user_id": user_id,
             "order_number": order_number,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow(),
+            "created_at": now_ist(),
+            "updated_at": now_ist(),
             "status": "pending",  # Default status
             **order_data
         }
@@ -300,14 +392,14 @@ class OrderService:
     
     async def update_order(self, order_id: str, update_data: dict) -> Optional[OrderInDB]:
         """Update order"""
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = now_ist()
         
         # Handle status updates
         if "status" in update_data:
             if update_data["status"] == OrderStatus.SHIPPED.value:
-                update_data["shipped_at"] = datetime.utcnow()
+                update_data["shipped_at"] = now_ist()
             elif update_data["status"] == OrderStatus.DELIVERED.value:
-                update_data["delivered_at"] = datetime.utcnow()
+                update_data["delivered_at"] = now_ist()
         
         result = await self.orders_collection.update_one(
             {"id": order_id},
@@ -491,8 +583,8 @@ async def create_guest_order(
                 "zip_code": order_data.shipping_address.zip_code,
                 "country": getattr(order_data.shipping_address, 'country', 'India'),
                 "is_default": is_default,
-                "created_at": datetime.utcnow(),
-                "updated_at": datetime.utcnow()
+                "created_at": now_ist(),
+                "updated_at": now_ist()
             }
             
             await order_service.addresses_collection.insert_one(address_data)
@@ -661,13 +753,71 @@ async def get_all_orders(
         
         # Convert to response format
         order_responses = []
+
+        phone_groups = {}
+
+        # First pass: identify phone number groups and add phone number analysis
         for order_doc in result["orders"]:
             order = OrderInDB(**order_doc)
-            order_responses.append(OrderResponse(**order.dict()).dict())
+            # order_responses.append(OrderResponse(**order.dict()).dict())
+            phone = order.shipping_address.phone if order.shipping_address else None
+
+            if phone:
+
+                if phone not in phone_groups:
+
+                    phone_groups[phone] = []
+
+                phone_groups[phone].append(order.id)
+
+        
+
+        # Second pass: add grouping metadata to each order
+
+        for order_doc in result["orders"]:
+
+            order = OrderInDB(**order_doc)
+
+            order_dict = OrderResponse(**order.dict()).dict()
+
+            # Add phone grouping information
+
+            phone = order.shipping_address.phone if order.shipping_address else None
+
+            if phone and phone in phone_groups:
+
+                same_phone_orders = phone_groups[phone]
+
+                order_dict["phone_group_info"] = {
+
+                    "phone_number": phone,
+
+                    "total_orders_from_phone": len(same_phone_orders),
+
+                    "should_highlight": len(same_phone_orders) > 1,
+
+                    "other_order_ids": [oid for oid in same_phone_orders if oid != order.id]
+
+                }
+
+            else:
+
+                order_dict["phone_group_info"] = {
+
+                    "phone_number": phone,
+
+                    "total_orders_from_phone": 1,
+
+                    "should_highlight": False,
+
+                    "other_order_ids": []
+
+                }   
+            order_responses.append(order_dict)
         
         return PaginatedResponse(
             success=True,
-            message="Orders retrieved successfully",
+            message="Orders retrieved successfully with phone grouping",
             data=order_responses,
             total=result["total"],
             page=result["page"],

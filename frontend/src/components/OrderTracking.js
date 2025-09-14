@@ -149,7 +149,7 @@ const OrderTracking = () => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(price);
   };
 
@@ -180,7 +180,7 @@ const OrderTracking = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20 flex items-center justify-center relative overflow-hidden">
+      <div className="min-h-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20 flex items-center justify-center relative overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
@@ -213,7 +213,7 @@ const OrderTracking = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 via-pink-50 to-rose-50 dark:from-gray-900 dark:via-red-900/20 dark:to-pink-900/20 relative overflow-hidden">
+      <div className="min-h-full bg-gradient-to-br from-red-50 via-pink-50 to-rose-50 dark:from-gray-900 dark:via-red-900/20 dark:to-pink-900/20 relative overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-red-400 to-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
@@ -323,7 +323,7 @@ const OrderTracking = () => {
   const statusSteps = getStatusSteps();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20 relative overflow-hidden">
+    <div className="min-h-full bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-purple-900/20 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
@@ -365,27 +365,45 @@ const OrderTracking = () => {
                   <div className="flex items-center space-x-2">
                     <p className="text-gray-600 dark:text-gray-400">Order Number:</p>
                     <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-xl">
-                      <code className="font-mono text-lg font-semibold text-gray-900 dark:text-white">
-                        {order.order_number}
-                      </code>
-                      <button
-                        onClick={copyOrderNumber}
-                        className={`p-2 rounded-lg transition-all duration-200 ${
-                          copiedOrder 
-                            ? 'bg-green-500 text-white' 
-                            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
-                        }`}
-                        title="Copy order number"
-                      >
-                        {copiedOrder ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                      </button>
+                      <div className="relative flex items-center">
+                        <code className="font-mono text-lg font-semibold text-gray-900 dark:text-white">
+                          {order.order_number}
+                        </code>
+                        <button
+                          onClick={copyOrderNumber}
+                          className={`p-2 rounded-lg transition-all duration-200 ${
+                            copiedOrder 
+                              ? 'bg-green-500 text-white' 
+                              : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600'
+                          }`}
+                          title="Copy order number"
+                          style={{ position: 'relative' }}
+                        >
+                          {copiedOrder ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                          {copiedOrder && (
+                            <span
+                              className="text-green-600 dark:text-green-400 text-sm font-medium animate-fade-in"
+                              style={{
+                                position: 'absolute',
+                                top: '100%',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                marginTop: '4px',
+                                zIndex: 10,
+                                background: 'rgba(255,255,255,0.95)',
+                                borderRadius: '0.5rem',
+                                padding: '2px 10px',
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+                                whiteSpace: 'nowrap'
+                              }}
+                            >
+                              ✓ Copied!
+                            </span>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
-                  {copiedOrder && (
-                    <span className="text-green-600 dark:text-green-400 text-sm font-medium animate-fade-in">
-                      ✓ Copied!
-                    </span>
-                  )}
                 </div>
               </div>
               

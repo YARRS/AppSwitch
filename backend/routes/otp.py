@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import Optional
 from datetime import datetime, timedelta
+from timezone_utils import now_ist, to_ist
 import re
 from pydantic import BaseModel, validator
 
@@ -20,18 +21,13 @@ class OTPSendRequest(BaseModel):
     
     @validator('phone_number')
     def validate_phone(cls, v):
-        # Remove any non-digit characters
-        phone = re.sub(r'\D', '', v)
-        
-        # Check if it's a valid 10-digit Indian mobile number
-        if len(phone) == 10 and phone.startswith(('6', '7', '8', '9')):
-            return phone
-        elif len(phone) == 12 and phone.startswith('91'):
-            return phone[2:]  # Remove country code
-        elif len(phone) == 13 and phone.startswith('+91'):
-            return phone[3:]  # Remove country code with +
-        
-        raise ValueError('Invalid phone number format. Please provide a valid 10-digit mobile number.')
+        # Use consistent AuthService formatting
+        from auth import AuthService
+        try:
+            formatted_phone = AuthService.format_phone_number(v)
+            return formatted_phone
+        except ValueError as e:
+            raise ValueError(f'Invalid phone number format: {str(e)}')
 
 class OTPVerifyRequest(BaseModel):
     phone_number: str
@@ -56,7 +52,7 @@ class OTPService:
     def __init__(self, db: AsyncIOMotorDatabase):
         self.db = db
         self.otp_collection = db.otp_sessions
-        self.default_otp = "079254"  # Default OTP for testing
+        self.default_otp = "123456"  # Default OTP for testing
     
     async def send_otp(self, phone_number: str) -> dict:
         """Send OTP to phone number (mock implementation for testing)"""
@@ -65,8 +61,8 @@ class OTPService:
             session_data = {
                 "phone_number": phone_number,
                 "otp": self.default_otp,
-                "created_at": datetime.utcnow(),
-                "expires_at": datetime.utcnow() + timedelta(minutes=10),
+                "created_at": now_ist(),
+                "expires_at": now_ist() + timedelta(minutes=10),
                 "attempts": 0,
                 "is_verified": False
             }
@@ -101,23 +97,38 @@ class OTPService:
             if not otp_session:
                 return False
             
+            # Normalize expires_at to timezone-aware IST datetime for safe comparison
+            expires_at = otp_session.get("expires_at")
+            try:
+                if isinstance(expires_at, str):
+                    # Handle ISO string stored in DB
+                    expires_dt = to_ist(datetime.fromisoformat(expires_at))
+                elif isinstance(expires_at, datetime):
+                    expires_dt = to_ist(expires_at)
+                else:
+                    expires_dt = None
+            except Exception:
+                expires_dt = None
+
             # Check if OTP has expired
-            if datetime.utcnow() > otp_session["expires_at"]:
+            if expires_dt is not None and now_ist() > expires_dt:
                 # Clean up expired OTP
                 await self.otp_collection.delete_one({"_id": otp_session["_id"]})
                 return False
             
             # Check attempts limit (max 3 attempts)
-            if otp_session["attempts"] >= 3:
+            attempts = int(otp_session.get("attempts", 0) or 0)
+            if attempts >= 3:
                 await self.otp_collection.delete_one({"_id": otp_session["_id"]})
                 return False
             
             # Verify OTP
-            if otp_session["otp"] == otp:
+            # Compare OTPs as strings to avoid type issues
+            if str(otp_session.get("otp")) == str(otp):
                 # Mark as verified and clean up
                 await self.otp_collection.update_one(
                     {"_id": otp_session["_id"]},
-                    {"$set": {"is_verified": True, "verified_at": datetime.utcnow()}}
+                    {"$set": {"is_verified": True, "verified_at": now_ist()}}
                 )
                 return True
             else:
@@ -138,7 +149,7 @@ class OTPService:
         """Clean up expired OTP sessions"""
         try:
             await self.otp_collection.delete_many({
-                "expires_at": {"$lt": datetime.utcnow()}
+                "expires_at": {"$lt": now_ist()}
             })
         except Exception:
             pass  # Ignore cleanup errors

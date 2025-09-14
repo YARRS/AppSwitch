@@ -1,35 +1,52 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useCart } from '../contexts/CartContext';
-import { Search, Filter, ShoppingCart, Eye, Star, Heart, Sparkles, Zap, TrendingUp } from 'lucide-react';
+import { Search, Filter, ShoppingCart, Eye, Star, Heart, Sparkles, Zap, TrendingUp, Loader } from 'lucide-react';
 import axios from 'axios';
 
 const ProductsPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const [categories, setCategories] = useState([]);
-  const [pagination, setPagination] = useState({
-    page: 1,
-    per_page: 12,
-    total: 0,
-    total_pages: 0
-  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  // Refs for infinite scroll
+  const observer = useRef();
+  const lastProductElementRef = useRef();
 
   const { isAuthenticated, getAuthenticatedAxios } = useAuth();
   const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
 
-  // Fetch products from API
-  const fetchProducts = async (page = 1) => {
+  // Get products per page based on screen size
+  const getProductsPerPage = () => {
+    // Mobile: 4 products per row, Desktop: 12 products per page
+    if (window.innerWidth < 640) {
+      return 8; // 2 rows of 4 products on mobile
+    } else if (window.innerWidth < 1024) {
+      return 12; // 4 rows of 3 products on tablet
+    } else {
+      return 12; // 3 rows of 4 products on desktop
+    }
+  };
+  // Fetch products from API with infinite scroll support
+  const fetchProducts = async (page = 1, append = false) => {
     try {
-      setLoading(true);
+      if (page === 1) {
+        setLoading(true);
+      } else {
+        setLoadingMore(true);
+      }
+      const per_page = getProductsPerPage();
       const params = new URLSearchParams({
         page: page.toString(),
-        per_page: pagination.per_page.toString(),
+        per_page: per_page.toString(),
         is_active: 'true' // Only show active products
       });
 
@@ -37,27 +54,35 @@ const ProductsPage = () => {
       if (selectedCategory) params.append('category', selectedCategory);
       if (priceRange.min) params.append('min_price', priceRange.min);
       if (priceRange.max) params.append('max_price', priceRange.max);
-
       const response = await axios.get(`${API_BASE_URL}/api/products/?${params}`);
-      
       if (response.data.success) {
-        setProducts(response.data.data || []);
-        setPagination({
-          page: response.data.page || 1,
-          per_page: response.data.per_page || 12,
-          total: response.data.total || 0,
-          total_pages: response.data.total_pages || 0
-        });
+        const newProducts = response.data.data || [];
+        const total = response.data.total || 0;
+        const totalPages = response.data.total_pages || 0;        
+        if (append && page > 1) {
+          // Append to existing products for infinite scroll
+          setProducts(prevProducts => [...prevProducts, ...newProducts]);
+        } else {
+          // Replace products for first load or filter change
+          setProducts(newProducts);
+        }
+        setTotalProducts(total);
+        setHasMore(page < totalPages);
+        setCurrentPage(page);
       } else {
         throw new Error(response.data.message || 'Failed to fetch products');
       }
     } catch (err) {
       console.error('Error fetching products:', err);
       setError('Failed to load products. Please try again later.');
-      // Fallback to sample data for demo
-      setProducts(getSampleProducts());
+      // Fallback to sample data for demo only on first page
+      if (page === 1) {
+        setProducts(getSampleProducts());
+        setHasMore(false);
+      }
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -82,6 +107,24 @@ const ProductsPage = () => {
     }
   };
 
+  // Infinite scroll callback function
+  const lastProductElementCallback = useCallback((node) => {
+    if (loadingMore) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        setCurrentPage(prevPage => prevPage + 1);
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loadingMore, hasMore]);
+  // Reset products when filters change
+  const resetProducts = () => {
+    setProducts([]);
+    setCurrentPage(1);
+    setHasMore(true);
+    setError(null);
+  };
   // Sample products for fallback with beautiful images
   const getSampleProducts = () => [
     {
@@ -285,6 +328,12 @@ const ProductsPage = () => {
   useEffect(() => {
     fetchProducts(1);
   }, [searchTerm, selectedCategory, priceRange.min, priceRange.max]);
+  // useEffect for infinite scroll - fetch more products when currentPage changes
+  useEffect(() => {
+    if (currentPage > 1) {
+      fetchProducts(currentPage, true);
+    }
+  }, [currentPage]);
 
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
@@ -310,13 +359,13 @@ const ProductsPage = () => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(price);
   };
 
   if (loading && products.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Loading products...</p>
@@ -326,7 +375,7 @@ const ProductsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
+    <div className="bg-gradient-to-br from-pink-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-purple-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Hero Header Section */}
         <div className="text-center mb-12">
@@ -448,72 +497,45 @@ const ProductsPage = () => {
         {/* Products Grid */}
         {products.length > 0 ? (
           <>
-            <div id="products-grid" className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-12">
-              {products.map((product, index) => (
-                <ProductCard 
-                  key={product.id} 
-                  product={product} 
-                  isAuthenticated={isAuthenticated}
-                  index={index}
-                />
-              ))}
+            <div id="products-grid" className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-12">
+              {products.map((product, index) => {
+                // Add ref to last product for infinite scroll detection
+                const isLast = index === products.length - 1;
+                return (
+                  <ProductCard 
+                    key={`${product.id}-${index}`} 
+                    product={product} 
+                    isAuthenticated={isAuthenticated}
+                    index={index}
+                    ref={isLast ? lastProductElementCallback : null}
+                  />
+                );
+              })}
             </div>
 
-            {/* Pagination */}
-            {pagination.total_pages > 1 && (
-              <div className="flex justify-center items-center space-x-3 flex-wrap gap-3">
-                <button
-                  onClick={() => fetchProducts(Math.max(1, pagination.page - 1))}
-                  disabled={pagination.page === 1}
-                  className="px-6 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 hover:border-purple-300 dark:hover:border-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium transform hover:scale-105 active:scale-95 shadow-lg"
-                >
-                  ← Previous
-                </button>
-                
-                {/* Page Numbers */}
-                <div className="hidden sm:flex space-x-2">
-                  {Array.from({ length: Math.min(pagination.total_pages, 7) }, (_, i) => {
-                    let page;
-                    if (pagination.total_pages <= 7) {
-                      page = i + 1;
-                    } else if (pagination.page <= 4) {
-                      page = i + 1;
-                    } else if (pagination.page >= pagination.total_pages - 3) {
-                      page = pagination.total_pages - 6 + i;
-                    } else {
-                      page = pagination.page - 3 + i;
-                    }
-                    
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => fetchProducts(page)}
-                        className={`px-4 py-3 rounded-xl font-medium transition-all duration-200 transform hover:scale-105 active:scale-95 shadow-lg ${
-                          page === pagination.page
-                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-purple-500/30'
-                            : 'bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 hover:border-purple-300 dark:hover:border-purple-600'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
+            {/* Loading More Indicator */}
+            {loadingMore && (
+              <div className="flex justify-center items-center py-8">
+                <div className="bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl p-6 shadow-2xl border border-white/20 dark:border-gray-700/20">
+                  <div className="flex items-center space-x-4">
+                    <div className="relative">
+                      <div className="w-8 h-8 border-4 border-purple-200 dark:border-purple-800 rounded-full animate-spin border-t-purple-600 dark:border-t-purple-400"></div>
+                      <div className="absolute inset-0 w-8 h-8 border-4 border-transparent rounded-full animate-ping border-t-purple-400"></div>
+                    </div>
+                    <p className="text-gray-700 dark:text-gray-300 font-medium">Loading more products...</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* End of Results Indicator */}
+            {!hasMore && products.length > 0 && (
+              <div className="text-center py-8">
+                <div className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-green-100 to-blue-100 dark:from-green-900/20 dark:to-blue-900/20 text-green-800 dark:text-green-300 rounded-full border border-green-200 dark:border-green-800 shadow-lg">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="font-medium">You've seen all {totalProducts} products! 🎉</span>
                 </div>
                 
-                {/* Mobile page indicator */}
-                <div className="sm:hidden px-4 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl shadow-lg">
-                  <span className="text-sm text-gray-700 dark:text-gray-300 font-medium">
-                    Page {pagination.page} of {pagination.total_pages}
-                  </span>
-                </div>
-                
-                <button
-                  onClick={() => fetchProducts(Math.min(pagination.total_pages, pagination.page + 1))}
-                  disabled={pagination.page === pagination.total_pages}
-                  className="px-6 py-3 bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 hover:border-purple-300 dark:hover:border-purple-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 font-medium transform hover:scale-105 active:scale-95 shadow-lg"
-                >
-                  Next →
-                </button>
               </div>
             )}
           </>
@@ -561,8 +583,8 @@ const ProductsPage = () => {
   );
 };
 
-// Modern Product Card Component with Advanced Animations
-const ProductCard = ({ product, isAuthenticated, index }) => {
+// Modern Product Card Component with Advanced Animations and Infinite Scroll Support
+const ProductCard = React.forwardRef(({ product, isAuthenticated, index }, ref) => {
   const { addToCart } = useCart();
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -571,7 +593,7 @@ const ProductCard = ({ product, isAuthenticated, index }) => {
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(price);
   };
 
@@ -620,6 +642,7 @@ const ProductCard = ({ product, isAuthenticated, index }) => {
 
   return (
     <div 
+      ref={ref}
       className="group relative bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 overflow-hidden border border-white/20 dark:border-gray-700/20 transform hover:-translate-y-2 hover:scale-[1.02]"
       style={{
         animation: `fadeInUp 0.6s ease-out ${index * 0.1}s both`
@@ -774,7 +797,7 @@ const ProductCard = ({ product, isAuthenticated, index }) => {
               {product.rating} ({product.review_count})
             </span>
           </div>
-        )}
+        )} 
 
         {/* Product Name */}
         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
@@ -844,21 +867,23 @@ const ProductCard = ({ product, isAuthenticated, index }) => {
           )}
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex space-x-3">
+
+        {/* Action Buttons - Mobile Responsive */}
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 px-1">
           <Link
             to={`/products/${product.id}`}
-            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-center py-3 px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 font-medium shadow-lg hover:shadow-blue-500/30 transform hover:scale-105 active:scale-95"
-          >
+            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-center py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 font-medium shadow-lg hover:shadow-blue-500/30 transform hover:scale-105 active:scale-95 text-sm sm:text-base"   
+            >
             <Eye className="w-4 h-4" />
-            <span>View Details</span>
+            <span className="hidden xs:inline sm:inline">View Details</span>
+            <span className="xs:hidden sm:hidden">View</span>
           </Link>
           
           {product.is_in_stock && (
             <button 
               onClick={handleAddToCart}
               disabled={isAddingToCart}
-              className={`px-4 py-3 rounded-xl transition-all duration-300 flex items-center justify-center font-medium shadow-lg transform hover:scale-105 active:scale-95 ${
+              className={`flex-1 sm:w-auto sm:min-w-[120px] py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 font-medium shadow-lg transform hover:scale-105 active:scale-95 text-sm sm:text-base ${
                 isAddingToCart 
                   ? 'bg-gray-400 cursor-not-allowed text-white' 
                   : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white hover:shadow-green-500/30'
@@ -866,9 +891,13 @@ const ProductCard = ({ product, isAuthenticated, index }) => {
               title="Add to Cart"
             >
               {isAddingToCart ? (
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
               ) : (
-                <ShoppingCart className="w-5 h-5" />
+                <>
+                  <ShoppingCart className="w-4 h-4" />
+                  <span className="hidden xs:inline sm:inline">Add to Cart</span>
+                  <span className="xs:hidden sm:hidden">Add</span>
+                </>
               )}
             </button>
           )}
@@ -887,7 +916,9 @@ const ProductCard = ({ product, isAuthenticated, index }) => {
       <div className="absolute inset-0 -top-2 -left-2 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 opacity-0 group-hover:opacity-100 group-hover:animate-shimmer transition-opacity duration-500 pointer-events-none"></div>
     </div>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 // Enhanced Featured Categories Carousel Component
 const FeaturedCategoriesCarousel = ({ categories, products, onCategorySelect, selectedCategory }) => {
@@ -921,7 +952,7 @@ const FeaturedCategoriesCarousel = ({ categories, products, onCategorySelect, se
   const formatPrice = (price) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'INR'
     }).format(price);
   };
 

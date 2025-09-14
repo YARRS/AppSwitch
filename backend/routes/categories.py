@@ -46,7 +46,7 @@ class CategoryService:
     
     async def update_category(self, category_id: str, update_data: dict) -> Optional[CategoryInDB]:
         """Update category"""
-        update_data["updated_at"] = datetime.utcnow()
+        update_data["updated_at"] = now_ist()
         
         result = await self.categories_collection.update_one(
             {"id": category_id},

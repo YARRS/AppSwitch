@@ -17,3 +17,4 @@ twilio==9.6.5
 authlib==1.6.0
 slowapi==0.1.9
 PyYAML==6.0.2
+tzdata

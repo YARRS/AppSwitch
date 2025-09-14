@@ -39,7 +39,33 @@ const OrderManagement = () => {
       };
       
       const response = await axios.get('/api/orders/admin/all', { params });
-      setOrders(response.data.data);
+
+      // Orders now come with phone_group_info from backend
+
+      const ordersData = response.data.data;
+   
+      // Add enhanced highlighting info to each order using backend data
+
+      const ordersWithHighlighting = ordersData.map(order => {
+
+        const phoneGroupInfo = order.phone_group_info || {};
+   
+        return {
+
+          ...order,
+
+          phoneGroup: phoneGroupInfo.phone_number,
+
+          shouldHighlight: phoneGroupInfo.should_highlight || false,
+
+          phoneGroupCount: phoneGroupInfo.total_orders_from_phone || 1,
+
+          otherOrderIds: phoneGroupInfo.other_order_ids || []
+
+        };
+      });
+      
+      setOrders(ordersWithHighlighting);
       setTotalPages(response.data.total_pages);
     } catch (error) {
       console.error('Failed to fetch orders:', error);
@@ -211,13 +237,59 @@ const OrderManagement = () => {
 const OrderRow = ({ order, onStatusUpdate, onViewDetails, orderStatuses }) => {
   const currentStatus = orderStatuses.find(s => s.value === order.status);
   const StatusIcon = currentStatus?.icon || Clock;
+  // Generate consistent color for phone group highlighting
+
+  const getPhoneGroupColor = (phone) => {
+
+    if (!phone) return '';
+
+    const colors = [
+
+      'bg-blue-50 border-l-4 border-blue-400 dark:bg-blue-900/20 dark:border-blue-600',
+
+      'bg-green-50 border-l-4 border-green-400 dark:bg-green-900/20 dark:border-green-600',
+
+      'bg-purple-50 border-l-4 border-purple-400 dark:bg-purple-900/20 dark:border-purple-600',
+
+      'bg-orange-50 border-l-4 border-orange-400 dark:bg-orange-900/20 dark:border-orange-600',
+
+      'bg-pink-50 border-l-4 border-pink-400 dark:bg-pink-900/20 dark:border-pink-600',
+
+      'bg-indigo-50 border-l-4 border-indigo-400 dark:bg-indigo-900/20 dark:border-indigo-600'
+
+    ];
+    // Simple hash function for consistent color mapping
+
+    let hash = 0;
+
+    for (let i = 0; i < phone.length; i++) {
+
+      hash = ((hash << 5) - hash + phone.charCodeAt(i)) & 0xffffffff;
+
+    }
+
+    return colors[Math.abs(hash) % colors.length];
+
+  };
+  const highlightClass = order.shouldHighlight ? getPhoneGroupColor(order.phoneGroup) : '';
+
 
   return (
-    <tr className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+    <tr className={`hover:bg-gray-50 dark:hover:bg-gray-700/50 ${highlightClass}`}>
       <td className="px-6 py-4 whitespace-nowrap">
         <div>
-          <div className="text-sm font-medium text-gray-900 dark:text-white">
+          <div className="text-sm font-medium text-gray-900 dark:text-white flex items-center">
             #{order.order_number}
+
+            {order.shouldHighlight && (
+
+              <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+
+                {order.phoneGroupCount} orders from this phone
+
+              </span>
+
+            )}
           </div>
           <div className="text-sm text-gray-500 dark:text-gray-400">
             {order.items?.length || 0} items
@@ -332,8 +404,8 @@ const OrderDetailsModal = ({ order, onClose, onStatusUpdate, orderStatuses }) =>
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-screen overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-[9999] p-4 pt-8">
+      <div className="bg-white dark:bg-gray-800 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
         <div className="p-6">
           {/* Header */}
           <div className="flex justify-between items-center mb-6">
