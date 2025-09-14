@@ -16,6 +16,8 @@ from timezone_utils import now_ist
 # Add the backend directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+from models import ProductInDB, HiddenTaxCategory, TaxCalculationType
+
 # Load environment variables
 load_dotenv()
 

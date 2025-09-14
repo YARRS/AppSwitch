@@ -4,7 +4,7 @@ import {
   Package, Users, ShoppingCart, Settings, BarChart3, 
   TrendingUp, AlertTriangle, Clock, DollarSign,
   Star, Eye, Plus, Filter, Search, Edit, Trash2, Tag,
-  ArrowUp, ArrowDown, Zap, Activity, Target
+  ArrowUp, ArrowDown, Zap, Activity, Target, Calculator
 } from 'lucide-react';
 
 // Component imports
@@ -141,25 +141,25 @@ const AdminDashboard = () => {
           <div className="border-b border-gray-200/50 dark:border-gray-700/50">
             {/* Mobile Navigation - Enhanced Dropdown */}
             <div className="block sm:hidden px-6 py-4">
-              <select
-                value={activeTab}
-                onChange={(e) => setActiveTab(e.target.value)}
-                className="w-full p-4 border-2 border-purple-200 dark:border-purple-600 rounded-xl bg-gradient-to-r from-white to-purple-50 dark:text-white dark:from-gray-700 dark:to-purple-900 text-gray-900 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 focus:ring-4 focus:ring-purple-500 focus:border-purple-500 cursor-pointer"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                  backgroundPosition: 'right 16px center',
-                  backgroundRepeat: 'no-repeat',
-                  backgroundSize: '20px',
-                  paddingRight: '48px',
-                  appearance: 'none'
-                }}
-              >
-                {navigationTabs.map((tab) => (
-                  <option key={tab.id} value={tab.id} className="py-3">
-                    {tab.label}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={activeTab}
+                  onChange={(e) => setActiveTab(e.target.value)}
+                  className="w-full p-4 border-2 border-purple-200 dark:border-purple-600 rounded-xl bg-gradient-to-r from-white to-purple-50 dark:from-gray-800 dark:to-gray-700 text-gray-900 dark:text-white text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-300 focus:ring-4 focus:ring-purple-500 focus:border-purple-500 cursor-pointer appearance-none pr-12"
+                >
+                  {navigationTabs.map((tab) => (
+                    <option key={tab.id} value={tab.id} className="py-3 bg-white dark:bg-gray-800 text-gray-900 dark:text-white">
+                      {tab.label}
+                    </option>
+                  ))}
+                </select>
+                {/* Custom dropdown arrow */}
+                <div className="absolute inset-y-0 right-0 flex items-center px-4 pointer-events-none">
+                  <svg className="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Desktop Navigation - Enhanced Horizontal Tabs */}

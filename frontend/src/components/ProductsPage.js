@@ -797,7 +797,7 @@ const ProductCard = React.forwardRef(({ product, isAuthenticated, index }, ref) 
               {product.rating} ({product.review_count})
             </span>
           </div>
-        )}
+        )} 
 
         {/* Product Name */}
         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors duration-300">
@@ -869,10 +869,9 @@ const ProductCard = React.forwardRef(({ product, isAuthenticated, index }, ref) 
 
 
         {/* Action Buttons - Mobile Responsive */}
-        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 px-1">
           <Link
             to={`/products/${product.id}`}
-            
             className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-center py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 font-medium shadow-lg hover:shadow-blue-500/30 transform hover:scale-105 active:scale-95 text-sm sm:text-base"   
             >
             <Eye className="w-4 h-4" />
@@ -884,8 +883,7 @@ const ProductCard = React.forwardRef(({ product, isAuthenticated, index }, ref) 
             <button 
               onClick={handleAddToCart}
               disabled={isAddingToCart}
-
-              className={`flex-1 sm:flex-none py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 font-medium shadow-lg transform hover:scale-105 active:scale-95 text-sm sm:text-base ${
+              className={`flex-1 sm:w-auto sm:min-w-[120px] py-2.5 sm:py-3 px-3 sm:px-4 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 font-medium shadow-lg transform hover:scale-105 active:scale-95 text-sm sm:text-base ${
                 isAddingToCart 
                   ? 'bg-gray-400 cursor-not-allowed text-white' 
                   : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white hover:shadow-green-500/30'

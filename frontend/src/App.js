@@ -20,6 +20,7 @@ import Checkout from './components/Checkout';
 import Logo from './components/Logo';
 import OrderTracking from './components/OrderTracking';
 import ScrollToTop from './components/ScrollToTop';
+import DebugInfo from './components/DebugInfo';
 
 // Theme context
 export const ThemeContext = React.createContext();
@@ -116,6 +117,9 @@ function App() {
                 </Routes>
               </main>
               <Footer />
+              
+              {/* Debug component for development */}
+              <DebugInfo />
             </div>
           </Router>
         </ThemeContext.Provider>

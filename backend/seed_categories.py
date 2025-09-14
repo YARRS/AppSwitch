@@ -44,22 +44,31 @@ DEFAULT_CATEGORIES = [
         "sort_order": 2
     },
     {
-        "name": "Jewelry & Accessories",
+        "name": "Jewelry",
         "description": "Elegant jewelry pieces and fashion accessories",
-        "slug": "jewelry_accessories",
+        "slug": "jewelry",
         "is_active": True,
         "is_hidden": False,
         "is_seasonal": False,
         "sort_order": 3
     },
     {
-        "name": "Keepsakes & Memory Items",
-        "description": "Special items to preserve and cherish memories",
-        "slug": "keepsakes_memory",
+        "name": "Accessories", 
+        "description": "Stylish accessories to complete your look",
+        "slug": "accessories",
         "is_active": True,
         "is_hidden": False,
         "is_seasonal": False,
         "sort_order": 4
+    },
+    {
+        "name": "Keepsakes",
+        "description": "Special items to preserve and cherish memories",
+        "slug": "keepsakes",
+        "is_active": True,
+        "is_hidden": False,
+        "is_seasonal": False,
+        "sort_order": 5
     },
     {
         "name": "Special Occasions",
@@ -68,7 +77,7 @@ DEFAULT_CATEGORIES = [
         "is_active": True,
         "is_hidden": False,
         "is_seasonal": False,
-        "sort_order": 5
+        "sort_order": 6
     },
     {
         "name": "Luxury Items",
@@ -77,7 +86,7 @@ DEFAULT_CATEGORIES = [
         "is_active": True,
         "is_hidden": False,
         "is_seasonal": False,
-        "sort_order": 6
+        "sort_order": 7
     },
     {
         "name": "Corporate Gifts",
@@ -86,7 +95,7 @@ DEFAULT_CATEGORIES = [
         "is_active": True,
         "is_hidden": False,
         "is_seasonal": False,
-        "sort_order": 7
+        "sort_order": 8
     },
     
     # Seasonal hidden categories (only visible to admins)
