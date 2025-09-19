@@ -24,6 +24,38 @@ class OrderStatus(str, Enum):
     SHIPPED = "shipped"
     DELIVERED = "delivered"
     CANCELLED = "cancelled"
+    REPLACEMENT_REQUESTED = "replacement_requested"
+    REPLACEMENT_APPROVED = "replacement_approved"
+    REPLACEMENT_REJECTED = "replacement_rejected"
+
+# Order activity type enum
+class OrderActivityType(str, Enum):
+    STATUS_CHANGE = "status_change"
+    NOTE_ADDED = "note_added"
+    TRACKING_UPDATED = "tracking_updated"
+    CANCELLATION_REQUEST = "cancellation_request"
+    REPLACEMENT_REQUEST = "replacement_request"
+    ADMIN_ACTION = "admin_action"
+    SYSTEM_UPDATE = "system_update"
+
+# Replacement reason enum
+class ReplacementReason(str, Enum):
+    DAMAGED = "damaged"
+    WRONG_ITEM = "wrong_item"
+    NOT_AS_DESCRIBED = "not_as_described"
+    SIZE_ISSUE = "size_issue"
+    QUALITY_ISSUE = "quality_issue"
+    OTHER = "other"
+
+# Replacement status enum
+class ReplacementStatus(str, Enum):
+    REQUESTED = "requested"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    PROCESSING = "processing"
+    SHIPPED = "shipped"
+    DELIVERED = "delivered"
+    CANCELLED = "cancelled"
 
 # Campaign status enum
 class CampaignStatus(str, Enum):
@@ -409,6 +441,14 @@ class OrderBase(BaseModel):
     status: OrderStatus = OrderStatus.PENDING
     payment_method: str = "COD"
     notes: Optional[str] = None
+    # Enhanced fields for new order management
+    tracking_number: Optional[str] = None
+    expected_delivery_date: Optional[datetime] = None
+    assigned_to: Optional[str] = None  # User ID who is handling this order
+    priority: int = 0  # 0 = normal, 1 = high, 2 = urgent
+    is_replacement: bool = False
+    original_order_id: Optional[str] = None  # For replacement orders
+    replacement_deadline: Optional[datetime] = None  # 7 days from delivery for replacements
 
 class OrderCreate(OrderBase):
     pass
@@ -426,23 +466,120 @@ class AuthenticatedOrderCreate(BaseModel):
     status: OrderStatus = OrderStatus.PENDING
     payment_method: str = "COD"
     notes: Optional[str] = None
+    expected_delivery_date: Optional[datetime] = None
 
 class OrderUpdate(BaseModel):
     status: Optional[OrderStatus] = None
     tracking_number: Optional[str] = None
     notes: Optional[str] = None
+    expected_delivery_date: Optional[datetime] = None
+    assigned_to: Optional[str] = None
+    priority: Optional[int] = None
+
+# Enhanced Order Management Models
+
+# Order Activity/Timeline Model
+class OrderActivityBase(BaseModel):
+    order_id: str
+    activity_type: OrderActivityType
+    title: str
+    description: str
+    performed_by: str  # User ID who performed the action
+    is_visible_to_customer: bool = True
+    metadata: Dict[str, Any] = {}  # Additional data like old_status, new_status, etc.
+
+class OrderActivityCreate(OrderActivityBase):
+    pass
+
+class OrderActivityInDB(OrderActivityBase, BaseDocument):
+    pass
+
+class OrderActivityResponse(OrderActivityBase, BaseDocument):
+    performed_by_name: Optional[str] = None
+    performed_by_role: Optional[str] = None
+
+# Order Notes Model
+class OrderNoteBase(BaseModel):
+    order_id: str
+    note: str
+    is_internal: bool = False  # Internal notes not visible to customers
+    created_by: str  # User ID who created the note
+
+class OrderNoteCreate(OrderNoteBase):
+    pass
+
+class OrderNoteInDB(OrderNoteBase, BaseDocument):
+    pass
+
+class OrderNoteResponse(OrderNoteBase, BaseDocument):
+    created_by_name: Optional[str] = None
+    created_by_role: Optional[str] = None
+
+# Order Replacement Model
+class OrderReplacementBase(BaseModel):
+    original_order_id: str
+    user_id: str
+    reason: ReplacementReason
+    description: str
+    items_to_replace: List[OrderItem]
+    status: ReplacementStatus = ReplacementStatus.REQUESTED
+    handling_charges: float = 0.0  # 99 or 199 based on location
+    location_type: str = "local"  # "local" or "remote" for handling charges
+    approved_by: Optional[str] = None
+    rejected_reason: Optional[str] = None
+
+class OrderReplacementCreate(OrderReplacementBase):
+    pass
+
+class OrderReplacementUpdate(BaseModel):
+    status: Optional[ReplacementStatus] = None
+    approved_by: Optional[str] = None
+    rejected_reason: Optional[str] = None
+    new_order_id: Optional[str] = None  # If replacement is approved and new order created
+
+class OrderReplacementInDB(OrderReplacementBase, BaseDocument):
+    new_order_id: Optional[str] = None  # ID of the replacement order if created
+    
+class OrderReplacementResponse(OrderReplacementBase, BaseDocument):
+    new_order_id: Optional[str] = None
+    approved_by_name: Optional[str] = None
+    original_order_number: Optional[str] = None
+
+# Order Cancellation Model
+class OrderCancellationBase(BaseModel):
+    order_id: str
+    reason: str
+    requested_by: str  # User ID who requested cancellation
+    approved_by: Optional[str] = None
+    refund_amount: float = 0.0
+    refund_status: str = "pending"  # pending, processed, completed
+
+class OrderCancellationCreate(OrderCancellationBase):
+    pass
+
+class OrderCancellationInDB(OrderCancellationBase, BaseDocument):
+    pass
+
+class OrderCancellationResponse(OrderCancellationBase, BaseDocument):
+    requested_by_name: Optional[str] = None
+    approved_by_name: Optional[str] = None
 
 class OrderInDB(OrderBase, BaseDocument):
     order_number: str
-    tracking_number: Optional[str] = None
     shipped_at: Optional[datetime] = None
     delivered_at: Optional[datetime] = None
+    cancelled_at: Optional[datetime] = None
+    can_be_replaced: bool = False  # Calculated field based on delivery date
 
 class OrderResponse(OrderBase, BaseDocument):
     order_number: str
-    tracking_number: Optional[str] = None
     shipped_at: Optional[datetime] = None
     delivered_at: Optional[datetime] = None
+    cancelled_at: Optional[datetime] = None
+    can_be_replaced: bool = False
+    assigned_to_name: Optional[str] = None
+    timeline: List[OrderActivityResponse] = []
+    notes: List[OrderNoteResponse] = []
 
 # Category models
 class CategoryBase(BaseModel):
@@ -689,3 +826,27 @@ class AddressInDB(AddressBase, BaseDocument):
 
 class AddressResponse(AddressBase, BaseDocument):
     user_id: str
+
+# Email Notification Models
+class EmailNotificationBase(BaseModel):
+    recipient_email: str
+    recipient_name: str
+    template_type: str  # order_shipped, order_delivered, note_added, etc.
+    subject: str
+    order_id: Optional[str] = None
+    order_number: Optional[str] = None
+    template_data: Dict[str, Any] = {}  # Data to populate email template
+    status: str = "pending"  # pending, sent, failed
+
+class EmailNotificationCreate(EmailNotificationBase):
+    pass
+
+class EmailNotificationInDB(EmailNotificationBase, BaseDocument):
+    sent_at: Optional[datetime] = None
+    error_message: Optional[str] = None
+    retry_count: int = 0
+
+class EmailNotificationResponse(EmailNotificationBase, BaseDocument):
+    sent_at: Optional[datetime] = None
+    error_message: Optional[str] = None
+    retry_count: int = 0

@@ -1,79 +1,185 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { 
-  Package, ArrowLeft, Truck, CheckCircle2, Clock, 
-  MapPin, Phone, Mail, Calendar, Copy, ExternalLink,
-  User, CreditCard, AlertCircle, ShoppingCart, RotateCcw, Eye,
-  Sparkles, Zap, Heart, Shield, Gift, Star, Home, ChevronRight,
-  FileText, CreditCard as Card, Banknote, Plus, Search
+  Package, 
+  Clock, 
+  Truck, 
+  CheckCircle2, 
+  AlertCircle, 
+  Copy, 
+  Eye, 
+  ShoppingCart, 
+  User, 
+  RotateCcw, 
+  Home, 
+  ChevronRight, 
+  MapPin, 
+  Phone, 
+  CreditCard, 
+  Calendar, 
+  Sparkles, 
+  Shield,
+  Banknote,
+  Gift,
+  Activity,
+  MessageSquare,
+  RefreshCw,
+  Star,
+  FileText,
+  Plus
 } from 'lucide-react';
 
-const OrderTracking = () => {
+const OrderTracking = ({ user, isAuthenticated }) => {
   const { orderId } = useParams();
-  const { user, getAuthenticatedAxios, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
   const [copiedOrder, setCopiedOrder] = useState(false);
+  const [showReplacementForm, setShowReplacementForm] = useState(false);
+  const [replacementForm, setReplacementForm] = useState({
+    reason: '',
+    description: '',
+    items_to_replace: [],
+    location_type: 'local'
+  });
+
+  // Enhanced status configuration with new statuses
+  const statusConfig = {
+    pending: { 
+      title: 'Order Placed', 
+      description: 'Your order has been received and is being reviewed',
+      icon: CheckCircle2, 
+      completed: true,
+      color: 'text-green-600',
+      bgColor: 'bg-green-100 dark:bg-green-900/20'
+    },
+    processing: { 
+      title: 'Processing', 
+      description: 'We\'re preparing your order for shipment',
+      icon: Clock, 
+      completed: false,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100 dark:bg-blue-900/20'
+    },
+    shipped: { 
+      title: 'Shipped', 
+      description: 'Your order is on its way to you',
+      icon: Truck, 
+      completed: false,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100 dark:bg-purple-900/20'
+    },
+    delivered: { 
+      title: 'Delivered', 
+      description: 'Your order has been delivered successfully',
+      icon: Package, 
+      completed: false,
+      color: 'text-emerald-600',
+      bgColor: 'bg-emerald-100 dark:bg-emerald-900/20'
+    },
+    cancelled: {
+      title: 'Cancelled',
+      description: 'Your order has been cancelled',
+      icon: AlertCircle,
+      completed: false,
+      color: 'text-red-600',
+      bgColor: 'bg-red-100 dark:bg-red-900/20'
+    },
+    replacement_requested: {
+      title: 'Replacement Requested',
+      description: 'Your replacement request is being reviewed',
+      icon: RefreshCw,
+      completed: false,
+      color: 'text-yellow-600',
+      bgColor: 'bg-yellow-100 dark:bg-yellow-900/20'
+    }
+  };
 
   useEffect(() => {
     if (orderId) {
       fetchOrderDetails();
     }
-  }, [orderId, isAuthenticated, user]);
+  }, [orderId, retryCount]);
 
   const fetchOrderDetails = async () => {
     try {
       setLoading(true);
       setError(null);
       
-      // Get the API base URL
-      const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      const token = localStorage.getItem('token');
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
       
-      // Try to get authenticated axios first, but fallback to regular axios with token
-      let axiosInstance;
-      try {
-        axiosInstance = getAuthenticatedAxios();
-      } catch (authError) {
-        // Fallback: try to get token from localStorage manually
-        const token = localStorage.getItem('access_token');
-        if (token) {
-          const axios = require('axios');
-          axiosInstance = axios.create({
-            baseURL: API_BASE_URL,
+      // Use enhanced order details endpoint
+      const response = await fetch(`${backendUrl}/api/order-management/orders/${orderId}/details`, {
             headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-        } else {
-          throw new Error('No authentication token available');
+          'Authorization': token ? `Bearer ${token}` : '',
+          'Content-Type': 'application/json'
         }
-      }
+      });
       
-      const response = await axiosInstance.get(`/api/orders/${orderId}`);
-      
-      if (response.data.success) {
-        setOrder(response.data.data);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setOrder(data.data);
       } else {
-        throw new Error(response.data.message || 'Failed to load order');
+          throw new Error(data.message || 'Failed to load order');
+      }
+      } else if (response.status === 401) {
+        setError('Please log in to view your order details');
+      } else if (response.status === 404) {
+        setError('Order not found');
+      } else if (response.status === 403) {
+        setError('You are not authorized to view this order');
+      } else {
+        throw new Error('Failed to load order details');
       }
     } catch (error) {
       console.error('Failed to fetch order details:', error);
-      
-      if (error.response?.status === 404) {
-        setError('Order not found');
-      } else if (error.response?.status === 403) {
-        setError('You are not authorized to view this order');
-      } else if (error.response?.status === 401) {
-        setError('Please log in to view your order details');
-      } else {
-        setError('Failed to load order details. Please try again.');
-      }
+      setError(error.message || 'Failed to load order details. Please try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const requestReplacement = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError('Please log in to request replacement');
+        return;
+      }
+
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+      
+      const response = await fetch(`${backendUrl}/api/order-management/orders/${orderId}/replacement`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          ...replacementForm,
+          items_to_replace: order.items // Replace all items by default
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.success) {
+          setShowReplacementForm(false);
+          setReplacementForm({ reason: '', description: '', items_to_replace: [], location_type: 'local' });
+          await fetchOrderDetails(); // Refresh order details
+        } else {
+          throw new Error(data.message || 'Failed to submit replacement request');
+        }
+      } else {
+        throw new Error('Failed to submit replacement request');
+      }
+    } catch (error) {
+      console.error('Failed to request replacement:', error);
+      alert('Failed to submit replacement request. Please try again.');
     }
   };
 
@@ -99,62 +205,43 @@ const OrderTracking = () => {
   };
 
   const getStatusSteps = () => {
-    const steps = [
-      { 
-        id: 'pending', 
-        title: 'Order Placed', 
-        description: 'Your order has been received and is being reviewed',
-        icon: CheckCircle2, 
-        completed: true,
-        color: 'text-green-600',
-        bgColor: 'bg-green-100 dark:bg-green-900/20'
-      },
-      { 
-        id: 'processing', 
-        title: 'Processing', 
-        description: 'We\'re preparing your order for shipment',
-        icon: Clock, 
-        completed: order?.status !== 'pending',
-        color: 'text-blue-600',
-        bgColor: 'bg-blue-100 dark:bg-blue-900/20'
-      },
-      { 
-        id: 'shipped', 
-        title: 'Shipped', 
-        description: 'Your order is on its way to you',
-        icon: Truck, 
-        completed: ['shipped', 'delivered'].includes(order?.status),
-        color: 'text-purple-600',
-        bgColor: 'bg-purple-100 dark:bg-purple-900/20'
-      },
-      { 
-        id: 'delivered', 
-        title: 'Delivered', 
-        description: 'Your order has been delivered successfully',
-        icon: Package, 
-        completed: order?.status === 'delivered',
-        color: 'text-emerald-600',
-        bgColor: 'bg-emerald-100 dark:bg-emerald-900/20'
-      }
-    ];
+    const baseSteps = ['pending', 'processing', 'shipped', 'delivered'];
+    let steps = baseSteps.map(status => ({
+      ...statusConfig[status],
+      id: status
+    }));
 
-    const currentStepIndex = steps.findIndex(step => step.id === order?.status);
-    return steps.map((step, index) => ({
+    if (order?.status === 'cancelled') {
+      steps = [
+        { ...statusConfig.pending, id: 'pending', completed: true },
+        { ...statusConfig.cancelled, id: 'cancelled', completed: true, active: true }
+      ];
+    } else if (order?.status === 'replacement_requested') {
+      steps = [
+        ...steps.map(step => ({ ...step, completed: true })),
+        { ...statusConfig.replacement_requested, id: 'replacement_requested', completed: true, active: true }
+    ];
+    } else {
+      const currentStepIndex = baseSteps.findIndex(step => step === order?.status);
+      steps = steps.map((step, index) => ({
       ...step,
       active: index === currentStepIndex,
-      completed: step.completed || index < currentStepIndex
+        completed: index <= currentStepIndex
     }));
+    }
+
+    return steps;
   };
 
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
       currency: 'INR'
     }).format(price);
   };
 
   const formatDate = (dateString) => {
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('en-IN', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
@@ -165,12 +252,20 @@ const OrderTracking = () => {
 
   const getEstimatedDelivery = () => {
     if (order?.status === 'delivered') return 'Delivered';
+    if (order?.expected_delivery_date) {
+      return new Date(order.expected_delivery_date).toLocaleDateString('en-IN', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
     
     const orderDate = new Date(order?.created_at);
     const estimatedDate = new Date(orderDate);
     estimatedDate.setDate(orderDate.getDate() + 3); // 3 days from order date
     
-    return estimatedDate.toLocaleDateString('en-US', {
+    return estimatedDate.toLocaleDateString('en-IN', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -214,21 +309,12 @@ const OrderTracking = () => {
   if (error) {
     return (
       <div className="min-h-full bg-gradient-to-br from-red-50 via-pink-50 to-rose-50 dark:from-gray-900 dark:via-red-900/20 dark:to-pink-900/20 relative overflow-hidden">
-        {/* Animated Background Elements */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-red-400 to-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse"></div>
-          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-orange-400 to-red-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse delay-1000"></div>
-        </div>
-
+        {/* Error display remains the same as before */}
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative z-10">
           <div className="text-center">
-            {/* Error Icon with Animation */}
             <div className="relative mb-8">
               <div className="w-24 h-24 mx-auto bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center animate-bounce shadow-2xl">
                 <AlertCircle className="w-12 h-12 text-red-600 dark:text-red-400" />
-              </div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-24 h-24 border-4 border-red-300 rounded-full animate-ping opacity-30"></div>
               </div>
             </div>
             
@@ -241,17 +327,6 @@ const OrderTracking = () => {
                 <strong className="text-red-600 dark:text-red-400">{error}</strong>
               </p>
               
-              <p className="text-gray-600 dark:text-gray-400 mb-8">
-                {error === 'Order not found' 
-                  ? 'The order you\'re looking for doesn\'t exist or may have been removed. Please check your order number or contact support.'
-                  : error === 'You are not authorized to view this order'
-                  ? 'This order belongs to another customer. Please check your order history or log in with the correct account.'
-                  : error === 'Please log in to view your order details'
-                  ? 'Your session may have expired. Please log in again to view your order details.'
-                  : 'There was a problem loading the order details. This might be due to a temporary connection issue.'}
-              </p>
-              
-              {/* Action Buttons Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <button
                   onClick={handleRetry}
@@ -288,31 +363,7 @@ const OrderTracking = () => {
                 </Link>
               </div>
             </div>
-            
-            {/* Helpful Information */}
-            <div className="bg-blue-50/80 dark:bg-blue-900/20 backdrop-blur-lg border-2 border-blue-200 dark:border-blue-800 rounded-2xl p-8 shadow-lg">
-              <h3 className="text-xl font-bold text-blue-800 dark:text-blue-300 mb-6 flex items-center justify-center space-x-3">
-                <Package className="w-6 h-6" />
-                <span>Need Help?</span>
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <Phone className="w-6 h-6 text-blue-600" />
                   </div>
-                  <p className="font-semibold text-blue-700 dark:text-blue-400 mb-2">Order Issues</p>
-                  <p className="text-sm text-blue-600 dark:text-blue-300">Contact our support team with your order number for immediate assistance.</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
-                    <Shield className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <p className="font-semibold text-blue-700 dark:text-blue-400 mb-2">Account Access</p>
-                  <p className="text-sm text-blue-600 dark:text-blue-300">Make sure you're logged in with the account used to place the order.</p>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     );
@@ -423,6 +474,7 @@ const OrderTracking = () => {
                   order.status === 'delivered' ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
                   order.status === 'shipped' ? 'bg-gradient-to-r from-blue-500 to-cyan-500' :
                   order.status === 'processing' ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
+                  order.status === 'cancelled' ? 'bg-gradient-to-r from-red-500 to-pink-500' :
                   'bg-gradient-to-r from-gray-500 to-gray-600'
                 }`}>
                   <div className="flex items-center space-x-3 mb-2">
@@ -430,7 +482,7 @@ const OrderTracking = () => {
                     <p className="font-semibold">Status</p>
                   </div>
                   <p className="text-2xl font-bold capitalize">
-                    {order.status?.replace('_', ' ') || 'Pending'}
+                    {statusConfig[order.status]?.title || order.status?.replace('_', ' ') || 'Pending'}
                   </p>
                 </div>
 
@@ -467,12 +519,12 @@ const OrderTracking = () => {
               <div 
                 className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-1000"
                 style={{ 
-                  width: `${(statusSteps.filter(s => s.completed).length - 1) / (statusSteps.length - 1) * 100}%` 
+                  width: `${Math.min(100, (statusSteps.filter(s => s.completed).length / statusSteps.length) * 100)}%` 
                 }}
               ></div>
             </div>
             
-            <div className="grid grid-cols-4 gap-4 relative">
+            <div className={`grid gap-4 relative ${statusSteps.length <= 4 ? 'grid-cols-4' : 'grid-cols-5'}`}>
               {statusSteps.map((step, index) => (
                 <div key={step.id} className="text-center">
                   <div className={`w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-4 transition-all duration-300 shadow-xl ${
@@ -535,6 +587,59 @@ const OrderTracking = () => {
           </div>
         </div>
 
+        {/* Enhanced Timeline and Notes */}
+        {(order.timeline?.length > 0 || order.notes?.length > 0) && (
+          <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 mb-8 border border-white/20 dark:border-gray-700/20">
+            <div className="flex items-center space-x-3 mb-8">
+              <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center shadow-lg">
+                <Activity className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Order Activity & Updates</h3>
+                <p className="text-gray-600 dark:text-gray-400">Latest updates and communications</p>
+              </div>
+            </div>
+            
+            <div className="space-y-6">
+              {/* Timeline Activities */}
+              {order.timeline?.map((activity, index) => (
+                <div key={activity.id} className="flex items-start space-x-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl">
+                  <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/40 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Activity className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white">{activity.title}</h4>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">{formatDate(activity.created_at)}</span>
+                    </div>
+                    <p className="text-gray-700 dark:text-gray-300 mb-2">{activity.description}</p>
+                    {activity.performed_by_name && (
+                      <p className="text-sm text-gray-500 dark:text-gray-400">by {activity.performed_by_name}</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+
+              {/* Admin Notes */}
+              {order.notes?.filter(note => !note.is_internal).map((note, index) => (
+                <div key={note.id} className="flex items-start space-x-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-xl">
+                  <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/40 rounded-full flex items-center justify-center flex-shrink-0">
+                    <MessageSquare className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h4 className="text-lg font-semibold text-gray-900 dark:text-white">Message from {note.created_by_name || 'Support Team'}</h4>
+                      <span className="text-sm text-gray-500 dark:text-gray-400">{formatDate(note.created_at)}</span>
+                    </div>
+                    <p className="text-gray-700 dark:text-gray-300">{note.note}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Rest of the component remains the same... */}
         {/* Enhanced Order Details */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Order Items */}
@@ -679,6 +784,17 @@ const OrderTracking = () => {
 
             {/* Action Buttons */}
             <div className="space-y-4">
+              {/* Replacement Button - Only show if delivered and within 7 days */}
+              {order.can_be_replaced && order.status === 'delivered' && (
+                <button
+                  onClick={() => setShowReplacementForm(true)}
+                  className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white py-4 px-6 rounded-2xl font-bold text-lg transition-all duration-300 flex items-center justify-center space-x-3 shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
+                >
+                  <RefreshCw className="w-6 h-6" />
+                  <span>Request Replacement</span>
+                </button>
+              )}
+              
               <Link
                 to="/profile?tab=orders"
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-4 px-6 rounded-2xl font-bold text-lg transition-all duration-300 flex items-center justify-center space-x-3 shadow-xl hover:shadow-2xl transform hover:scale-105 active:scale-95"
@@ -697,67 +813,89 @@ const OrderTracking = () => {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Order Timeline Details */}
-        {order.created_at && (
-          <div className="mt-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg rounded-3xl shadow-2xl p-8 border border-white/20 dark:border-gray-700/20">
-            <div className="flex items-center space-x-3 mb-6">
-              <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg">
-                <Clock className="w-6 h-6 text-white" />
+      {/* Replacement Request Modal */}
+      {showReplacementForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white">Request Replacement</h3>
+              <button
+                onClick={() => setShowReplacementForm(false)}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              >
+                ✕
+              </button>
               </div>
+            
+            <div className="p-6 space-y-4">
               <div>
-                <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Order Timeline</h3>
-                <p className="text-gray-600 dark:text-gray-400">Key milestones for your order</p>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Reason</label>
+                <select
+                  value={replacementForm.reason}
+                  onChange={(e) => setReplacementForm(prev => ({ ...prev, reason: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="">Select reason</option>
+                  <option value="damaged">Damaged item</option>
+                  <option value="wrong_item">Wrong item received</option>
+                  <option value="not_as_described">Not as described</option>
+                  <option value="size_issue">Size issue</option>
+                  <option value="quality_issue">Quality issue</option>
+                  <option value="other">Other</option>
+                </select>
               </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Description</label>
+                <textarea
+                  value={replacementForm.description}
+                  onChange={(e) => setReplacementForm(prev => ({ ...prev, description: e.target.value }))}
+                  rows="3"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  placeholder="Please describe the issue..."
+                />
             </div>
             
-            <div className="bg-gray-50 dark:bg-gray-700/50 rounded-xl p-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-600">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
-                      <CheckCircle2 className="w-5 h-5 text-green-600" />
-                    </div>
-                    <span className="font-semibold text-gray-900 dark:text-white">Order Placed</span>
-                  </div>
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {formatDate(order.created_at)}
-                  </span>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location</label>
+                <select
+                  value={replacementForm.location_type}
+                  onChange={(e) => setReplacementForm(prev => ({ ...prev, location_type: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                >
+                  <option value="local">Local (₹99 handling charges)</option>
+                  <option value="remote">Remote (₹199 handling charges)</option>
+                </select>
                 </div>
                 
-                {order.status !== 'pending' && (
-                  <div className="flex items-center justify-between py-3 border-b border-gray-200 dark:border-gray-600">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/20 rounded-full flex items-center justify-center">
-                        <Clock className="w-5 h-5 text-blue-600" />
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                <p className="text-sm text-yellow-800 dark:text-yellow-300">
+                  <strong>Note:</strong> Handling charges of {replacementForm.location_type === 'local' ? '₹99' : '₹199'} will be added to your replacement order.
+                </p>
                       </div>
-                      <span className="font-semibold text-gray-900 dark:text-white">Processing Started</span>
-                    </div>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {formatDate(order.updated_at)}
-                    </span>
-                  </div>
-                )}
-                
-                {order.status === 'delivered' && (
-                  <div className="flex items-center justify-between py-3">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/20 rounded-full flex items-center justify-center">
-                        <Package className="w-5 h-5 text-emerald-600" />
+
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowReplacementForm(false)}
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={requestReplacement}
+                  disabled={!replacementForm.reason || !replacementForm.description}
+                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Submit Request
+                </button>
                       </div>
-                      <span className="font-semibold text-gray-900 dark:text-white">Order Delivered</span>
                     </div>
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {formatDate(order.updated_at)}
-                    </span>
-                  </div>
-                )}
-              </div>
             </div>
           </div>
         )}
       </div>
-    </div>
   );
 };
 

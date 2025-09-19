@@ -47,6 +47,7 @@ from routes.products import router as products_router
 from routes.categories import router as categories_router
 from routes.cart import router as cart_router
 from routes.orders import router as orders_router
+from routes.order_management import router as order_management_router
 from routes.inventory import router as inventory_router
 from routes.campaigns import router as campaigns_router
 from routes.commissions import router as commissions_router
@@ -68,6 +69,7 @@ app.include_router(products_router)
 app.include_router(categories_router)
 app.include_router(cart_router)
 app.include_router(orders_router)
+app.include_router(order_management_router)
 app.include_router(inventory_router)
 app.include_router(campaigns_router)
 app.include_router(commissions_router)
@@ -314,6 +316,11 @@ async def startup_event():
         
         startup_tasks = StartupTasks(db)
         await startup_tasks.run_startup_tasks()
+        
+        # Start email service background task
+        import asyncio
+        from email_service import start_email_service
+        asyncio.create_task(start_email_service(db))
         
         logger.info("✅ Backend startup completed successfully")
         
