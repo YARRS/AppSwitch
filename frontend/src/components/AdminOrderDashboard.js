@@ -100,7 +100,7 @@ const AdminOrderDashboard = ({ user }) => {
     try {
       setLoading(true);
       
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       if (!token) {
         throw new Error('No authentication token found');
       }
@@ -117,7 +117,7 @@ const AdminOrderDashboard = ({ user }) => {
       if (filters.search) params.append('search', filters.search);
 
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
-      const response = await fetch(`${backendUrl}/api/order-management/orders/admin/dashboard?${params}`, {
+      const response = await fetch(`${backendUrl}/api/orders/admin/all?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -151,10 +151,10 @@ const AdminOrderDashboard = ({ user }) => {
   // Fetch order details
   const fetchOrderDetails = async (orderId) => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
       
-      const response = await fetch(`${backendUrl}/api/order-management/orders/${orderId}/details`, {
+      const response = await fetch(`${backendUrl}/api/orders/${orderId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -181,21 +181,22 @@ const AdminOrderDashboard = ({ user }) => {
   // Update order status
   const updateOrderStatus = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
       
-      const params = new URLSearchParams();
-      params.append('new_status', statusForm.status);
-      if (statusForm.tracking_number) params.append('tracking_number', statusForm.tracking_number);
-      if (statusForm.expected_delivery_date) params.append('expected_delivery_date', statusForm.expected_delivery_date);
-      if (statusForm.notes) params.append('notes', statusForm.notes);
+      const updateData = {
+        status: statusForm.status
+      };
+      if (statusForm.tracking_number) updateData.tracking_number = statusForm.tracking_number;
+      if (statusForm.notes) updateData.notes = statusForm.notes;
       
-      const response = await fetch(`${backendUrl}/api/order-management/orders/${selectedOrder.id}/status?${params}`, {
+      const response = await fetch(`${backendUrl}/api/orders/${selectedOrder.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify(updateData)
       });
 
       if (!response.ok) {
@@ -222,16 +223,21 @@ const AdminOrderDashboard = ({ user }) => {
   // Add order note
   const addOrderNote = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('access_token');
       const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
       
-      const response = await fetch(`${backendUrl}/api/order-management/orders/${selectedOrder.id}/notes`, {
-        method: 'POST',
+      // For now, just add the note to the order's notes field since we don't have a separate notes endpoint
+      const updateData = {
+        notes: (selectedOrder.notes || '') + '\n' + `[${new Date().toISOString()}] ${noteForm.note}`
+      };
+      
+      const response = await fetch(`${backendUrl}/api/orders/${selectedOrder.id}`, {
+        method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(noteForm)
+        body: JSON.stringify(updateData)
       });
 
       if (!response.ok) {

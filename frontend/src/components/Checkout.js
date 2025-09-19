@@ -1479,7 +1479,7 @@ const OrderSuccess = ({ orderData }) => {
     const timer = setInterval(() => {
       setCountdown((prevCount) => {
         if (prevCount <= 1) {
-          // Navigate to order tracking page
+          // Navigate to order tracking page for specific order
           navigate(`/orders/${orderData.id}`);
           return 0;
         }
@@ -1496,6 +1496,13 @@ const OrderSuccess = ({ orderData }) => {
     setShowCountdown(false);
     // Navigate to order tracking page
     navigate(`/orders/${orderData.id}`);
+  };
+
+  const handleViewAllOrders = () => {
+    // Cancel auto-redirect
+    setShowCountdown(false);
+    // Navigate to user profile orders tab
+    navigate('/profile?tab=orders');
   };
 
   const handleContinueShopping = () => {
