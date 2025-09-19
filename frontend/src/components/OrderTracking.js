@@ -29,6 +29,7 @@ import {
   Plus
 } from 'lucide-react';
 
+
 const OrderTracking = ({ user, isAuthenticated }) => {
   const { orderId } = useParams();
   const navigate = useNavigate();
@@ -113,7 +114,7 @@ const OrderTracking = ({ user, isAuthenticated }) => {
       
       // Use enhanced order details endpoint
       const response = await fetch(`${backendUrl}/api/order-management/orders/${orderId}/details`, {
-            headers: {
+        headers: {
           'Authorization': token ? `Bearer ${token}` : '',
           'Content-Type': 'application/json'
         }
@@ -123,9 +124,9 @@ const OrderTracking = ({ user, isAuthenticated }) => {
         const data = await response.json();
         if (data.success) {
           setOrder(data.data);
-      } else {
+        } else {
           throw new Error(data.message || 'Failed to load order');
-      }
+        }
       } else if (response.status === 401) {
         setError('Please log in to view your order details');
       } else if (response.status === 404) {
@@ -220,14 +221,14 @@ const OrderTracking = ({ user, isAuthenticated }) => {
       steps = [
         ...steps.map(step => ({ ...step, completed: true })),
         { ...statusConfig.replacement_requested, id: 'replacement_requested', completed: true, active: true }
-    ];
+      ];
     } else {
       const currentStepIndex = baseSteps.findIndex(step => step === order?.status);
       steps = steps.map((step, index) => ({
-      ...step,
-      active: index === currentStepIndex,
+        ...step,
+        active: index === currentStepIndex,
         completed: index <= currentStepIndex
-    }));
+      }));
     }
 
     return steps;
@@ -363,7 +364,7 @@ const OrderTracking = ({ user, isAuthenticated }) => {
                 </Link>
               </div>
             </div>
-                  </div>
+          </div>
         </div>
       </div>
     );
@@ -462,7 +463,7 @@ const OrderTracking = ({ user, isAuthenticated }) => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:w-auto lg:grid-cols-3">
                 <div className="bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl shadow-xl p-6 text-white">
                   <div className="flex items-center space-x-3 mb-2">
-                    <Card className="w-6 h-6" />
+                    <CreditCard className="w-6 h-6" />
                     <p className="font-semibold">Order Total</p>
                   </div>
                   <p className="text-3xl font-bold">
@@ -827,7 +828,7 @@ const OrderTracking = ({ user, isAuthenticated }) => {
               >
                 ✕
               </button>
-              </div>
+            </div>
             
             <div className="p-6 space-y-4">
               <div>
@@ -856,8 +857,8 @@ const OrderTracking = ({ user, isAuthenticated }) => {
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                   placeholder="Please describe the issue..."
                 />
-            </div>
-            
+              </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Location</label>
                 <select
@@ -868,13 +869,13 @@ const OrderTracking = ({ user, isAuthenticated }) => {
                   <option value="local">Local (₹99 handling charges)</option>
                   <option value="remote">Remote (₹199 handling charges)</option>
                 </select>
-                </div>
-                
+              </div>
+
               <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
                 <p className="text-sm text-yellow-800 dark:text-yellow-300">
                   <strong>Note:</strong> Handling charges of {replacementForm.location_type === 'local' ? '₹99' : '₹199'} will be added to your replacement order.
                 </p>
-                      </div>
+              </div>
 
               <div className="flex justify-end space-x-3">
                 <button
@@ -890,12 +891,12 @@ const OrderTracking = ({ user, isAuthenticated }) => {
                 >
                   Submit Request
                 </button>
-                      </div>
-                    </div>
+              </div>
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+    </div>
   );
 };
 
